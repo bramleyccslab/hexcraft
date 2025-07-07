@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hexcraft testing stuff</title>
+    <script src="https://unpkg.com/jspsych@8.0.2"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@2.0.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-instructions@2.0.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.0.0"></script>
+
+ <!-- Libraries -->
+    <script src="static/lib/jquery.min.js"></script>
+    <script src="static/lib/d3.min.js"></script>
+    <script src="static/lib/underscore-min.js"></script>
+    <script src="static/lib/rot.js"></script>
+    <script src="static/lib/lodash.min.js"></script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="static/css/main.css"/>
+
+    <!-- Scripts -->
+    <script>var cache = false;</script>
+    <script src="static/js/task.js" charset="utf-8"></script>
+
+    <link href="https://unpkg.com/jspsych@8.0.2/css/jspsych.css" rel="stylesheet">
+
+</head>
+
+
+<body></body>
+
+<script>
+
+
+    var jsPsych = initJsPsych({
+    on_finish: function() {
+        //jsPsych.data.displayData('csv');
+    }
+    }); 
+
+
+var instructions = {
+    type: jsPsychInstructions,
+    pages: [
+        'Here you will see the instructions for the experiment',
+        'By clicking continue here you give consent to participate etc'
+    ],
+    button_label_next: "Continue",
+    button_label_previous: "Back",
+    show_clickable_nav: true
+}
+
+var patternCounter = 0;
+
+// testing trials: 
+var dabone = ['XKX','ZXKXW','XKXKSXKXR'];
+var hazard = ['ZSA', 'ZSAZSAR', 'ZSAEEZSASWXWEK'];  
+var triangle = ['ASAEA', 'ASAEAEASAEAK', 'ASAEASASAEAEASAEA'];     //the cache is a bit too long 
+var dinopaw = ['XZD', 'ZXDSRKR', 'XKSSZXDRKK'];     //potential cache that's also 3 keys long
+
+var empty = ['K'];
+
+//ignore all tutorial stuff for now
+var tutorial = ['A', 'AWSE', 'Z', 'X', 'ZX', 'XD', 'ZKKK', 'ZF', 'ASSR'];
+
+var allTrials = dabone.concat(hazard, triangle);
+
+
+
+//ignore this for now:
+var hexTutorial = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `<div id="board-and-cache">
+    <!-- Board will go here -->
+    <div id="caches">
+        <p style="font-size: 0.9em;"><b>Instructions:</b> Your goal is to match the green pattern. There are 12 actions you can use to achieve this. Take actions by pressing keys on the keyboard:</p>
+        <ul style="font-size: 0.6em;">
+        <li><b>A</b> adds a single piece in the center of the board
+        <li><b>Z</b> adds three pieces in a triangular arrangement
+        <li><b>X</b> adds three pieces in a straight line
+        <li><b>D</b> removes any piece in the center of the board
+        <li><b>ENTER ("↵")</b> <i>locks</i> in the positions of the pieces you have added (you can do this multiple times)
+        <li><b>SPACE ("∠")</b> rotates all (unlocked) pieces clockwise
+        <li><b>F</b> flips all (unlocked) pieces on an axis from North-West to South-East
+        <li><b>W,E,R,S</b>,and <b>C</b> shift all (unlocked) pieces one space to the West, East, North-West, South-West, and South-East, respectively. Any pieces that fall off the edge of the board are deleted
+        </ul>
+        <p style="font-size: 0.9em;">Your additions can overlap existing pieces. You complete the puzzle by covering all the green hexes with locked in pieces. You lose a point for each white hex you cover in your final pattern.</p>
+        <p style="font-size: 1em;"><b>Try to match the green pattern!</b></p>
+    </div>
+</div>
+
+<p id="response_area">
+    Your action sequence appears below:
+</p>
+<div id="main_focus"></div>
+<img src="static/img/keyboard_full.png" style="width:400px">
+<ol>
+</ol>`,
+    on_load: function() {
+        const oldButtons = document.getElementById("control-buttons");
+        if (oldButtons) oldButtons.remove();
+        inputLocked = false;
+        attemptCount = 0;
+        Start(tutorial[patternCounter]);
+        patternCounter = patternCounter + 1;
+        //console.log('condition: ', condition, ' patterns: ', patterns);
+    },
+    choices: "NO_KEYS",
+    trial_duration: null
+}
+
+
+//actual trials:
+var hexTrial = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `<div id="board-and-cache">
+    <!-- Board will go here -->
+    <div id="caches">
+        <p style="font-size: 0.9em;"><b>Instructions:</b> Your goal is to match the green pattern. There are 12 actions you can use to achieve this. Take actions by pressing keys on the keyboard:</p>
+        <ul style="font-size: 0.6em;">
+        <img src="static/img/instructions_mockup.png" style="height:350px">
+        <p style="font-size: 0.9em;">Your additions can overlap existing pieces. You complete the puzzle by covering all the green hexes with locked in pieces. You lose a point for each white hex you cover in your final pattern.</p>
+        <p style="font-size: 1em;"><b>Try to match the green pattern!</b></p>
+    </div>
+</div>
+
+<p id="response_area">
+    Your action sequence appears below:
+</p>
+<div id="main_focus"></div>
+<img src="static/img/keyboard_full.png" style="width:400px">
+<ol>
+</ol>`,
+    on_load: function() {
+        const oldButtons = document.getElementById("control-buttons");
+        if (oldButtons) oldButtons.remove();
+        inputLocked = false;
+        attemptCount = 0;
+        Start(allTrials[patternCounter]);   //change allTrials to the specific cache-array if needed
+        patternCounter = patternCounter + 1;
+        //console.log('condition: ', condition, ' patterns: ', patterns);
+    },
+    choices: "NO_KEYS",
+    trial_duration: null
+}
+
+var debrief = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: function() {
+
+        return `This would be the debrief. Press any button!`;
+
+      },
+      on_load: function() {
+        const oldButtons = document.getElementById("control-buttons");
+        if (oldButtons) oldButtons.remove();
+      }
+
+    };
+
+jsPsych.run([instructions, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, debrief]);
+</script>
+
+
+
+</html>

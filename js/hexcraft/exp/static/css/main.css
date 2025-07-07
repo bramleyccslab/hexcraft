@@ -1,0 +1,113 @@
+/*body {
+    margin: 60px auto;
+    width: 70%;
+}
+*/
+
+#main_focus {
+  width: 700px;
+  height: 200px;
+  font-size: 48px;
+  font-family: monospace, monospace;
+  padding: 4px 8px;
+  box-sizing: border-box;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  background-color: #f8f8f8;
+  word-break: break-all;
+  line-height: 1;
+  resize: none;
+}
+
+#board-and-cache {
+    width:1100px;
+    display:flex;
+}
+
+#caches {
+    width:950px;
+}
+
+.cache-container {
+    width:500px;
+    display: flex;
+    align-items: center;
+}
+
+.cache-label {    
+    display: flex;
+    align-items: center;
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+    font-family: monospace, monospace;
+    float: left;
+}
+
+.cache {
+  width: 350px;
+  height: 50px;
+  font-size: 24px;
+  font-family: monospace, monospace;
+  padding: 4px 8px;
+  box-sizing: border-box;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  background-color: #f8f8f8;
+  resize: none;
+  margin-left: 50px;
+}
+
+.cache-btn{
+    float: right;
+    
+}
+
+
+
+
+/*input[type='text'] { font-size: 48px; font-family: monospace; }*/
+
+h1 {
+    font-size: 2.5em;
+    font-family:'Helvetica', 'Arial', 'Sans-Serif';
+    /*text-align: center;*/
+}
+h2 {
+    font-size: 2em;
+    font-family:'Helvetica', 'Arial', 'Sans-Serif';
+}
+h3 {
+    font-size: 1.75em;
+    font-family:'Helvetica', 'Arial', 'Sans-Serif';
+    text-align: center;
+}
+p {
+    font-family:'Helvetica', 'Arial', 'Sans-Serif';
+    font-size: 1.3em;
+    line-height: 1.3em;
+    margin:0;
+    color: #333;
+}
+li {
+    font-family:'Helvetica', 'Arial', 'Sans-Serif';
+    font-size: 1.3em;
+    line-height: 1.3em;
+    color: #333;
+}
+
+
+body {
+    padding:0px;
+    margin: 0px;
+    background-color: white;
+    color: black;
+    font-weight: 300; 
+    font-size: 13pt;
+}
+
+div.spacer { clear: both; }
+
+.btn.btn-primary[disabled] {
+    background-color: #ffff00;
+}
