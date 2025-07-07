@@ -10,9 +10,10 @@
     - hex_game_2.py: the second (and the current) version of a hex game, with objective shape as goal and can judge whether the objective is reached.
     - solver.py: a script for searching all the possible action chains that could solve a problem within a certain chain length.
 - js
-    - demo and demo_nocache are original demo sites created by Neil 
-    - testing.html: modified version of no_cache in development for use as experiment. Among other things, in this file the caches and their corresponding testing trials are defined. 
-    - task.js: actual hexcraft task. The logic behind all actions etc is set up here. 
+    - exp1: code in development for first experiment
+        - demo and demo_nocache are original demo sites created by Neil 
+        - testing.html: modified version of no_cache in development for use as experiment 1. Among other things, in this file the caches and their corresponding testing trials are defined. 
+        - task.js: actual hexcraft task. The logic behind all actions etc is set up here. 
 
     List of primitive actions (can also be seen visually in instructions_mockup):
     - A = put a piece in the middle of the board
