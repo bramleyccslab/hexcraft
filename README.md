@@ -41,7 +41,7 @@
         - f$[7] "Reflect" corresponds to "R"
         - f$[8] "ShiftNE" corresponds to "E"
         - f$[9] "ShiftSE" corresponds to "S"
-        - f$[10] "ShiftW" correspodns to "W"
+        - f$[10] "ShiftW" corresponds to "W"
 
 
 ### Experiment 1 Design
