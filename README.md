@@ -11,7 +11,7 @@
     - solver.py: a script for searching all the possible action chains that could solve a problem within a certain chain length.
 - js
     - demo and demo_nocache are original demo sites created by Neil 
-    - testing.html: modified no_cache used for the experiment. Among other things, in this file the caches and their corresponding testing trials are defined. 
+    - testing.html: modified version of no_cache in development for use as experiment. Among other things, in this file the caches and their corresponding testing trials are defined. 
     - task.js: actual hexcraft task. The logic behind all actions etc is set up here. 
 
     List of primitive actions (can also be seen visually in instructions_mockup):
@@ -25,8 +25,6 @@
     - F = flips pieces from SE to NW (and vice versa)
     - R = reflects pieces (same as Flip but the original pieces stay in their places)
     - Space = rotates the board clockwise (is coded as 'K' in the actual code)
-
-
     - Enter = Ends the trial 
 
     Caches and testing trials: 
@@ -45,7 +43,7 @@
     - hazard, medium hazard, hard hazard
     - triangle, medium triangle, hard triangle 
 
-For each puzzle, after three unsuccessful tries the user can move on to the next one. 
+    For each puzzle, after three unsuccessful tries the user can move on to the next one. 
 
  - R
     - demos: this is a file I mostly used to input action sequences to see how they are reflected on the board. There is also a greedy solver that I haven't touched yet. 
