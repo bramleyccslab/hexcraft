@@ -1,6 +1,6 @@
-### Hexcraft project
+## Hexcraft project
 
-## Contents
+### Contents
 
 - mcmc.py: this is the file for the Metropolis-Hastings model for the general sequence learning process.
 
@@ -15,7 +15,7 @@
 - solver.py: a script for searching all the possible action chains that could solve a problem within a certain chain length.
 
 ## Contributors
- - Haozhe Sun
- - Ana Belan
- - Bonan Zhao
- - Neil Bramley (neil.bramley@ed.ac.uk)
+ - Haozhe Sun (sunhaozhepy; sunhaozhe050722a@gmail.com)
+ - Ana Belan (a.belan@sms.ed.ac.uk)
+ - Bonan Zhao (zhaobn; b.zhao@ed.ac.uk)
+ - Neil Bramley (neilbramley; neil.bramley@ed.ac.uk)
