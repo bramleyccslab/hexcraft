@@ -2,17 +2,54 @@
 
 ### Contents
 
-- mcmc.py: this is the file for the Metropolis-Hastings model for the general sequence learning process.
+- python
+    - mcmc.py: this is the file for the Metropolis-Hastings model for the general sequence learning process.
+    - generate.py: some trial code that I used to generate some sequences from a given library.
+    - square_game.py: the code for manipulating a square board. A Python replica of a previous master's project.
+    - hex_game_1.py: the first version of a hex game.
+    - hex_game_2.py: the second (and the current) version of a hex game, with objective shape as goal and can judge whether the objective is reached.
+    - solver.py: a script for searching all the possible action chains that could solve a problem within a certain chain length.
+- js
+    - demo and demo_nocache are Neil's code 
+    - testing.html: modified no_cache used for the experiment. Among other things, in this file the caches and their corresponding testing trials are defined. 
+    - task.js: actual hexcraft task. The logic behind all actions etc is set up here. 
 
-- generate.py: some trial code that I used to generate some sequences from a given library.
+    List of primitive actions (can also be seen visually in instructions_mockup):
+    - A = put a piece in the middle of the board
+    - D = delete a piece in the middle of the board 
+    - Z = put a cornery shape 
+    - X = put a diagonal bar 
+    - W = shifts all pieces one space to the west 
+    - E = shifts to North-East 
+    - S = shifts to South-East 
+    - F = flips pieces from SE to NW (and vice versa)
+    - R = reflects pieces (same as Flip but the original pieces stay in their places)
+    - Space = rotates the board clockwise (is coded as 'K' in the actual code)
+    - Enter = locks in the answer 
 
-- square_game.py: the code for manipulating a square board. A Python replica of a previous master's project.
+    Caches and testing trials: 
+    - There are three caches (pictures can be found in the 'caches' folder):
+	    - dabone (sort of looks like a bone, achieved via X-Space-X)
+	    - hazard (sort of looks like the hazard symbol, Z-S-A)
+	    - triangle (A-S-A-E-A)
+    - Since the triangle is a bit long, there is also another one (yet unconfirmed) that would also be 3 keys long:
+	    - Dinopaw (X-Z-D)
+    - For each cache there are two puzzles that are loosely based on using these caches: one medium and one hard
+    - These puzzles (and how to solve them) can be seen in each list that corresponds to their cache
+	    - Each puzzle is basically coded as an action sequence that can be used to solve them 
 
-- hex_game_1.py: the first version of a hex game.
+    When running the html file now, the sequence of the puzzles goes like this:
+    - dabone, medium dabone, hard dabone
+    - hazard, medium hazard, hard hazard
+    - triangle, medium triangle, hard triangle 
 
-- hex_game_2.py: the second (and the current) version of a hex game, with objective shape as goal and can judge whether the objective is reached.
+For each puzzle, after three unsuccessful tries the user can move on to the next one. 
 
-- solver.py: a script for searching all the possible action chains that could solve a problem within a certain chain length.
+ - R
+    - demos: this is a file I mostly used to input action sequences to see how they are reflected on the board. There is also a greedy solver that I haven't touched yet. 
+    - generate_testsets: generates random caches and then test sets using these caches 
+    - custom_cache_test: edited generate_testsets that generates based on custom caches (defined as a manual list of primitives)
+    - hex_setup: sets up the board and actions. Actions match the js ones.
 
 ## Contributors
  - Haozhe Sun (sunhaozhepy; sunhaozhe050722a@gmail.com)
