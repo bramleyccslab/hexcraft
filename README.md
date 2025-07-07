@@ -45,27 +45,27 @@
 
 
 ### Experiment 1 Design
-Caches and testing trials: 
-    - There are three caches (pictures can be found in the 'caches' folder):
-	    - dabone (sort of looks like a bone, achieved via X-K-X)
-	    - hazard (sort of looks like the hazard symbol, Z-S-A)
-	    - triangle (A-S-A-E-A)
-        - Since the triangle is a bit long, there is also another one (TBC) that would also be 3 keys long:
-	        - Dinopaw (X-Z-D)
-    - For each cache there are two puzzles that make use of these caches. One medium and one hard:
-        - dabone: medium: Z[XKX]W; hard: [XKX]KS[XKX]R
-        - hazard: medium: [ZSA][ZSA]R; hard: [ZSA]EE[ZSA]SWXWEK
-        - triangle: medium: [ASAEA]E[ASAEA]K; hard: [ASAEA]S[ASAEA]E[ASAEA]
-        - dinopaw: medium: [XZD]SRKR; hard: XKSS[XZD]RKK
-    - These puzzles (and one way to solve them) can be seen in each list that corresponds to their cache
-	    - Each puzzle is coded with an action sequence that can be used to solve them 
-    
-    When running the html file now, the sequence of the puzzles goes like this:
-    - dabone, medium dabone, hard dabone
-    - hazard, medium hazard, hard hazard
-    - triangle, medium triangle, hard triangle 
 
-    For each puzzle, after three unsuccessful tries the user can move on to the next one. 
+Caches and testing trials: 
+- There are three caches (pictures can be found in the 'caches' folder):
+    - dabone (sort of looks like a bone, achieved via X-K-X)
+    - hazard (sort of looks like the hazard symbol, Z-S-A)
+    - triangle (A-S-A-E-A)
+- Since the triangle is a bit long, there is also another one (TBC) that would also be 3 keys long:
+    - Dinopaw (X-Z-D)
+- For each cache there are two puzzles that make use of these caches. One medium and one hard:
+    - dabone: medium: Z[XKX]W; hard: [XKX]KS[XKX]R
+    - hazard: medium: [ZSA][ZSA]R; hard: [ZSA]EE[ZSA]SWXWEK
+    - triangle: medium: [ASAEA]E[ASAEA]K; hard: [ASAEA]S[ASAEA]E[ASAEA]
+    - dinopaw: medium: [XZD]SRKR; hard: XKSS[XZD]RKK
+- These puzzles (and one way to solve them) can be seen in each list that corresponds to their cache
+
+When running the html file now, the sequence of the puzzles goes like this:
+- dabone, medium dabone, hard dabone
+- hazard, medium hazard, hard hazard
+- triangle, medium triangle, hard triangle 
+
+For each puzzle, after three unsuccessful tries the user can move on to the next one. 
 
 ## Contributors
  - Haozhe Sun (sunhaozhepy; sunhaozhe050722a@gmail.com)
