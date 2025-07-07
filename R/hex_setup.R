@@ -48,7 +48,7 @@ make_hex_lattice = function(N, dist=1) {
   
   loc <- cbind(loc, oddr_to_cube(loc$x, loc$y))
   
-  loc<-loc %>% arrange(y, x) %>%
+  loc<-loc %>% arrange(desc(y), x) %>%   #this was changed to desc because it was flipped upside-down
     filter(abs(q)<5 & abs(r)<5 & abs(s)<5) %>% mutate(id = 1:n()) %>%
   select(id, x, y, q,r,s, x_pos, y_pos)
 
@@ -103,9 +103,9 @@ for (dir in 1:6)
 amort$rotations[[1]]<-data.frame(from=1:nrow(empty_state), to = rep(NA, nrow(empty_state)))
 for (i in 1:nrow(empty_state))
 {
-  tmp<-which(empty_state$q==-empty_state$q[i] &
-               empty_state$r==-empty_state$r[i] &
-               empty_state$s==-empty_state$s[i])
+  tmp<-which(empty_state$q==-empty_state$r[i] &
+               empty_state$r==-empty_state$s[i] &
+               empty_state$s==-empty_state$q[i])
   if (any(tmp))
   {
     amort$rotations[[1]]$to[i]<-tmp
@@ -164,7 +164,7 @@ f$AddUnit<-function(ts)
 
 f$RemoveUnit<-function(ts)
 {
-  #Add unit in center
+  #Remove unit in center
   # ts$active[ts$x==0, ts$y==0] <- 0
   ts$active[31]<-0
   ts
@@ -173,7 +173,7 @@ f$RemoveUnit<-function(ts)
 f$AddBar<-function(ts)
 {
   #Add horizontal bar
-  ts$active[c(30, 31, 32)] <- 1
+  ts$active[c(39, 31, 23)] <- 1
   #ts$x==-1 & ts$y==0
   #ts$x==0 & ts$y==0
   ts
@@ -182,7 +182,7 @@ f$AddBar<-function(ts)
 f$AddCorner<-function(ts)
 {
   #Add horizontal bar
-  ts$active[c(24,31,32)] <- 1#ts$x==1 & ts$y==-1
+  ts$active[c(22,31,32)] <- 1#ts$x==1 & ts$y==-1
   ts
 }
 
@@ -226,11 +226,11 @@ f$ShiftNE<-function(ts, dir = 1)
 }
 
 
-f$ShiftNW<-function(ts, dir = 3)
+f$ShiftSE<-function(ts, dir = 3) #changed this to SE
 {
-  os<-ts
+  os<-ts 
   ts$active<-0
-  ts$active[amort$vectors[[dir]]$to]<-os$active[amort$vectors[[dir]]$from]
+  ts$active[amort$vectors[[dir]]$to]<-os$active[amort$vectors[[dir]]$from] 
   ts
 }
 
@@ -253,6 +253,8 @@ apply_cache<-function(ts, cache){
 
 save(file='./dat/hexsetup.rdata', f, empty_state, board_polygons, amort,
      cube_to_oddr, oddr_to_cube, make_hex_coords, make_hex_lattice, apply_cache)
+
+direction_vectors
 
 # f$ShiftE<-function(ts, dir = 2)
 # {

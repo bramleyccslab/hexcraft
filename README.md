@@ -10,7 +10,7 @@
     - hex_game_2.py: the second (and the current) version of a hex game, with objective shape as goal and can judge whether the objective is reached.
     - solver.py: a script for searching all the possible action chains that could solve a problem within a certain chain length.
 - js
-    - demo and demo_nocache are Neil's code 
+    - demo and demo_nocache are original demo sites created by Neil 
     - testing.html: modified no_cache used for the experiment. Among other things, in this file the caches and their corresponding testing trials are defined. 
     - task.js: actual hexcraft task. The logic behind all actions etc is set up here. 
 
@@ -25,7 +25,9 @@
     - F = flips pieces from SE to NW (and vice versa)
     - R = reflects pieces (same as Flip but the original pieces stay in their places)
     - Space = rotates the board clockwise (is coded as 'K' in the actual code)
-    - Enter = locks in the answer 
+
+
+    - Enter = Ends the trial 
 
     Caches and testing trials: 
     - There are three caches (pictures can be found in the 'caches' folder):

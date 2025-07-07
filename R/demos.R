@@ -15,25 +15,42 @@ set.seed(1988)
 #Create an initially empty 'state', i.e. board description
 state<-empty_state %>% select(-x_pos, -y_pos) %>% mutate(target = 0, active=0)
 
+
+#A: creating a testing sort of thing to try various actions out a-la interactively
 # Apply a random sequence of actions to this state
 depth<-10
 # Keep track of what you do
-a_states<-matrix(NA, nrow=nrow(state), ncol=depth)
-actions<-rep(NA, length = depth)
+#a_states<-matrix(NA, nrow=nrow(state), ncol=depth)
+#actions<-rep(NA, length = depth)
 
-for (d in 1:depth)
-{
-  if (d==1)
-  {
-    action<-sample(c(1,3,4), 1)
-  } else {
-    action<-sample(length(f), 1)
-  }
+# for (d in 1:depth)
+# {
+#   if (d==1)
+#   {
+#     action<-sample(c(1,3,4), 1)
+#   } else {
+#     action<-sample(length(f), 1)
+#   }
+# 
+#   state<-f[[action]](state)
+#   
+#   a_states[,d]<-state$active
+#   actions[d]<-names(f)[action]
+# }
 
+#put action numbers here 
+temp_actions = c(4, 5)
+
+a_states<-matrix(NA, nrow=nrow(state), ncol=length(temp_actions))
+actions<-rep(NA, length = length(temp_actions))
+
+for (a in 1:length(temp_actions)){
+  action = temp_actions[a]
   state<-f[[action]](state)
-  
-  a_states[,d]<-state$active
-  actions[d]<-names(f)[action]
+  a_states[,a]<-state$active
+  actions[a]<-names(f)[action]
+  a
+  action
 }
 
 #Check that some stuff got added to the board (columns should sum to more than zero)
@@ -42,9 +59,19 @@ colSums(a_states)
 actions
 
 # Paste the final state to the board-map and plot it out to look at what happened
-board_polygons$state<-factor(rep(a_states[,9], each = 6))
-ggplot(board_polygons, aes(x_pos, y_pos)) + 
+board_polygons$state<-factor(rep(a_states[,length(temp_actions)], each = 6))
+
+# ggplot(board_polygons, aes(x = x_pos, y = y_pos)) +
+#   geom_polygon(aes(group = id), fill = "white", colour = "black") +
+#   geom_text(data = empty_state, aes(x = x_pos, y = y_pos, label = id), size = 3) +
+#   theme_void() +
+#   coord_equal()
+
+
+ggplot(board_polygons, aes(x_pos, y_pos)) +
   geom_polygon(aes(group = id, fill=state), colour = 'black') +
+  geom_text(data = empty_state, aes(x = x_pos, y = y_pos, label = id), size = 3) +
+  scale_y_reverse() +
   scale_fill_manual(values = c('white','yellow'))
 
 

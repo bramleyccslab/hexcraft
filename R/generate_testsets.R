@@ -8,11 +8,14 @@ library(gridExtra) #For plotting lots of things at once
 # source('hex_setup.R')
 load('./dat/hexsetup.rdata', verbose = T)
 
+custom_cache = c("AddUnit")
+ccache = TRUE
+
 
 # ##################################################
 # Generate a bunch of test sequences without caching
 
-set.seed(1988)
+set.seed(678654) #changed for random generation
 
 depth<-3
 N<-100
@@ -121,13 +124,14 @@ for (cache in 1:N)
         action<-names(f)[sample(length(f), 1)]
         tmp_state<-f[[action]](state)
         cat('cache', cache, ' example', example, 'primitive\n')
-      } else {
-        action<-'Cache'#basic_targets_d3_solutions[[cache]]
-        tmp_state<-apply_cache(state, basic_targets_d3_solutions[[cache]])
+      } 
+      else {
+        tmp_state <- apply_cache(state, basic_targets_d3_solutions[[cache]])
+        
         cat('cache', cache, ' example', example, 'library\n')
       }
       
-      
+       
       # Checks the state actually changed (reduces redundancies a lot)
       loop_check<-F
       
@@ -190,6 +194,7 @@ for (cache in 1:N)
       scale_fill_manual(values = c('white','yellow')) +
       ggtitle(paste0(recursive_targets_d3_solutions[[cache]][[example]], collapse=' '))
   }
+  str(p)
   p_save<-grid.arrange(grobs = p, nrow = 2,
                        top = paste0('Cache sequence: ', paste0(basic_targets_d3_solutions[[cache]], collapse = ' ')))
   ggsave(p_save, filename=paste0('./plot/recursive_targets', cache, '.pdf'), width = 30, height = 10, limitsize = F)
@@ -214,7 +219,7 @@ for (d in 1:10)
 
 
 state<-empty_state %>% select(-x_pos, -y_pos) %>% mutate(target = 0, active=0)
-ix<-which(sapply(library, length)==max(sapply(library, length)))[1]
+ix <- which(sapply(library, length) == max(sapply(library, length)))[1]
 a_states<-matrix(NA, nrow=nrow(state), ncol=length(library[[ix]]))#vector(mode = "list", length = depth)
 
 # todo make it a character string using letters and stop at 26 entries (so they are always a single string digit)?
