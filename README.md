@@ -50,6 +50,16 @@
     - generate_testsets: generates random caches and then test sets using these caches 
     - custom_cache_test: edited generate_testsets that generates based on custom caches (defined as a manual list of primitives)
     - hex_setup: sets up the board and actions. Actions match the js ones.
+        - f$[1] "AddUnit" corresponds to "A"
+        - f$[2] "RemoveUnit" corresponds to "D"
+        - f$[3] "AddBar" corresponds to "X"
+        - f$[4] "AddCorner" corresponds to "Z"
+        - f$[5] "RotateClockwise" corresponds to "Space"
+        - f$[6] "Flip" corresponds to "F"
+        - f$[7] "Reflect" corresponds to "R"
+        - f$[8] "ShiftNE" corresponds to "E"
+        - f$[9] "ShiftSE" corresponds to "S"
+        - f$[10] "ShiftW" correspodns to "W"
 
 ## Contributors
  - Haozhe Sun (sunhaozhepy; sunhaozhe050722a@gmail.com)
