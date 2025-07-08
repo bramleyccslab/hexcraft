@@ -2,10 +2,15 @@ import itertools
 
 BOARD_SIZE = 9
 
-GOAL_SHAPE = [(BOARD_SIZE // 2, BOARD_SIZE // 2), (BOARD_SIZE // 2, BOARD_SIZE // 2 + 1)]
-
 def check_goal(shapes, goal_shape):
     return set(shapes[0]) == set(goal_shape)
+
+def get_shape_from_sequence(sequence):
+    shapes = [[]]
+    for cmd in sequence:
+        func = ACTIONS[cmd]
+        shapes = func(shapes)
+    return shapes[0]
 
 def create_center(shapes):
     cx, cy = BOARD_SIZE // 2, BOARD_SIZE // 2
@@ -136,7 +141,7 @@ ACTIONS = {
     ' ': rotate,
 }
 
-def goal_solver_brute_force(goal_shape, max_depth=7):
+def goal_solver(goal_shape, max_depth=7):
     action_keys = list(ACTIONS.keys())
     solutions = []
 
@@ -151,9 +156,21 @@ def goal_solver_brute_force(goal_shape, max_depth=7):
 
     return solutions
 
+def convert_string(s):
+    # convert action sequences to usable input to our program
+    result = []
+    for char in s:
+        if char == 'K':
+            result.append(' ')
+        else:
+            result.append(char.lower())
+    return result
+
 def main():
+    GOAL_SHAPE = get_shape_from_sequence(convert_string('ZSAZSAR'))
+
     print("Searching for solutions...")
-    sols = goal_solver_brute_force(GOAL_SHAPE, max_depth=6)
+    sols = goal_solver(GOAL_SHAPE, max_depth=6)
     for i, sol in enumerate(sols):
         print(f"Solution {i+1}: {' -> '.join(sol)}")
     print(f"Total solutions found: {len(sols)}")
