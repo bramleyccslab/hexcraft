@@ -9,7 +9,7 @@
     - hex_game_1.py: the first version of a hex game.
     - hex_game_2.py: the second version of a hex game, with objective shape as goal and can judge whether the objective is reached.
     - hex_game_3.py: the third (and the current) version of a hex game, with the same design choices as in Ana's experiment.
-    - solver.py: a script for searching all the possible action chains that could solve a problem within a certain chain length.
+    - solver.py: a script for searching all the possible action chains that could solve a problem within a certain chain length. Possible to use shapes or action sequences as input.
 - js
     - exp1: code in development for first experiment
         - demo and demo_nocache are original demo sites created by Neil 
