@@ -1,4 +1,4 @@
-import itertools
+import os
 
 BOARD_SIZE = 9
 
@@ -6,6 +6,35 @@ GOAL_SHAPE = [(BOARD_SIZE // 2, BOARD_SIZE // 2), (BOARD_SIZE // 2, BOARD_SIZE /
 
 def check_goal(shapes, goal_shape):
     return set(shapes[0]) == set(goal_shape)
+
+def generate_board_string(shapes, label="Board"):
+    half = BOARD_SIZE // 2
+    start = BOARD_SIZE - half
+    increasing = list(range(start, BOARD_SIZE + 1))
+    decreasing = list(range(BOARD_SIZE - 1, start - 1, -1))
+    row_lengths = increasing + decreasing
+
+    start = 2 + half
+    decreasing = list(range(start, 1, -1))
+    increasing = list(range(3, start + 1))
+    leading_spaces = decreasing + increasing
+
+    board_lines = [f"{label}:"]
+    shape_set = set(shapes[0])
+
+    for y in range(BOARD_SIZE):
+        row_str = " " * leading_spaces[y]
+        for x in range(row_lengths[y]):
+            row_str += '■ ' if (y, x) in shape_set else '· '
+        board_lines.append(row_str)
+    return "\n".join(board_lines)
+
+def print_two_boards(goal_shape, current_shapes):
+    os.system('cls' if os.name == 'nt' else 'clear')
+    goal_str = generate_board_string([goal_shape], "Target Shape")
+    current_str = generate_board_string(current_shapes, "Your Shape")
+    print(goal_str + "\n\n" + current_str)
+    print("\na=add center, d=delete center, z=corner, x=bar, w=west, e=northeast, s=southeast, f=flip, r=reflect, space=rotate, q=quit")
 
 def create_center(shapes):
     cx, cy = BOARD_SIZE // 2, BOARD_SIZE // 2
@@ -123,40 +152,39 @@ def reflect(shapes):
         reflected_shapes.append(combined)
     return reflected_shapes
 
-ACTIONS = {
-    'a': create_center,
-    'd': delete_center,
-    'z': add_corner,
-    'x': add_bar,
-    'w': move_west,
-    'e': move_northeast,
-    's': move_southeast,  
-    'f': flip,
-    'r': reflect,
-    ' ': rotate,
-}
-
-def goal_solver_brute_force(goal_shape, max_depth=7):
-    action_keys = list(ACTIONS.keys())
-    solutions = []
-
-    for length in range(1, max_depth + 1):
-        for cmd_seq in itertools.product(action_keys, repeat=length):
-            shapes = [[]]
-            for cmd in cmd_seq:
-                func = ACTIONS[cmd]
-                shapes = func(shapes)
-            if check_goal(shapes, goal_shape):
-                solutions.append(list(cmd_seq))
-
-    return solutions
-
 def main():
-    print("Searching for solutions...")
-    sols = goal_solver_brute_force(GOAL_SHAPE, max_depth=6)
-    for i, sol in enumerate(sols):
-        print(f"Solution {i+1}: {' -> '.join(sol)}")
-    print(f"Total solutions found: {len(sols)}")
+    shapes = [[]]
+    print_two_boards(GOAL_SHAPE, shapes)
+    while True:
+        command = input("Please enter your command: ").lower()
+        if command == 'q':
+            break
+        elif command == 'a':
+            shapes = create_center(shapes)
+        elif command == 'd':
+            shapes = delete_center(shapes)
+        elif command == 'z':
+            shapes = add_corner(shapes)
+        elif command == 'x':
+            shapes = add_bar(shapes)
+        elif command == 'w':
+            shapes = move_west(shapes)
+        elif command == 'e':
+            shapes = move_northeast(shapes)
+        elif command == 's':
+            shapes = move_southeast(shapes)
+        elif command == 'f':
+            shapes = flip(shapes)
+        elif command == 'r':
+            shapes = reflect(shapes)
+        elif command == ' ':
+            shapes = rotate(shapes)
+
+        print_two_boards(GOAL_SHAPE, shapes)
+
+        if check_goal(shapes, GOAL_SHAPE):
+            print("Goal Completed!")
+            break
 
 if __name__ == "__main__":
     main()
