@@ -65,7 +65,23 @@ var tutorial = ['A', 'AWSE', 'Z', 'X', 'ZX', 'XD', 'ZKKK', 'ZF', 'ASSR'];
 
 var allTrials = dabone.concat(hazard, triangle);
 
-
+// progress bar styles
+const validKeys = ['a','d','z','x','w','e','s','f','r',' ','Enter'];
+const NUM_SEGMENTS = 30;
+const FILL_COLOR = 'green';
+const SEGMENT_STYLE = {
+    width: '20px',
+    height: '20px',
+    backgroundColor: 'white',
+    border: '1px solid black',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '12px',
+    fontWeight: 'bold',
+    fontFamily: 'sans-serif',
+    marginRight: '2px'
+};
 
 //ignore this for now:
 var hexTutorial = {
@@ -127,19 +143,55 @@ var hexTrial = {
 <p id="response_area">
     Your action sequence appears below:
 </p>
-<div id="main_focus"></div>
+<!-- <div id="main_focus"></div> -->
+<div id="progressContainer"></div>
 <img src="static/img/keyboard_full.png" style="width:400px">
-<ol>
-</ol>`,
+`,
     on_load: function() {
+        
         const oldButtons = document.getElementById("control-buttons");
         if (oldButtons) oldButtons.remove();
         inputLocked = false;
         attemptCount = 0;
         Start(allTrials[patternCounter]);   //change allTrials to the specific cache-array if needed
         patternCounter = patternCounter + 1;
-        //console.log('condition: ', condition, ' patterns: ', patterns);
+
+        const container = document.getElementById('progressContainer');
+        for (let i = 0; i < NUM_SEGMENTS; i++) {
+            const segment = document.createElement('div');
+            Object.assign(segment.style, SEGMENT_STYLE);
+            segment.classList.add('segment');
+            container.appendChild(segment);
+        }
+
+        let currentIndex = 0;
+        const keyHandler = (e) => {
+            if (currentIndex >= NUM_SEGMENTS) return;
+            if (validKeys.includes(e.key) || e.key === ' ') {
+                const segments = document.querySelectorAll('#progressContainer .segment');
+                segments[currentIndex].style.backgroundColor = FILL_COLOR;
+                segments[currentIndex].style.color = 'white';
+                segments[currentIndex].dataset.key = e.key;
+                if (e.key === ' ') {
+                    segments[currentIndex].textContent = '\u2220';
+                } else if (e.key === 'Enter') {
+                    segments[currentIndex].textContent = '\u21B5';
+                } else {
+                    segments[currentIndex].textContent = e.key.toUpperCase();
+                }
+                currentIndex++;
+            }
+        };
+
+        document.addEventListener('keydown', keyHandler);
+
+        jsPsych.getCurrentTrial()._keyHandler = keyHandler; // store for removal later
     },
+    // on_finish: function() {
+    //     if (jsPsych.getCurrentTrial()._keyHandler) {
+    //         document.removeEventListener('keydown', jsPsych.getCurrentTrial()._keyHandler);
+    //     }
+    // },
     choices: "NO_KEYS",
     trial_duration: null
 }
