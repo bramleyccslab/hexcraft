@@ -187,11 +187,11 @@ var hexTrial = {
 
         jsPsych.getCurrentTrial()._keyHandler = keyHandler; // store for removal later
     },
-    // on_finish: function() {
-    //     if (jsPsych.getCurrentTrial()._keyHandler) {
-    //         document.removeEventListener('keydown', jsPsych.getCurrentTrial()._keyHandler);
-    //     }
-    // },
+    on_finish: function() {
+        if (jsPsych.getCurrentTrial()._keyHandler) {
+            document.removeEventListener('keydown', jsPsych.getCurrentTrial()._keyHandler);
+        }
+    },
     choices: "NO_KEYS",
     trial_duration: null
 }
