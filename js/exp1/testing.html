@@ -51,22 +51,24 @@ var instructions = {
 }
 
 var patternCounter = 0;
+let currentIndex = 0;
 
 // testing trials: 
-var dabone = ['XKX','ZXKXW','XKXKSXKXR'];
-var hazard = ['ZSA', 'ZSAZSAR', 'ZSAEEZSASWXWEK'];  
-var triangle = ['ASAEA', 'ASAEAEASAEAK', 'ASAEASASAEAEASAEA'];     //the cache is a bit too long 
-var dinopaw = ['XZD', 'ZXDSRKR', 'XKSSZXDRKK'];     //potential cache that's also 3 keys long
+var dabone = ['XKX','ZXKXW','XKXWWXKXSSR'];   //'[XKX]','Z[XKX]W','[XKX]WW[XKX]SSR'
+var hazard = ['ZSA', 'ZSARK', 'ZSAKZSARKX'];      //'[ZSA]', '[ZSA]RK', '[ZSA]K[ZSA]RKX' 
+var dinopaw = ['ZXD', 'ZXDWR', 'ZXDESZXDSR'];     // '[ZXD]', '[ZXD]WR', '[ZXD]ES[ZXD]SR'
+
+//var triangle = ['ASAEA', 'ASAEAEASAEAK', 'ASAEASASAEAEASAEA'];     //the cache is a bit too long 
 
 var empty = ['K'];
 
 //ignore all tutorial stuff for now
 var tutorial = ['A', 'AWSE', 'Z', 'X', 'ZX', 'XD', 'ZKKK', 'ZF', 'ASSR'];
 
-var allTrials = dabone.concat(hazard, triangle);
+var allTrials = dabone.concat(hazard, dinopaw);
 
 // progress bar styles
-const validKeys = ['a','d','z','x','w','e','s','f','r',' ','Enter'];
+const validKeys = ['a','d','z','x','w','e','s','f','r','A','D','Z','X','W','E','S','F','R', ' ','Enter'];
 const NUM_SEGMENTS = 30;
 const FILL_COLOR = 'green';
 const SEGMENT_STYLE = {
@@ -153,10 +155,11 @@ var hexTrial = {
         if (oldButtons) oldButtons.remove();
         inputLocked = false;
         attemptCount = 0;
-        Start(allTrials[patternCounter]);   //change allTrials to the specific cache-array if needed
+        Start(dinopaw[patternCounter]);   //change allTrials to the specific cache-array if needed
         patternCounter = patternCounter + 1;
 
         const container = document.getElementById('progressContainer');
+        container.innerHTML = '';
         for (let i = 0; i < NUM_SEGMENTS; i++) {
             const segment = document.createElement('div');
             Object.assign(segment.style, SEGMENT_STYLE);
@@ -164,7 +167,7 @@ var hexTrial = {
             container.appendChild(segment);
         }
 
-        let currentIndex = 0;
+        currentIndex = 0;
         const keyHandler = (e) => {
             if (currentIndex >= NUM_SEGMENTS) return;
             if (validKeys.includes(e.key) || e.key === ' ') {

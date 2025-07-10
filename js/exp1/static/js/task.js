@@ -1,7 +1,7 @@
 var N = 4 //Hexagon radius (excluding centre, other stuff should scale with this)
 
 //TODO: UPDATE PRIMITIVE KEY MAPPINGS
-console.log('cache?', cache);
+//console.log('cache?', cache);
 
 var empty_state = Array.apply(null, Array(2*N+1))
 .map(function () { });
@@ -16,6 +16,8 @@ var locked_state = _.cloneDeep(empty_state);//Tracks the locked-in board state o
 var target = _.cloneDeep(empty_state);//Contains the target state
 var target_lock_tmp = _.cloneDeep(empty_state);//For procedurally generating the target state if it involves locking steps
 var spillage = 0;//tracks false positives in solutions
+var key_times = []; //list for recording time when keys were pressed 
+var key_between_times = []; //list for time diffs between key presses
 
 var d //The canvas identifier
 
@@ -32,7 +34,7 @@ var library = [[32, 32, 32, 87, 32, 32, 32], //East
                [65, 82, 65, 83, 69, 83, 69, 65, 82],//Bar65, 87, 82, 65, 83, 83, 69, 69, 65, 87, 82
                []]; //Store the action sequences they cache
 
-var results = {target:[], performance:[], action_history:[], state_history:[], library_history:[], library_update_at:[0]};
+var results = {target:[], performance:[], action_history:[], state_history:[], library_history:[], library_update_at:[0], timestamps:[]};
 //TMP BOB FOR DEMO
 // library = [[32, 32, 87, 32, 32, 32,32], //SE
 //                [32,32,32,32,87,32,32], //NW
@@ -70,7 +72,7 @@ if (cache)
     action_keycodes = [ 87, 65, 68, 70, 13, 32];//76, 75
     // action_displays = ['W','A','D','Z', '&#8629;','&#8736;'];
 
-    console.log(cachable_keycodes);
+    //console.log(cachable_keycodes);
 
 } else {
     primitive_keycodes = [87, 65, 68, 70, 13, 32,
@@ -100,8 +102,9 @@ for (var i=0; i<args.length; ++i) {
 function Start(fpattern)
 {
 
+    key_times = [];
+    key_between_times = [];
     pattern = fpattern;
-    console.log('testing testing ', pattern, fpattern);
 
     state = _.cloneDeep(empty_state);
     old_state = _.cloneDeep(empty_state);
@@ -215,7 +218,7 @@ function Start(fpattern)
         //Functionality for using caches
         $(".cache-btn").click(function(){
             var tmp = this.id
-            console.log('clicked', this.id, tmp.charAt(tmp.length-1));
+            //console.log('clicked', this.id, tmp.charAt(tmp.length-1));
             var which_cache = Number(tmp.charAt(tmp.length-1));
 
             // console.log('hihi', actions, which_cache, cachable_keycodes,
@@ -262,7 +265,7 @@ function Action(keycode, this_state=state, real=true, midcache = false)
     //a target rather than interactively generating a solution
 
 
-    if (keycode==81){Undo();}
+    //if (keycode==81){Undo();}
 
 
     if (keycode==76 | keycode==13){Lock(this_state, real);} 
@@ -294,7 +297,7 @@ function Action(keycode, this_state=state, real=true, midcache = false)
 
     if (real & !midcache & (primitive_keycodes.indexOf(keycode)>-1 | [81,75,76].indexOf(keycode)>-1))
     {
-        console.log('got here');
+        //console.log('got here');
         actions.push(keycode);
         
         results.action_history.push(_.cloneDeep(actions));
@@ -379,7 +382,7 @@ function UpdateStringVis()
             }
         }
     }
-    console.log('updatestringvis triggered', display_array.join(''));
+    //console.log('updatestringvis triggered', display_array.join(''));
     $('#main_focus').html(display_array.join(''));
 }
 
@@ -397,7 +400,7 @@ function UpdateCacheVis(cache_n)
             }
         }
     }
-    console.log('update cache vis triggered', tmp.join(''));
+    //console.log('update cache vis triggered', tmp.join(''));
 
     $("#cache" + String(cache_n)).html(tmp.join(''));
 }
@@ -461,7 +464,6 @@ function AddCorner(this_state, real)
 
 function Shift(dir, this_state, real)
 {
-    console.log("Shift triggered:", dir); 
     //Clone the current state
     old_state = _.cloneDeep(this_state);
 
@@ -633,7 +635,7 @@ function HexReflect(axis=1, this_state, real)
 
 function Undo()
 {
-    console.log('undoing', state, old_state);
+    //console.log('undoing', state, old_state);
     state = _.cloneDeep(old_state);//Revert to previous state
     actions.pop();//And remove the latest letter from the list
     // (should only be called in interactive mode)
@@ -668,9 +670,10 @@ function Lock(this_state, real)
 
             if (real & Math.abs(q)<=N & Math.abs(r)<=N & Math.abs(s)<=N)
             {
-                if (locked_state[q+N][r+N]==0 & target[q+N][r+N]==1)
+                if (locked_state[q+N][r+N]==0 & target[q+N][r+N]==1)    
                 {
-                   console.log('nonmatch', q,r);
+                   //console.log('nonmatch', q,r);
+                   
                     match = false; 
                 }
 
@@ -682,11 +685,11 @@ function Lock(this_state, real)
         }
     }
 
-    console.log("Match =", match);
-    console.log("Locked state:");
-    console.log(JSON.stringify(locked_state));
-    console.log("Target:");
-    console.log(JSON.stringify(target));
+    // console.log("Match =", match);
+    // console.log("Locked state:");
+    // console.log(JSON.stringify(locked_state));
+    // console.log("Target:");
+    // console.log(JSON.stringify(target));
 
 
     if (real)
@@ -775,21 +778,16 @@ function RandomPattern()
 
 function ChallengePattern(sequence)
 {
-    console.log('sequence: ', sequence);    //fine
     var target_pattern = _.cloneDeep(state);
 
     var seq_arr = Array.from(sequence);
-    console.log('seq_arr: ', seq_arr);  //fine?
     for (var step =0; step<sequence.length; step++)
     {
         var this_key = seq_arr.shift();
-        console.log('this key: ', this_key);    //fine?
         var tmp = action_keys.indexOf(this_key);
-        console.log('keycode', this_key, tmp, primitive_keycodes.concat(cachable_keycodes));    //fine?
         
 
         Action(primitive_keycodes.concat(cachable_keycodes)[tmp], target_pattern, false);
-        console.log('primitive_keycodes.concat(cachable_keycodes)[tmp]: ', primitive_keycodes.concat(cachable_keycodes)[tmp]); 
     }
 
     for (var q=-N; q<=N; q++)
@@ -829,7 +827,7 @@ function ProceduralPattern(depth)
             } 
         }
     }
-    console.log('gen proc', generation_procedure, action_keycodes.concat(primitive_keycodes));
+    //console.log('gen proc', generation_procedure, action_keycodes.concat(primitive_keycodes));
     var tmp_key_array = [];
     for (var i=0; i<generation_procedure.length; i++)
     {
@@ -848,7 +846,7 @@ function UseCache(n, this_state, this_real)
 {    
    //Read the cached pattern TODO KEEP THIS NOT IN THE STRING
    var cache_pattern = _.cloneDeep(library[n]);//Array.from($('#cache' + n).text());
-   console.log('before expanding:', cache_pattern);
+   //console.log('before expanding:', cache_pattern);
 
    //Get rid of any nesting before the display process begins
    
@@ -876,7 +874,7 @@ function UseCache(n, this_state, this_real)
    var cpl = cache_pattern.length;
 
    //Feed the string to the Action function with short timeouts so you can see it play out
-   console.log('after expanding:', cache_pattern);
+   //console.log('after expanding:', cache_pattern);
 
 
    while (cache_pattern.length>0)
@@ -929,8 +927,20 @@ function save_data()
 {
     var now = new Date();
 
-    results.performance = {steps:actions.length, errors:spillage, cache:cache};
+    key_between_times.push({key: key_times[0].key, interval: key_times[0].time});   //for the first key pressed it just includes the key code and the output of performance.now
+
+    for (let i = 1; i < key_times.length; i++) {    //for the other ones it calculates the differences in milliseconds
+        key_between_times.push({
+            key: key_times[i].key,
+            interval: key_times[i].time - key_times[i - 1].time
+    });
+}
+
+    results.performance = {steps:actions.length, errors:spillage};
+    results.timestamps.push(key_between_times);
     results_str = JSON.stringify(results);
+
+    console.log('results: ', results);
 
     jQuery.ajax({
         url: './static/php/save_data.php',
@@ -950,6 +960,8 @@ function save_data()
     })
 }
 
+
+
 function Hint1() {
     $('#hint1').show();
     $('#hintbtn1').hide();
@@ -962,7 +974,7 @@ function Hint2() {
 
 function hexKeyListener(e) {
         if (inputLocked) {
-        console.log("input locked");
+        //console.log("input locked");
         return;
         }
 
@@ -977,8 +989,22 @@ function hexKeyListener(e) {
             code = code-32;//Hack to convert lower case keycodes to upper case
         }
         var ch = String.fromCharCode(code);
+
+        if(ch == " "){  //workaround so that space's ch is 'K' instead of ' ' for readability
+            ch = "K";
+        };
+
+        var stamp = performance.now();  //this should record timestamp at which the key was pressed 
+        key_times.push({key:ch, time:stamp});
+        console.log('key: ', ch, 'time: ', stamp);
+
         console.log(ch);
         console.log("Key char is: " + ch + " Code is: " + code);
+
+        if(actions.length == 29){
+        Lock(state, true);
+        }
+
         Action(code);
     };
 
