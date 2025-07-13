@@ -670,7 +670,7 @@ function Lock(this_state, real)
 
             if (real & Math.abs(q)<=N & Math.abs(r)<=N & Math.abs(s)<=N)
             {
-                if (locked_state[q+N][r+N]==0 & target[q+N][r+N]==1)    
+                if (locked_state[q+N][r+N] !== target[q+N][r+N])    
                 {
                    //console.log('nonmatch', q,r);
                    
@@ -714,7 +714,17 @@ function Lock(this_state, real)
         tryAgainBtn.textContent = "Try Again";
         tryAgainBtn.onclick = function () {
             inputLocked = false;
-            ResetBoard();
+            console.log('attempt count: ' + attemptCount);
+            if(jsPsych.getCurrentTrial()==hexTutorial){
+                timeline.splice(tutCounter+1, 0, hexTutorial);
+                tutCounter = tutCounter-1;
+            }
+            else{
+                timeline.splice(patternCounter+1, 0, hexTrial);
+                patternCounter = patternCounter-1;
+            }
+
+            jsPsych.finishTrial();
         };
         btnContainer.appendChild(tryAgainBtn);
 
@@ -725,6 +735,7 @@ function Lock(this_state, real)
         moveOnBtn.onclick = function () {
             if (match) {
                 save_data(); 
+                attemptCount = 0;
             }
             jsPsych.finishTrial();
         };
@@ -1014,31 +1025,31 @@ function hexKeyListener(e) {
 function tutorialText(step) {
     switch(step){
         case 1:
-            var tutText = '<p style="font-size: 0.9em;">First, put a single piece in the middle of the Board by pressing <b>A</b> on your keyboard.</p><p style="font-size: 0.9em;">Then press <b>Enter</b> to lock it in and move on.</p>';
+            var tutText = '<p style="font-size: 1em;">\n\nFirst, put a single piece in the middle of the Board by pressing <b>A</b> on your keyboard.</p><p style="font-size: 1em;">Then press <b>Enter</b> to lock it in and move on.\n\n</p>';
             break;
         case 2:
-            var tutText = '<p style="font-size: 0.9em;">Pressing <b>W</b> moves all pieces on the Board one space to the <b>West</b>.</p><p style="font-size: 0.9em;">Pressing <b>E</b> moves all pieces on the Board one space to the <b>North-East</b>.</p><p style="font-size: 0.9em;">Pressing <b>S</b> moves all pieces on the Board one space to the <b>South-East</b>.</p><p style="font-size: 0.9em;">Use these keys to put a piece in the middle of the Board and move it on space to the <b>East</b></p>';
+            var tutText = '<p style="font-size: 1em;">Pressing <b>W</b> moves all pieces on the Board one space to the <b>West</b>.</p><p style="font-size: 1em;">Pressing <b>E</b> moves all pieces on the Board one space to the <b>North-East</b>.</p><p style="font-size: 1em;">Pressing <b>S</b> moves all pieces on the Board one space to the <b>South-East</b>.</p><p style="font-size: 1em;">Use these keys to put a piece in the middle of the Board and move it on space to the <b>South-West</b></p>';
             break;
         case 3:
-            var tutText = '<p style="font-size: 0.9em;">Pressing <b>Z</b> puts a <b>Corner shape</b> in the middle of the Board. Place it and lock it in to move on.</p>';
+            var tutText = '<p style="font-size: 1em;">Pressing <b>Z</b> puts a <b>Corner shape</b> in the middle of the Board. Place it and lock it in to move on.</p>';
             break;
         case 4:
-            var tutText = '<p style="font-size: 0.9em;">Pressing <b>X</b> puts a <b>straight bar</b> in the middle of the Board. Place it and lock it in to move on.</p>';
+            var tutText = '<p style="font-size: 1em;">Pressing <b>X</b> puts a <b>diagonal bar</b> in the middle of the Board. Place it and lock it in to move on.</p>';
             break;
         case 5:
-            var tutText = '<p style="font-size: 0.9em;">The placed pieces can overlap with each other.</p><p style="font-size: 0.9em;">Put both a <b>Corner</b> and a <b>Bar</b> to combine them.</p>';
+            var tutText = '<p style="font-size: 1em;">The placed pieces can overlap with each other.</p><p style="font-size: 1em;">Put both a <b>Corner</b> and a <b>Bar</b> to combine them.</p>';
             break;
         case 6:
-            var tutText = '<p style="font-size: 0.9em;">A piece can be <b>deleted</b> from the middle of the board by pressing <b>D</b>.</p><p style="font-size: 0.9em;">Place a <b>Bar</b> and <b>delete</b> its middle piece to move on.';
+            var tutText = '<p style="font-size: 1em;">A piece can be <b>deleted</b> from the middle of the board by pressing <b>D</b>.</p><p style="font-size: 1em;">Place a <b>Bar</b> and <b>delete</b> its middle piece to move on.';
             break;
         case 7:
-            var tutText = '<p style="font-size: 0.9em;">Pressing <b>Space</b> <b>rotates</b> the board clockwise.</p><p style="font-size: 0.9em;">Place a <b>Corner</b> and <b>Rotate</b> it until it matches the target shape.</p>';
+            var tutText = '<p style="font-size: 1em;">Pressing <b>Space</b> <b>rotates</b> the board clockwise.</p><p style="font-size: 1em;">Place a <b>Corner</b> and <b>Rotate</b> it until it matches the target shape.</p>';
             break;
         case 8:
-            var tutText = '<p style="font-size: 0.9em;">Pressing <b>F</b> makes the board <b>Flip</b> from South-East to North-West (and vice-versa).</p><p style="font-size: 0.9em;">Place a <b>Corner</b> and <b>Flip</b> it to match the target shape.</p>';
+            var tutText = '<p style="font-size: 1em;">Pressing <b>F</b> makes the board <b>Flip</b> from South-East to North-West (and vice-versa).</p><p style="font-size: 1em;">Place a <b>Corner</b> and <b>Flip</b> it to match the target shape.</p>';
             break;
         case 9:
-            var tutText = '<p style="font-size: 0.9em;">Pressing <b>R</b> serves a similar function to <b>Flip</b>, but instead the board <b>Reflects</b>, so the original pieces are copied on the other side of the board.</p><p style="font-size: 0.9em;">Place a <b>Piece</b> and <b>Move</b> it to match one of the target locations, then <b>Reflect</b> the board.</p>';
+            var tutText = '<p style="font-size: 1em;">Pressing <b>R</b> serves a similar function to <b>Flip</b>, but instead the board <b>Reflects</b>, so the original pieces are copied on the other side of the board.</p><p style="font-size: 1em;">Place a <b>Piece</b> and <b>Move</b> it to match one of the target locations, then <b>Reflect</b> the board.</p>';
             break;
     }
     document.getElementById("tutText").innerHTML = tutText;

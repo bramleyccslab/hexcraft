@@ -63,7 +63,12 @@
     
 }
 
-
+#tutTextContainer{
+    display: flex;
+    align-items: center;      
+    height: 300px;            
+    padding-left: 20px; 
+}
 
 
 /*input[type='text'] { font-size: 48px; font-family: monospace; }*/
