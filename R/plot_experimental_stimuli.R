@@ -10,10 +10,15 @@ load('./dat/hexsetup.rdata', verbose = T)
 
 keymap<-c("A","D","X","Z","K","F","R","E","S","W")
 
-stimuli<-list(dabone=list('XKX','ZXKXW','XKXKSXKXR'),
-              hazard=list('ZSA','ZSAZSAR','ZSAEEZSASWXEK'),
-              dinopaw=list('XZD','XZDSRKR','ZKSSXZDRKK'),
-              triangle=list('ASAEA','ASAEAEASAEAK','ASAEASASAEAEASAEA'))
+stimuli<-list(dabone =  c('XKX','ZXKXW','XKXWWXKXSSR'), 
+              hazard =  c('ZSA', 'ZSARK', 'ZSAKZSARKX'), 
+              dinopaw = c('ZXD', 'ZXDWR', 'ZXDESZXDSR'),
+              mixer = c('XKXFZXDWZSA'))
+  
+# stimuli_old<-list(dabone=list('XKX','ZXKXW','XKXKSXKXR'),
+#               hazard=list('ZSA','ZSAZSAR','ZSAEEZSASWXEK'),
+#               dinopaw=list('XZD','XZDSRKR','ZKSSXZDRKK'),
+#               triangle=list('ASAEA','ASAEAEASAEAK','ASAEASASAEAEASAEA'))
 s<-t<-a<-1
 
 for (s in 1:length(stimuli))
