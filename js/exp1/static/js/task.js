@@ -714,17 +714,20 @@ function Lock(this_state, real)
         tryAgainBtn.textContent = "Try Again";
         tryAgainBtn.onclick = function () {
             inputLocked = false;
-            console.log('attempt count: ' + attemptCount);
-            if(jsPsych.getCurrentTrial()==hexTutorial){
-                timeline.splice(tutCounter+1, 0, hexTutorial);
-                tutCounter = tutCounter-1;
-            }
-            else{
-                timeline.splice(patternCounter+1, 0, hexTrial);
-                patternCounter = patternCounter-1;
-            }
+            //console.log('attempt count: ' + attemptCount);
+            // if(jsPsych.getCurrentTrial()==hexTutorial){
+            //     //timeline.splice(tutCounter+1, 0, hexTutorial);
+            //     //tutCounter = tutCounter-1;
+            //     R
+            // }
+            // else{
+            //     //timeline.splice(patternCounter+1, 0, hexTrial);
+            //     //patternCounter = patternCounter-1;
+            // }
 
-            jsPsych.finishTrial();
+            //jsPsych.finishTrial();
+            ResetBoard();
+
         };
         btnContainer.appendChild(tryAgainBtn);
 
@@ -757,10 +760,25 @@ function ResetBoard() {
     results.state_history = [];
 
     Update();  
-    document.getElementById("main_focus").innerHTML = "";
+    //document.getElementById("main_focus").innerHTML = "";
+  
+
+    const container = document.getElementById("progressContainer");
+
+    container.innerHTML = "";
+    for (let i = 0; i < NUM_SEGMENTS; i++) {
+        const segment = document.createElement("div");
+        Object.assign(segment.style, SEGMENT_STYLE);
+        segment.classList.add("segment");
+        container.appendChild(segment);
+    }
+    currentIndex = 0;
+
+
     
     const controls = document.getElementById("control-buttons");
     if (controls) controls.remove();
+
 }
 
 
