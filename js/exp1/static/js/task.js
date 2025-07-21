@@ -714,20 +714,7 @@ function Lock(this_state, real)
         tryAgainBtn.textContent = "Try Again";
         tryAgainBtn.onclick = function () {
             inputLocked = false;
-            //console.log('attempt count: ' + attemptCount);
-            // if(jsPsych.getCurrentTrial()==hexTutorial){
-            //     //timeline.splice(tutCounter+1, 0, hexTutorial);
-            //     //tutCounter = tutCounter-1;
-            //     R
-            // }
-            // else{
-            //     //timeline.splice(patternCounter+1, 0, hexTrial);
-            //     //patternCounter = patternCounter-1;
-            // }
-
-            //jsPsych.finishTrial();
             ResetBoard();
-
         };
         btnContainer.appendChild(tryAgainBtn);
 
@@ -737,14 +724,29 @@ function Lock(this_state, real)
         moveOnBtn.style.marginLeft = "1em";
         moveOnBtn.onclick = function () {
             if (match) {
-                save_data(); 
+                //save_data();    // TODO: highlighting this to change
                 attemptCount = 0;
+
+                key_between_times.push({key: key_times[0].key, interval: key_times[0].time});   //for the first key pressed it just includes the key code and the output of performance.now
+
+                for (let i = 1; i < key_times.length; i++) {    //for the other ones it calculates the differences in milliseconds
+                    key_between_times.push({
+                        key: key_times[i].key,
+                        interval: key_times[i].time - key_times[i - 1].time
+                    });
+                }
+
+                results.performance.push({steps:actions.length, errors:spillage}); 
+                results.timestamps.push(key_between_times);        
+
+                if(trialNumber==7){
+                    save_data();
+                }
             }
             jsPsych.finishTrial();
         };
         btnContainer.appendChild(moveOnBtn);
     }
-
     document.body.prepend(btnContainer);
     }
 }
@@ -952,24 +954,24 @@ function insertArrayAt(array, index, arrayToInsert) {
     Array.prototype.splice.apply(array, [index, 0].concat(arrayToInsert));
 }
 
-function save_data()
+function save_data()    // TODO: highlighting this too 
 {
     var now = new Date();
 
-    key_between_times.push({key: key_times[0].key, interval: key_times[0].time});   //for the first key pressed it just includes the key code and the output of performance.now
+//     key_between_times.push({key: key_times[0].key, interval: key_times[0].time});   //for the first key pressed it just includes the key code and the output of performance.now
 
-    for (let i = 1; i < key_times.length; i++) {    //for the other ones it calculates the differences in milliseconds
-        key_between_times.push({
-            key: key_times[i].key,
-            interval: key_times[i].time - key_times[i - 1].time
-    });
-}
+//     for (let i = 1; i < key_times.length; i++) {    //for the other ones it calculates the differences in milliseconds
+//         key_between_times.push({
+//             key: key_times[i].key,
+//             interval: key_times[i].time - key_times[i - 1].time
+//     });
+// }
 
-    results.performance = {steps:actions.length, errors:spillage};
-    results.timestamps.push(key_between_times);
+//     results.performance = {steps:actions.length, errors:spillage};
+//     results.timestamps.push(key_between_times);
     results_str = JSON.stringify(results);
 
-    console.log('results: ', results);
+    console.log('full results: ', results);
 
     jQuery.ajax({
         url: './static/php/save_data.php',
@@ -978,7 +980,7 @@ function save_data()
         success:function(data)
         {
             console.log('Sent data to database');
-            alert('Nailed it in: ' + actions.length + ' actions, with ' + spillage + ' mistakes!');
+            //alert('Nailed it in: ' + actions.length + ' actions, with ' + spillage + ' mistakes!');
             
         },
         error:function(xhr, status, error)
