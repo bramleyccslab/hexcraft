@@ -4,6 +4,7 @@
 }
 */
 
+
 #main_focus {
   width: 700px;
   height: 200px;
@@ -71,6 +72,7 @@
 }
 
 
+
 /*input[type='text'] { font-size: 48px; font-family: monospace; }*/
 
 h1 {
@@ -116,3 +118,4 @@ div.spacer { clear: both; }
 .btn.btn-primary[disabled] {
     background-color: #ffff00;
 }
+

@@ -188,6 +188,16 @@ function Start(fpattern)
                 } else {
                     d.draw(x, y, null, null, "#fff");
                 }
+
+                if(these_cube_coords[0]==0 & these_cube_coords[1]==0 & these_cube_coords[2]==0){
+                    // d.draw(x, y, '+', 'black', 'white');
+                    if (target[these_cube_coords[0]+N][these_cube_coords[1]+N]==1)
+                    {
+                        d.draw(x, y, '+', 'black', "#9e9");
+                    } else {
+                        d.draw(x, y, '+', 'black', "#fff");
+                    }
+                }
                 // d.draw(x, y-0.2, raw_xy_string, "#f99");
                 // d.draw(x, y+0.2, qrs_string, "#9f9");
             }
@@ -336,6 +346,15 @@ function Update()
                         //Otherwise
                         d.draw(x, y, null, null, "#900");//Red
                     }
+                    if(these_cube_coords[0]==0 & these_cube_coords[1]==0 & these_cube_coords[2]==0){
+                    // d.draw(x, y, '+', 'black', 'white');
+                    if (target[these_cube_coords[0]+N][these_cube_coords[1]+N]==1)
+                    {
+                        d.draw(x, y, '+', 'black', "#090");
+                    } else {
+                        d.draw(x, y, '+', 'black', "#900");
+                    }
+                }
 
                 } else {
                     //If state is not already not locked in but is part of the target
@@ -346,6 +365,16 @@ function Update()
                         //Otherwise if unoccupied, non target and not locked in it is white
                        d.draw(x, y, null, null, "white");
                     }
+
+                    if(these_cube_coords[0]==0 & these_cube_coords[1]==0 & these_cube_coords[2]==0){
+                    // d.draw(x, y, '+', 'black', 'white');
+                    if (target[these_cube_coords[0]+N][these_cube_coords[1]+N]==1)
+                    {
+                        d.draw(x, y, '+', 'black', "#9e9");
+                    } else {
+                        d.draw(x, y, '+', 'black', "#fff");
+                    }
+                }
                 }
                 
                 // If the state is actively occupied
