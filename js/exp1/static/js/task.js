@@ -18,6 +18,8 @@ var target_lock_tmp = _.cloneDeep(empty_state);//For procedurally generating the
 var spillage = 0;//tracks false positives in solutions
 var key_times = []; //list for recording time when keys were pressed 
 var key_between_times = []; //list for time diffs between key presses
+var level_result = []; //list to record the trial that the user has completed and fail / complete
+var number_correct = 0;
 
 var d //The canvas identifier
 
@@ -34,7 +36,7 @@ var library = [[32, 32, 32, 87, 32, 32, 32], //East
                [65, 82, 65, 83, 69, 83, 69, 65, 82],//Bar65, 87, 82, 65, 83, 83, 69, 69, 65, 87, 82
                []]; //Store the action sequences they cache
 
-var results = {target:[], performance:[], action_history:[], state_history:[], library_history:[], library_update_at:[0], timestamps:[]};
+var results = {target:[], performance:[], action_history:[], state_history:[], library_history:[], library_update_at:[0], timestamps:[], level:[], demographics:[]};
 //TMP BOB FOR DEMO
 // library = [[32, 32, 87, 32, 32, 32,32], //SE
 //                [32,32,32,32,87,32,32], //NW
@@ -104,6 +106,7 @@ function Start(fpattern)
 
     key_times = [];
     key_between_times = [];
+    level_result = [{trial: tutCounter + patternCounter, result: null} ]
     pattern = fpattern;
 
     state = _.cloneDeep(empty_state);
@@ -736,13 +739,39 @@ function Lock(this_state, real)
         btnContainer.style.marginBottom = "1em";
 
         const feedback = document.createElement("p");
-        feedback.textContent = match ? "Pattern complete" : "Pattern not complete -- try again.";
+        //feedback.textContent = match ? "Puzzle solved. You have earned £0.10!" : "Puzzle not solved, please try again.";
+        const currentTrial = jsPsych.getCurrentTrial();
+        const isTutorial = currentTrial.type === jsPsychHtmlKeyboardResponse && currentTrial.stimulus.includes("Tutorial");
+
+        if (match) {
+            feedback.textContent = isTutorial
+                ? "Tutorial step complete."
+                : "Puzzle solved. You have earned £0.10!";
+        } else {
+            feedback.textContent = isTutorial
+                ? "Tutorial step not complete. Please try again."
+                : "Puzzle not solved, please try again.";
+        }
         btnContainer.appendChild(feedback);
 
         const tryAgainBtn = document.createElement("button");
         tryAgainBtn.textContent = "Try Again";
         tryAgainBtn.onclick = function () {
             inputLocked = false;
+            //recording the data even if the try was incorrect
+            level_result = [{trial: tutCounter + patternCounter, result: false} ];
+            key_between_times.push({key: key_times[0].key, interval: key_times[0].time});   //for the first key pressed it just includes the key code and the output of performance.now
+
+                for (let i = 1; i < key_times.length; i++) {    //for the other ones it calculates the differences in milliseconds
+                    key_between_times.push({
+                        key: key_times[i].key,
+                        interval: key_times[i].time - key_times[i - 1].time
+                    });
+                }
+
+                results.performance.push({steps:actions.length, errors:spillage}); 
+                results.timestamps.push(key_between_times); 
+                results.level.push(level_result);
             ResetBoard();
         };
         btnContainer.appendChild(tryAgainBtn);
@@ -752,10 +781,16 @@ function Lock(this_state, real)
         moveOnBtn.textContent = "Move On";
         moveOnBtn.style.marginLeft = "1em";
         moveOnBtn.onclick = function () {
+            attemptCount = 0;
             if (match) {
-                //save_data();    // TODO: highlighting this to change
-                attemptCount = 0;
-
+                level_result = [{trial: tutCounter + patternCounter, result: true} ];
+                if (!isTutorial){
+                    number_correct = number_correct +1;
+                }
+            }
+            else{
+                level_result = [{trial: tutCounter + patternCounter, result: false} ];
+            }
                 key_between_times.push({key: key_times[0].key, interval: key_times[0].time});   //for the first key pressed it just includes the key code and the output of performance.now
 
                 for (let i = 1; i < key_times.length; i++) {    //for the other ones it calculates the differences in milliseconds
@@ -766,12 +801,12 @@ function Lock(this_state, real)
                 }
 
                 results.performance.push({steps:actions.length, errors:spillage}); 
-                results.timestamps.push(key_between_times);        
-
-                if(trialNumber==7){
-                    save_data();
-                }
-            }
+                results.timestamps.push(key_between_times);     
+                results.level.push(level_result);
+            
+            // if(trialNumber==1){ //don't forget to change to 7
+            //     save_data();
+            // }
             jsPsych.finishTrial();
         };
         btnContainer.appendChild(moveOnBtn);
@@ -1077,7 +1112,7 @@ function tutorialText(step) {
             var tutText = '<p style="font-size: 1em;">\n\nFirst, put a single piece in the middle of the Board by pressing <b>A</b> on your keyboard.</p><p style="font-size: 1em;">Then press <b>Enter</b> to lock it in and move on.\n\n</p>';
             break;
         case 2:
-            var tutText = '<p style="font-size: 1em;">Pressing <b>W</b> moves all pieces on the Board one space to the <b>West</b>.</p><p style="font-size: 1em;">Pressing <b>E</b> moves all pieces on the Board one space to the <b>North-East</b>.</p><p style="font-size: 1em;">Pressing <b>S</b> moves all pieces on the Board one space to the <b>South-East</b>.</p><p style="font-size: 1em;">Use these keys to put a piece in the middle of the Board and move it on space to the <b>South-West</b></p>';
+            var tutText = '<p style="font-size: 1em;">Pressing <b>W</b> moves all pieces on the Board one space to the <b>West</b>.</p><p style="font-size: 1em;">Pressing <b>E</b> moves all pieces on the Board one space to the <b>North-East</b>.</p><p style="font-size: 1em;">Pressing <b>S</b> moves all pieces on the Board one space to the <b>South-East</b>.</p><p style="font-size: 1em;">Use these keys to put a piece in the middle of the Board and move it one space to the <b>South-West</b></p>';
             break;
         case 3:
             var tutText = '<p style="font-size: 1em;">Pressing <b>Z</b> puts a <b>Corner shape</b> in the middle of the Board. Place it and lock it in to move on.</p>';
@@ -1092,7 +1127,7 @@ function tutorialText(step) {
             var tutText = '<p style="font-size: 1em;">A piece can be <b>deleted</b> from the middle of the board by pressing <b>D</b>.</p><p style="font-size: 1em;">Place a <b>Bar</b> and <b>delete</b> its middle piece to move on.';
             break;
         case 7:
-            var tutText = '<p style="font-size: 1em;">Pressing <b>Space</b> <b>rotates</b> the board clockwise.</p><p style="font-size: 1em;">Place a <b>Corner</b> and <b>Rotate</b> it until it matches the target shape.</p>';
+            var tutText = '<p style="font-size: 1em;">Pressing <b>Space</b> <b>rotates</b> all the pieces clockwise.</p><p style="font-size: 1em;">Place a <b>Corner</b> and <b>Rotate</b> it until it matches the target shape.</p>';
             break;
         case 8:
             var tutText = '<p style="font-size: 1em;">Pressing <b>F</b> makes the board <b>Flip</b> from South-East to North-West (and vice-versa).</p><p style="font-size: 1em;">Place a <b>Corner</b> and <b>Flip</b> it to match the target shape.</p>';
