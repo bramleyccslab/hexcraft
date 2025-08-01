@@ -1,7 +1,6 @@
 var N = 4 //Hexagon radius (excluding centre, other stuff should scale with this)
 
 //TODO: UPDATE PRIMITIVE KEY MAPPINGS
-//console.log('cache?', cache);
 
 var empty_state = Array.apply(null, Array(2*N+1))
 .map(function () { });
@@ -73,8 +72,6 @@ if (cache)
     // action_keys =     ['W','A','D','F','L','K'];
     action_keycodes = [ 87, 65, 68, 70, 13, 32];//76, 75
     // action_displays = ['W','A','D','Z', '&#8629;','&#8736;'];
-
-    //console.log(cachable_keycodes);
 
 } else {
     primitive_keycodes = [87, 65, 68, 70, 13, 32,
@@ -153,15 +150,12 @@ function Start(fpattern)
         target = ProceduralPattern(gen_depth);
     } else {
         target = ChallengePattern(pattern);
-        console.log('target: ', target);    
-        console.log(pattern);
         //'djdjdwuuuedjdjdwnnedjdjdwkkk' -previously
         //fxfxfswrwrwrtfxfxfscctfxfxfseeet
         //xkxkxdrrrlxkxkxdsslxkxkxdeeel -- e.g. three circles XKXKXDRRRLXKXKXDSSLXKXKXDEEEL
         //zfzsslzfzccclzfzrrrlzfzkeelzfzkkwwwlzfzkkkkeerrl circle of bones
     }
 
-    console.log(gen_depth, 'mode', mode, ' ', pattern);
     results.target = _.cloneDeep(target);//Store the target pattern
 
     if (cache)
@@ -895,7 +889,7 @@ function ChallengePattern(sequence)
             } 
         }
     }
-    console.log('target pattern ', target_pattern); 
+    //console.log('target pattern ', target_pattern); 
     return target_pattern;
 }
 
@@ -1035,7 +1029,7 @@ function save_data()    // TODO: highlighting this too
 //     results.timestamps.push(key_between_times);
     results_str = JSON.stringify(results);
 
-    console.log('full results: ', results);
+    //console.log('full results: ', results);
 
     jQuery.ajax({
         url: './static/php/save_data.php',
@@ -1043,7 +1037,7 @@ function save_data()    // TODO: highlighting this too
         data:{results:results_str},
         success:function(data)
         {
-            console.log('Sent data to database');
+            //console.log('Sent data to database');
             //alert('Nailed it in: ' + actions.length + ' actions, with ' + spillage + ' mistakes!');
             
         },
@@ -1091,10 +1085,10 @@ function hexKeyListener(e) {
 
         var stamp = performance.now();  //this should record timestamp at which the key was pressed 
         key_times.push({key:ch, time:stamp});
-        console.log('key: ', ch, 'time: ', stamp);
+        // console.log('key: ', ch, 'time: ', stamp);
 
-        console.log(ch);
-        console.log("Key char is: " + ch + " Code is: " + code);
+        // console.log(ch);
+        // console.log("Key char is: " + ch + " Code is: " + code);
 
         if(actions.length == 29){
         Lock(state, true);

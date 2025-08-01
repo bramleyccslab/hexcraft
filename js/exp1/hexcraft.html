@@ -394,11 +394,13 @@ var hexTrial = {
 
 var debrief = {
     type: jsPsychInstructions,
-    pages: [
+    pages: function() {
+        return [
         `<p>Thank you for completing the experiment.</p> 
         <p>Your score is ${number_correct} out of 7, which means you have earned £2.${number_correct}0!</p>
         <p>You will be eligible for full payment once you answer the following questions.</p>`
-    ],
+        ];
+    },
     on_load: function() {
          const oldButtons = document.getElementById("control-buttons");
          if (oldButtons) oldButtons.remove();
@@ -406,6 +408,16 @@ var debrief = {
     button_label_next: "Continue",
     allow_backward: false,
     show_clickable_nav: true
+}
+
+var survey_ID = {
+  type: jsPsychSurveyText,
+  questions: [
+    {prompt: 'Please enter your Prolific ID.',
+    name: 'prolific_id',
+    required: true
+    }
+  ]
 }
 
 var survey_gender = {
@@ -434,23 +446,23 @@ var theEnd = {
     type: jsPsychHtmlKeyboardResponse,
     stimulus: 'Thank you for completing the study! You can now close the window.',
     on_start: function() {
-      const data = jsPsych.data.get().filter({trial_type: 'survey-multi-choice'}).values();
-      const gender = data[0].response.gender;
 
-      const ageData = jsPsych.data.get().filter({trial_type: 'survey-text'}).values();
-      const age = ageData[0].response.age;
+        const idData = jsPsych.data.get().filter({trial_type: 'survey-text'}).values();
+        const prolific_id = idData[0].response.prolific_id;
+        const age = idData[1].response.age;
 
-      console.log("Gender:", gender);
-      console.log("Age:", age);
+        const data = jsPsych.data.get().filter({trial_type: 'survey-multi-choice'}).values();
+        const gender = data[0].response.gender;
 
-      results.demographics.push([gender, age]);
+
+      results.demographics.push([prolific_id, gender, age]);
       save_data();
     }
 }
 
 
 
-var timeline = [instructions, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, tutEnd, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, debrief, survey_gender, survey_age, theEnd];
+var timeline = [instructions, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, tutEnd, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, debrief, survey_ID, survey_gender, survey_age, theEnd];
 
 //hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, tutEnd, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial,
 
