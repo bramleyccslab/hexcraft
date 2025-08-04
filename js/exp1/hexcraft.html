@@ -444,7 +444,7 @@ var survey_age = {
 
 var theEnd = {
     type: jsPsychHtmlKeyboardResponse,
-    stimulus: 'Thank you for completing the study! You can now close the window.',
+    stimulus: 'Thank you for completing the study! Here is your completion code: C4WUY3E5. You can now close the window.',
     on_start: function() {
 
         const idData = jsPsych.data.get().filter({trial_type: 'survey-text'}).values();
@@ -462,7 +462,7 @@ var theEnd = {
 
 
 
-var timeline = [instructions, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, tutEnd, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, debrief, survey_ID, survey_gender, survey_age, theEnd];
+var timeline = [instructions, survey_ID, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, tutEnd, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, debrief, survey_gender, survey_age, theEnd];
 
 //hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, tutEnd, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial,
 
