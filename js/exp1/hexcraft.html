@@ -56,7 +56,7 @@ var instructions = {
             </p>
             <p style='margin-bottom: 20px;'>
               <b>Compensation.</b>
-              You will be paid £2 and an up to £0.60 bonus for your participation in this study.
+              You will be paid £2.50 and an up to £1.80 bonus for your participation in this study.
             </p>
             <p style='margin-bottom: 20px;'>
               <b>Risks and benefits.</b>
@@ -94,7 +94,7 @@ var instructions = {
         <p style = 'margin-bottom: 20px; font-size: 1.5em'>Task:</p>
         <p style='margin-bottom: 20px;'>In this experiment, you will solve seven shape puzzles. For each puzzle, you can choose from 10 actions to recreate the target shape. Each action is mapped to a specific key on your keyboard. There will be a tutorial before the actual puzzles to familiarize you with the available actions.</p>
         <img src="static/img/board.png" style="height:350px">
-        <p style='margin-bottom: 20px;'>Your objective is to match the target shape using these actions. For each puzzle you solve, you will get a bonus of £0.10. You are free to attempt each puzzle as many times as you want. However, you will need to make at least three attempts before you can skip a puzzle if you are stuck. Please note that you can perform a maximum of 30 actions per puzzle before your answer is automatically locked in.</p>
+        <p style='margin-bottom: 20px;'>Your objective is to match the target shape using these actions. For each puzzle you solve, you will get a bonus of £0.20. You are free to attempt each puzzle as many times as you want. However, you will need to make at least <b>five</b> attempts before you can skip a puzzle if you are stuck. Please note that you can perform a maximum of 30 actions per puzzle before your answer is automatically locked in.</p>
         <p><b>Important:</b> If you get stuck or want to try a puzzle again, <b>do not refresh the page.</b> Instead, lock in your answer and you will be able to retry the puzzle.</p> 
         </div>`
     ],
@@ -397,7 +397,7 @@ var debrief = {
     pages: function() {
         return [
         `<p>Thank you for completing the experiment.</p> 
-        <p>Your score is ${number_correct} out of 7, which means you have earned £2.${number_correct}0!</p>
+        <p>Your score is ${number_correct} out of 7, which means you have earned £${2.5 + number_correct*2/10}0!</p>
         <p>You will be eligible for full payment once you answer the following questions.</p>`
         ];
     },
@@ -417,7 +417,18 @@ var survey_ID = {
     name: 'prolific_id',
     required: true
     }
-  ]
+  ],
+  on_load: function() {
+    const input = document.querySelector('input[type="text"]');
+    
+    input.addEventListener('input', function(e) {
+      this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');
+    });
+  },
+  on_finish: function(data) {
+    const cleaned_id = data.response.prolific_id.replace(/[^a-zA-Z0-9]/g, '');
+    jsPsych.data.addProperties({prolific_id: cleaned_id});
+  }
 }
 
 var survey_gender = {
@@ -439,25 +450,68 @@ var survey_age = {
     name: 'age',
     required: true
     }
-  ]
+  ],
+  on_load: function() {
+    const input = document.querySelector('input[type="text"]');
+    
+    input.addEventListener('input', function(e) {
+      this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');
+    });
+  },
+  on_finish: function(data) {
+    const cleaned_age = data.response.age.replace(/[^a-zA-Z0-9]/g, '');
+    jsPsych.data.addProperties({age: cleaned_age});
+
+    const idData = jsPsych.data.get().filter({trial_type: 'survey-text'}).values();
+
+      var prolific_id = "";
+      var age = "";
+
+      if (idData.length > 0 && idData[0].response && idData[0].response.prolific_id) {
+        prolific_id = idData[0].response.prolific_id;
+      }
+      if (idData.length > 1 && idData[1].response && idData[1].response.age) {
+        age = idData[1].response.age;
+      }
+
+      const Mdata = jsPsych.data.get().filter({trial_type: 'survey-multi-choice'}).values();
+      var gender = "";
+
+      if (Mdata.length > 0 && Mdata[0].response && Mdata[0].response.gender) {
+        gender = Mdata[0].response.gender;
+      }
+
+      results.demographics.push([prolific_id, gender, age]);
+    
+      save_data();
+  }
 }
 
 var theEnd = {
     type: jsPsychHtmlKeyboardResponse,
-    stimulus: 'Thank you for completing the study! Here is your completion code: C4WUY3E5. You can now close the window.',
-    on_start: function() {
+    stimulus: `
+    <div>
+      <p style = 'margin-bottom: 20px;font-size: 2em'>Thank you for completing the study!</p>
+      <p>Please click the <b>"Finish"</b> button below, or use the code <b>C4WUY3E5</b> to confirm your participation on Prolific.</p>
+      <a href="https://app.prolific.com/submissions/complete?cc=C4WUY3E5" target="_blank">
+        <button style="padding:10px 20px; font-size:16px; margin-top:20px;">Finish</button>
+      </a>
+    </div>
+    `,
+    choices: "NO_KEYS", 
+    // on_start: function() {
 
-        const idData = jsPsych.data.get().filter({trial_type: 'survey-text'}).values();
-        const prolific_id = idData[0].response.prolific_id;
-        const age = idData[1].response.age;
+    //     const idData = jsPsych.data.get().filter({trial_type: 'survey-text'}).values();
+    //     const prolific_id = idData[0].response.prolific_id;
+    //     const age = idData[1].response.age;
 
-        const data = jsPsych.data.get().filter({trial_type: 'survey-multi-choice'}).values();
-        const gender = data[0].response.gender;
+    //     const data = jsPsych.data.get().filter({trial_type: 'survey-multi-choice'}).values();
+    //     const gender = data[0].response.gender;
 
 
-      results.demographics.push([prolific_id, gender, age]);
-      save_data();
-    }
+    //   results.demographics.push([prolific_id, gender, age]);
+    //   save_data();
+    // }
 }
 
 

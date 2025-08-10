@@ -75,15 +75,17 @@ if (cache)
 
 } else {
     primitive_keycodes = [87, 65, 68, 70, 13, 32,
-                       69,82,83,90, 88, 67];
+                       69,82,83,90, 88];
 
     action_keycodes = [87, 65, 68, 70, 13, 32,
-                       69,82,83,90, 88, 67];//76, 75
+                       69,82,83,90, 88];//76, 75
 
 
 
 
 }
+
+const VALID_CODES = new Set(action_keycodes);
 
 const regex = new RegExp("^[QWERASDFZXLK]*$");//For preventing any other button being pressed in input field
 // qwerasdfzxclk
@@ -103,7 +105,7 @@ function Start(fpattern)
 
     key_times = [];
     key_between_times = [];
-    level_result = [{trial: tutCounter + patternCounter, result: null} ]
+    level_result = [{trial: tutCounter + patternCounter, result: null, challenge: null} ]
     pattern = fpattern;
 
     state = _.cloneDeep(empty_state);
@@ -740,7 +742,7 @@ function Lock(this_state, real)
         if (match) {
             feedback.textContent = isTutorial
                 ? "Tutorial step complete."
-                : "Puzzle solved. You have earned £0.10!";
+                : "Puzzle solved. You have earned £0.20!";
         } else {
             feedback.textContent = isTutorial
                 ? "Tutorial step not complete. Please try again."
@@ -753,7 +755,7 @@ function Lock(this_state, real)
         tryAgainBtn.onclick = function () {
             inputLocked = false;
             //recording the data even if the try was incorrect
-            level_result = [{trial: tutCounter + patternCounter, result: false} ];
+            level_result = [{trial: tutCounter + patternCounter, result: false, challenge: pattern} ];
             key_between_times.push({key: key_times[0].key, interval: key_times[0].time});   //for the first key pressed it just includes the key code and the output of performance.now
 
                 for (let i = 1; i < key_times.length; i++) {    //for the other ones it calculates the differences in milliseconds
@@ -770,20 +772,20 @@ function Lock(this_state, real)
         };
         btnContainer.appendChild(tryAgainBtn);
 
-        if (match || attemptCount >= 3) {
+        if (match || attemptCount >= 5) {
         const moveOnBtn = document.createElement("button");
         moveOnBtn.textContent = "Move On";
         moveOnBtn.style.marginLeft = "1em";
         moveOnBtn.onclick = function () {
             attemptCount = 0;
             if (match) {
-                level_result = [{trial: tutCounter + patternCounter, result: true} ];
+                level_result = [{trial: tutCounter + patternCounter, result: true, challenge: pattern} ];
                 if (!isTutorial){
                     number_correct = number_correct +1;
                 }
             }
             else{
-                level_result = [{trial: tutCounter + patternCounter, result: false} ];
+                level_result = [{trial: tutCounter + patternCounter, result: false, challenge: pattern} ];
             }
                 key_between_times.push({key: key_times[0].key, interval: key_times[0].time});   //for the first key pressed it just includes the key code and the output of performance.now
 
@@ -1083,11 +1085,17 @@ function hexKeyListener(e) {
             ch = "K";
         };
 
+        if(ch == "\r"){  //workaround so that enter's ch is 'L' instead of ' ' for readability
+            ch = "L";
+        };
+
+        if (!VALID_CODES.has(code)) return;
+
         var stamp = performance.now();  //this should record timestamp at which the key was pressed 
         key_times.push({key:ch, time:stamp});
         // console.log('key: ', ch, 'time: ', stamp);
 
-        // console.log(ch);
+        //console.log(ch);
         // console.log("Key char is: " + ch + " Code is: " + code);
 
         if(actions.length == 29){
