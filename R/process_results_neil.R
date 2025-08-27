@@ -3,7 +3,7 @@ library(ggplot2)
 
 rm(list=ls())
 
-load('for_neil.rdata')
+load('./dat/results_for_neil.rdata')
 
 exclude<-c(87, 100, 107)
 problems<-data.frame(id=c('train1','train2','train3','train4','train5','train6','train7','train8','train9',
@@ -11,7 +11,9 @@ problems<-data.frame(id=c('train1','train2','train3','train4','train5','train6',
                      challenge=c('A', 'ASW', 'Z', 'X', 'ZX', 'XD', 'ZKKK', 'ZF', 'ASSR',
                                  'XKX','ZXKXW','XKXWWXKXSSR',
                                  'ZSA', 'ZSARK', 'ZSAKZSARKX',
-                                 'ZXD', 'ZXDWR', 'ZXDESZXDSR'))
+                                 'ZXD', 'ZXDWR', 'ZXDESZXDSR')) 
+# THIS IS THE CHRONOLOGICAL ORDER THEY APPEAR IN THE READ IN
+
 
 # var tutorial = ['A', 'ASW', 'Z', 'X', 'ZX', 'XD', 'ZKKK', 'ZF', 'ASSR'];
 # var dabone = ['XKX','ZXKXW','XKXWWXKXSSR'];
@@ -33,24 +35,43 @@ df.sw<-data.frame(upi = sapply(df_fixed$demographics, '[[', 1),
                   train7=NA,
                   train8=NA,
                   train9=NA,
-                  dabone1=NA,
-                  dabone2=NA,
-                  dabone3=NA,
-                  hazard1=NA,
-                  hazard2=NA,
-                  hazard3=NA,
                   dinopaw1=NA,
+                  dabone1=NA,
+                  hazard1=NA,
                   dinopaw2=NA,
-                  dinopaw3=NA)
+                  dabone2=NA,
+                  hazard2=NA,
+                  dinopaw3=NA,
+                  dabone3=NA,
+                  hazard3=NA,
+                  attempts_train1=NA,
+                  attempts_train2=NA,
+                  attempts_train3=NA,
+                  attempts_train4=NA,
+                  attempts_train5=NA,
+                  attempts_train6=NA,
+                  attempts_train7=NA,
+                  attempts_train8=NA,
+                  attempts_train9=NA,
+                  attempts_dinopaw1=NA,
+                  attempts_dabone1=NA,
+                  attempts_hazard1=NA,
+                  attempts_dinopaw2=NA,
+                  attempts_dabone2=NA,
+                  attempts_hazard2=NA,
+                  attempts_dinopaw3=NA,
+                  attempts_dabone3=NA,
+                  attempts_hazard3=NA,
+                  exclude = 1:118 %in% exclude)
 
 # Also need to create a dataframe with a row for every problem for every participant
 df.tw<-data.frame()
-ls.sw<-list()
+ls.sw<-ls.sw.all<-list()
 
 i<-1
 for (i in 1:nrow(df.sw))
 {
-  ls.sw[[i]]<-list()
+  ls.sw[[i]]<-ls.sw.all[[i]]<-list()
   if (!i%in%exclude)
   {
     this_results<-df_fixed$level[[i]]
@@ -60,28 +81,32 @@ for (i in 1:nrow(df.sw))
     
     for (j in 1:nrow(problems))
     {
-      ix<-which(sapply(this_results, '[[', 'challenge')==problems$challenge[j])
+      ix<-which(sapply(this_results, '[[', 'challenge') == problems$challenge[j])
       completed[j]<-any(sapply(this_results[ix], '[[', 'result'))
-      if (completed[j])
-      {
-        df.sw[[ problems$id[j] ]][i]<-length(ix)
-      }
+      df.sw[[problems$id[j]]][i]<-completed[j]
+      df.sw[[paste0('attempts_', problems$id[j]) ]][i]<-length(ix)
       
       ls.sw[[i]][[j]]<-df_fixed$timestamps_fixed[[i]][ix]
+      ls.sw.all[[i]][[j]] <-data.frame(do.call(rbind.data.frame, df_fixed$timestamps_fixed[[i]][ix]))
     }
     
-    tmp<-data.frame(do.call(rbind.data.frame, ls.sw[[i]][c(11:12,14:25, 17:18)]))#GOT HERE
-    df.sw$actions[i]<-nrow(tmp)
+    # tmp<-ls.sw[[i]][c(11:12,14:15, 17:18)]
+    # tmp2<-data.frame(do.call(rbind.data.frame, ls.sw[[i]]))#GOT HERE
+    # df.sw$actions[i]<-nrow(tmp2)
       
     df.sw$training_completed[i]<-sum(completed[1:9])
     df.sw$tests_completed[i]<-sum(completed[10:18])
-    df.sw$condition_problem_passed[i]<-!is.na(df.sw[[df.sw$condition[i]]][i])
+    df.sw$condition_problem_passed[i]<-df.sw[[df.sw$condition[i]]][i]
     
   }
   
 }
+ls.sw<-ls.sw[df.sw$condition_problem_passed & !df.sw$exclude]
+ls.sw.all<-ls.sw.all[df.sw$condition_problem_passed & !df.sw$exclude]
+df.sw <- filter(df.sw, condition_problem_passed & !exclude)
 
-df.sw<-df.sw %>%filter(condition_problem_passed)
+# MORE EXCLUSIONS FOR NOT PASSING THE TRAINING PUZZLE
+# df.sw<-df.sw %>%filter(condition_problem_passed)
 
 
 c(mean(!is.na(df.sw$dabone1)),
@@ -97,22 +122,48 @@ c(mean(!is.na(df.sw$dabone1)),
 df.sw %>% group_by(condition) %>% summarise_all('mean', na.rm=T)
 
 # CREATE TRIALWISE DATAFRAME
-df.tw <- df.sw %>% gather(problem, attempts, dabone1:dinopaw3) %>% 
-  mutate(problem = factor(problem, levels = c("train1",   "train2",   "train3",   "train4",   "train5",   "train6",   "train7",   "train8", "train9", 
-                                              "dinopaw1", "dabone1", "hazard1", "dinopaw2", "dabone2", "hazard2", "dinopaw3", "dabone3", "hazard3")),
-         condition = factor(condition, levels = c('dinopaw1','dabone1','hazard1'), labels = c('dinopaw', 'dabone','hazard')),
-         correct = !is.na(attempts)) %>% 
+tmp<-df.sw %>% gather(problem, attempts, attempts_dinopaw1:attempts_hazard3)
+df.tw <- df.sw %>% gather(problem, correct, dinopaw1:hazard3) %>% 
+  mutate(attempts = tmp$attempts,
+         problem = factor(problem, levels = c("dinopaw1", "dabone1", "hazard1",
+                                              "dinopaw2", "dabone2", "hazard2",
+                                              "dinopaw3", "dabone3", "hazard3")),
+         condition = factor(condition, levels = c('dinopaw1','dabone1','hazard1'),
+                            labels = c('dinopaw', 'dabone','hazard'))) %>%
+  select(c(1:6, 34:37)) %>%
   arrange(upi, condition)
 
+for (t in 1:nrow(df.tw))
+{
+  i<-which(df.sw$upi==df.tw$upi[t])
+  j<-which(problems$id==df.tw$problem[t])
+  df.tw$actions[t]<-paste0(ls.sw.all[[i]][[j]]$key, collapse = '')
+  # for (k in 1:length(ls.sw.all[[i]][[j]]))
+  # {
+  #   ls.sw.all[[i]][[j]][[k]]
+  # }
+  
+}
+
+save('./dat/results_processed_neil.rdata', df.sw, df.tw, ls.sw, ls.sw.all)
+
+
+
+# REMOVE THE ROWS FOR THE MANIPULATION PROBLEM TO FOCUS JUST ON THE TEST PROBLEM
 df.tw<-df.tw %>% filter(!(condition=='dabone' & problem=='hazard1') & !(condition=='dabone' & problem=='dinopaw1') &
                           !(condition=='hazard' & problem=='dabone1') & !(condition=='hazard' & problem=='dinopaw1') &
                           !(condition=='dinopaw' & problem=='dabone1') & !(condition=='dinopaw' & problem=='hazard1') )
 
+
+
 # Should just count how many T for each problem, condition combo
-ggplot(df.tw %>% filter(condition!='NA' & !problem%in%c('dabone1','hazard1','dinopaw1')), aes(as.numeric(correct), x=problem)) +
+ggplot(df.tw %>% filter(condition!='NA' & !problem%in%c('dinopaw1','dabone1','hazard1')), aes(as.numeric(correct), x=problem)) +
   geom_bar(stat='identity') +
   facet_wrap(~ condition) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+
+
 
 # WHAT WE WERE TRYING TO PLOT
 df.tw %>% group_by(condition, problem)%>% summarise(sc=sum(correct))
