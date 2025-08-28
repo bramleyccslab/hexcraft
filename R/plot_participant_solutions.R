@@ -26,7 +26,7 @@ problems<-data.frame(id=c('train1','train2','train3','train4','train5','train6',
 test_problems<-c('dinopaw2','dabone2','hazard2','dinopaw3','dabone3','hazard3')
 p<-t<-1
 
-for (p in 1:nrow(df.sw))
+for (p in nrow(df.sw):1)
 {
   for (t in 1:length(test_problems))
   {
@@ -34,7 +34,7 @@ for (p in 1:nrow(df.sw))
     ix<-df.tw$upi==df.sw$upi[p] & df.tw$problem==test_problems[t]
     string<-df.tw$actions[ix]
     actions<-strsplit(string, "")[[1]]
-    starts<-strsplit(df.tw$starts[ix])
+    locks<-strsplit(df.tw$locks[ix], "")[[1]]
     state<-empty_state %>% mutate(target = 0, active=0)
     
     # for (a in 1:length(actions))
@@ -45,9 +45,11 @@ for (p in 1:nrow(df.sw))
     for (a in 1:length(actions))
     {
       #If it is an impotent Enter (where they continue without clearing after), do nothing.
-      if (!(which(keymap==actions[a])==11 & starts[a]=='0'))
+      if (!(actions[a]=='L' & locks[a]=='0'))
       {
         state<-f[[which(keymap==actions[a])]](state)
+      } else {
+        cat('it happened', p,t,a, '\n')
       }
       
       state$combination<-0
@@ -56,7 +58,17 @@ for (p in 1:nrow(df.sw))
       state$combination[state$active==1 & state$target==1]<-3
       board_polygons$combination<-factor(rep(state$combination, each = 6), levels = 0:3, labels = c('empty','missed','wrong','correct'))
       board_polygons$target<-factor(rep(state$target, each = 6))
-
+      
+      #DISPLAY WHAT IS LOCKED IN, IF ITS A LOCK
+      if (locks[a]=='0')
+      {
+        old_polygons<-board_polygons
+      }
+      else if(locks[a]=='1')
+      {
+        board_polygons<-old_polygons
+      }
+      
       p_save[[a]]<-ggplot(board_polygons, aes(x_pos, y_pos)) + 
         geom_polygon(aes(group = id, fill=combination), colour = 'lightgray') +
         scale_y_reverse() +
@@ -67,7 +79,8 @@ for (p in 1:nrow(df.sw))
               axis.ticks.x=element_blank(),
               axis.title.y=element_blank(),
               axis.text.y=element_blank(),
-              axis.ticks.y=element_blank())
+              axis.ticks.y=element_blank(),
+              plot.background = element_rect(fill = c('white','yellow')[as.numeric(locks[a]=='1')+1]))
     }
       p_plot<-grid.arrange(grobs = p_save, nrow = round(sqrt(a)),
                            top = paste0('Problem: ', df.tw$problem[ix], ' Participant: ', df.tw$upi[ix], ' Solved: ', df.tw$correct[ix],

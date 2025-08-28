@@ -67,12 +67,12 @@ df.sw<-data.frame(upi = sapply(df_fixed$demographics, '[[', 1),
 
 # Also need to create a dataframe with a row for every problem for every participant
 df.tw<-data.frame()
-ls.sw<-ls.sw.all<-list()
+ls.sw<-ls.sw.all<-ls.whi<-list()
 
 i<-1
 for (i in 1:nrow(df.sw))
 {
-  ls.sw[[i]]<-ls.sw.all[[i]]<-list()
+  ls.sw[[i]]<-ls.sw.all[[i]]<-ls.whi<-list()
   if (!i%in%exclude)
   {
     this_results<-df_fixed$level[[i]]
@@ -84,6 +84,7 @@ for (i in 1:nrow(df.sw))
     {
       ix<-which(sapply(this_results, '[[', 'challenge') == problems$challenge[j])
       completed[j]<-any(sapply(this_results[ix], '[[', 'result'))
+      ls.whi[[i]][[j]]<-which(sapply(this_results[ix], '[[', 'result'))[1]
       df.sw[[problems$id[j]]][i]<-completed[j]
       df.sw[[paste0('attempts_', problems$id[j]) ]][i]<-length(ix)
       
@@ -104,6 +105,7 @@ for (i in 1:nrow(df.sw))
 }
 ls.sw<-ls.sw[df.sw$condition_problem_passed & !df.sw$exclude]
 ls.sw.all<-ls.sw.all[df.sw$condition_problem_passed & !df.sw$exclude]
+ls.whi<-ls.whi[df.sw$condition_problem_passed & !df.sw$exclude]
 df.sw <- filter(df.sw, condition_problem_passed & !exclude)
 
 # MORE EXCLUSIONS FOR NOT PASSING THE TRAINING PUZZLE
@@ -133,14 +135,24 @@ df.tw <- df.sw %>% gather(problem, correct, dinopaw1:hazard3) %>%
                             labels = c('dinopaw', 'dabone','hazard'))) %>%
   select(c(1:6, 34:38)) %>%
   arrange(upi, condition)
-
+df.tw$locks<-''
 for (t in 1:nrow(df.tw))
 {
   i<-which(df.sw$upi==df.tw$upi[t])
   j<-which(problems$id==df.tw$problem[t])
   df.tw$actions[t]<-paste0(ls.sw.all[[i]][[j]]$key, collapse = '')
-  df.tw$starts[t]<-paste0(rep('0', nchar(df.tw$actions[t])), collapse = '')
-  df.tw$starts[t]<-str_replace(df.tw$starts[t], sapply(ls.sw[[i]][[j]], nrow), '1')
+  df.tw$locks[t]<-paste0(rep('0', nchar(df.tw$actions[t])), collapse = '')
+  six<-sapply(ls.sw[[i]][[j]], nrow)
+  if (length(six)>0)
+  {
+    for (s in 1:length(six))
+    {
+      
+      str_sub(df.tw$locks[t], sum(six[1:s]), sum(six[1:s]))<-'1'
+    }
+  }
+
+
   # for (k in 1:length(ls.sw.all[[i]][[j]]))
   # {
   #   ls.sw.all[[i]][[j]][[k]]
@@ -148,7 +160,7 @@ for (t in 1:nrow(df.tw))
   
 }
 
-save(file='./dat/results_processed_neil.rdata', df.sw, df.tw, ls.sw, ls.sw.all)
+save(file='./dat/results_processed_neil.rdata', df.sw, df.tw, ls.sw, ls.sw.all, ls.whi)
 
 
 
