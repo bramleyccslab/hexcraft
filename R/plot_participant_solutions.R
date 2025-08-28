@@ -26,7 +26,7 @@ problems<-data.frame(id=c('train1','train2','train3','train4','train5','train6',
 test_problems<-c('dinopaw2','dabone2','hazard2','dinopaw3','dabone3','hazard3')
 p<-t<-1
 
-for (p in nrow(df.sw):1)
+for (p in 1:nrow(df.sw))
 {
   for (t in 1:length(test_problems))
   {
@@ -37,28 +37,35 @@ for (p in nrow(df.sw):1)
     locks<-strsplit(df.tw$locks[ix], "")[[1]]
     state<-empty_state %>% mutate(target = 0, active=0)
     
-    # for (a in 1:length(actions))
-    # {
-    #   state<-f[[which(keymap==actions[a])]](state)
-    # }
-    # 
+    
+    # One frequent bug? Sometimes the same sequence appears multiple times. Like they clicked 'complete several times but only attempted once.
+    if (sum(df.tw$attempts[ix])>1)
+    {
+      if (ls.sw[[p]][[which(problems==test_problems[t])]][[1]]$interval[1]==ls.sw[[p]][[which(problems==test_problems[t])]][[2]]$interval[1])
+      {
+        cat('p',p,'t', t, which(problems==test_problems[t]), 'ix', which(ix), df.tw$correct[t], df.tw$problem[t], df.sw$upi[p], '\n')
+      }
+    }
+
+    
+
     for (a in 1:length(actions))
     {
       #If it is an impotent Enter (where they continue without clearing after), do nothing.
-      if (!(actions[a]=='L' & locks[a]=='0'))
-      {
-        state<-f[[which(keymap==actions[a])]](state)
-      } else {
-        cat('it happened', p,t,a, '\n')
-      }
-      
+      # if (!(actions[a]=='L' & locks[a]=='0'))
+      # {
+      state<-f[[which(keymap==actions[a])]](state)
+      # } else {
+      #   cat('it happened', p,t,a, '\n')
+      # }
+
       state$combination<-0
       state$combination[state$active==0 & state$target==1]<-1
       state$combination[state$active==1 & state$target==0]<-2
       state$combination[state$active==1 & state$target==1]<-3
       board_polygons$combination<-factor(rep(state$combination, each = 6), levels = 0:3, labels = c('empty','missed','wrong','correct'))
       board_polygons$target<-factor(rep(state$target, each = 6))
-      
+
       #DISPLAY WHAT IS LOCKED IN, IF ITS A LOCK
       if (locks[a]=='0')
       {
@@ -68,8 +75,8 @@ for (p in nrow(df.sw):1)
       {
         board_polygons<-old_polygons
       }
-      
-      p_save[[a]]<-ggplot(board_polygons, aes(x_pos, y_pos)) + 
+
+      p_save[[a]]<-ggplot(board_polygons, aes(x_pos, y_pos)) +
         geom_polygon(aes(group = id, fill=combination), colour = 'lightgray') +
         scale_y_reverse() +
         scale_fill_manual(values = c('white','lightgreen','black','black'), drop = F) +
@@ -85,11 +92,17 @@ for (p in nrow(df.sw):1)
       p_plot<-grid.arrange(grobs = p_save, nrow = round(sqrt(a)),
                            top = paste0('Problem: ', df.tw$problem[ix], ' Participant: ', df.tw$upi[ix], ' Solved: ', df.tw$correct[ix],
                                         '\nAttempts: ', df.tw$attempts[ix], ' Actions: ', df.tw$actions[ix], collapse = '_'))
-      
+
       ggsave(p_plot, width = 10, height = 10,
              filename=paste0('./plot/participants/',
                              df.tw$problem[ix], '_', df.tw$upi[ix], '_', df.tw$correct[ix], '.pdf', collapse = ''))
     }
-    
-  }
+
+   }
 }
+
+
+df.tw %>% filter(upi=='5c4f5967aac8be0001716a65', problem=='dabone2')
+i<-which(df.sw$upi=='5c4f5967aac8be0001716a65')
+j<-which(problems$id=='dabone2')
+ls.sw[[i]][[j]][[1]]$interval[1]
