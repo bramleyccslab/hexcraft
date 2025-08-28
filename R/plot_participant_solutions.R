@@ -52,28 +52,36 @@ for (p in 1:nrow(df.sw))
     for (a in 1:length(actions))
     {
       #If it is an impotent Enter (where they continue without clearing after), do nothing.
-      # if (!(actions[a]=='L' & locks[a]=='0'))
-      # {
       state<-f[[which(keymap==actions[a])]](state)
       # } else {
       #   cat('it happened', p,t,a, '\n')
       # }
-
+      if (locks[a]=='1' & !actions[a]=='L')
+      {
+        state$active<-0
+        cat('end without lock', p,t,a, '\n')
+      }
       state$combination<-0
       state$combination[state$active==0 & state$target==1]<-1
       state$combination[state$active==1 & state$target==0]<-2
       state$combination[state$active==1 & state$target==1]<-3
+      
+      if (locks[a]=='1')
+      {
+        cat('p',p,'t',t,'a',a, 'sum state', sum(state$active), '\n')
+      }
+
+      
       board_polygons$combination<-factor(rep(state$combination, each = 6), levels = 0:3, labels = c('empty','missed','wrong','correct'))
       board_polygons$target<-factor(rep(state$target, each = 6))
 
       #DISPLAY WHAT IS LOCKED IN, IF ITS A LOCK
-      if (locks[a]=='0')
-      {
-        old_polygons<-board_polygons
-      }
-      else if(locks[a]=='1')
+     
+      if(locks[a]=='1' & actions[a]=='L')
       {
         board_polygons<-old_polygons
+      } else {
+        old_polygons<-board_polygons
       }
 
       p_save[[a]]<-ggplot(board_polygons, aes(x_pos, y_pos)) +
@@ -87,18 +95,18 @@ for (p in 1:nrow(df.sw))
               axis.title.y=element_blank(),
               axis.text.y=element_blank(),
               axis.ticks.y=element_blank(),
-              plot.background = element_rect(fill = c('white','yellow')[as.numeric(locks[a]=='1')+1]))
+              plot.background = element_rect(fill = c('white','yellow')[as.numeric(locks[a]=='1')+1]))+
+        ggtitle(actions[a])
     }
       p_plot<-grid.arrange(grobs = p_save, nrow = round(sqrt(a)),
                            top = paste0('Problem: ', df.tw$problem[ix], ' Participant: ', df.tw$upi[ix], ' Solved: ', df.tw$correct[ix],
-                                        '\nAttempts: ', df.tw$attempts[ix], ' Actions: ', df.tw$actions[ix], collapse = '_'))
+                                        '\nAttempts: ', df.tw$attempts_timestamp[ix], ' Actions: ', df.tw$actions[ix], collapse = '_'))
 
       ggsave(p_plot, width = 10, height = 10,
              filename=paste0('./plot/participants/',
                              df.tw$problem[ix], '_', df.tw$upi[ix], '_', df.tw$correct[ix], '.pdf', collapse = ''))
     }
 
-   }
 }
 
 

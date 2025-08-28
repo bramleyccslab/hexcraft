@@ -72,7 +72,7 @@ ls.sw<-ls.sw.all<-ls.whi<-list()
 i<-1
 for (i in 1:nrow(df.sw))
 {
-  ls.sw[[i]]<-ls.sw.all[[i]]<-ls.whi<-list()
+  ls.sw[[i]]<-ls.sw.all[[i]]<-ls.whi[[i]]<-list()
   if (!i%in%exclude)
   {
     this_results<-df_fixed$level[[i]]
@@ -84,7 +84,12 @@ for (i in 1:nrow(df.sw))
     {
       ix<-which(sapply(this_results, '[[', 'challenge') == problems$challenge[j])
       completed[j]<-any(sapply(this_results[ix], '[[', 'result'))
-      ls.whi[[i]][[j]]<-which(sapply(this_results[ix], '[[', 'result'))[1]
+      if (length(ix)>0)
+      {
+        ls.whi[[i]][[j]]<-which(sapply(this_results[ix], '[[', 'result'))[1]
+      } else {
+        ls.whi[[i]][[j]]<-NA
+      }
       df.sw[[problems$id[j]]][i]<-completed[j]
       df.sw[[paste0('attempts_', problems$id[j]) ]][i]<-length(ix)
       
@@ -108,10 +113,37 @@ ls.sw.all<-ls.sw.all[df.sw$condition_problem_passed & !df.sw$exclude]
 ls.whi<-ls.whi[df.sw$condition_problem_passed & !df.sw$exclude]
 df.sw <- filter(df.sw, condition_problem_passed & !exclude)
 
-# MORE EXCLUSIONS FOR NOT PASSING THE TRAINING PUZZLE
-# df.sw<-df.sw %>%filter(condition_problem_passed)
+# REMOVE DUPLICATE ATTEMPTS:
+for (i in 1:length(ls.sw))
+{
+  for (j in 1:length(ls.sw[[i]]))
+  {
+    timestamps<-c()
+    if (length(ls.sw[[i]][[j]])>1)
+    {
+      for (k in 1:length(ls.sw[[i]][[j]]) )
+      {
+        timestamps<-c(timestamps, ls.sw[[i]][[j]][[k]]$interval[1])
+      }
+      is_unique<-rep(T, length(timestamps))
+      for (l in 1:(length(timestamps)-1))
+      {
+        is_unique[l+1]<-!timestamps[l] %in% timestamps[l+1:length(timestamps)]
+      }
+      cat(i,j,k, is_unique, '\n')
+      
+      ls.sw[[i]][[j]]<-ls.sw[[i]][[j]][is_unique]
+      
+      df.tw$attempts[df.tw$upi==df.sw$upi[i] & df.tw$problem==problems$id[j]]<-sum(is_unique)
+
+      ls.sw.all[[i]][[j]] <-data.frame(do.call(rbind.data.frame, ls.sw[[i]][[j]]))
+    }
+    
+  }
+}
 
 
+#
 c(mean(df.sw$dabone1),
   sum(df.sw$dabone2),
   sum(df.sw$dabone3),
@@ -127,13 +159,14 @@ df.sw %>% group_by(condition) %>% summarise_all('mean', na.rm=T)
 # CREATE TRIALWISE DATAFRAME
 tmp<-df.sw %>% gather(problem, attempts, attempts_dinopaw1:attempts_hazard3)
 df.tw <- df.sw %>% gather(problem, correct, dinopaw1:hazard3) %>% 
-  mutate(attempts = tmp$attempts,
+  mutate(attempts_official = tmp$attempts,
+         attempts_timestamps = NA,
          problem = factor(problem, levels = c("dinopaw1", "dabone1", "hazard1",
                                               "dinopaw2", "dabone2", "hazard2",
                                               "dinopaw3", "dabone3", "hazard3")),
          condition = factor(condition, levels = c('dinopaw1','dabone1','hazard1'),
                             labels = c('dinopaw', 'dabone','hazard'))) %>%
-  select(c(1:6, 34:38)) %>%
+  select(c(1:6, 34:39)) %>%
   arrange(upi, condition)
 df.tw$locks<-''
 for (t in 1:nrow(df.tw))
@@ -142,7 +175,12 @@ for (t in 1:nrow(df.tw))
   j<-which(problems$id==df.tw$problem[t])
   df.tw$actions[t]<-paste0(ls.sw.all[[i]][[j]]$key, collapse = '')
   df.tw$locks[t]<-paste0(rep('0', nchar(df.tw$actions[t])), collapse = '')
+  
+  # These are the true breakpoints
   six<-sapply(ls.sw[[i]][[j]], nrow)
+  
+  df.tw$attempts_timestamp[t]<-length(six)
+  
   if (length(six)>0)
   {
     for (s in 1:length(six))
@@ -194,7 +232,7 @@ df.sim<-data.frame(mixhit=rep(NA, n_runs),
                    n=rep(NA, n_runs))
 for (n in 1:n_runs)
 {
-  gs<-12
+  gs<-6
   ts<-list()
   ts$mix<-c(sample(which(df.sw$condition=='dabone1'), floor(gs/3)),
          sample(which(df.sw$condition=='hazard1'), floor(gs/3)),
