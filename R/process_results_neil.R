@@ -1,5 +1,6 @@
 library(tidyverse)
 library(ggplot2)
+library(gridExtra) #For plotting lots of things at once
 
 rm(list=ls())
 
@@ -109,15 +110,15 @@ df.sw <- filter(df.sw, condition_problem_passed & !exclude)
 # df.sw<-df.sw %>%filter(condition_problem_passed)
 
 
-c(mean(!is.na(df.sw$dabone1)),
-  sum(!is.na(df.sw$dabone2)),
-  sum(!is.na(df.sw$dabone3)),
-  sum(!is.na(df.sw$hazard1)),
-  sum(!is.na(df.sw$hazard2)),
-  sum(!is.na(df.sw$hazard3)),
-  sum(!is.na(df.sw$dinopaw1)),
-  sum(!is.na(df.sw$dinopaw2)),
-  sum(!is.na(df.sw$dinopaw3)))
+c(mean(df.sw$dabone1),
+  sum(df.sw$dabone2),
+  sum(df.sw$dabone3),
+  sum(df.sw$hazard1),
+  sum(df.sw$hazard2),
+  sum(df.sw$hazard3),
+  sum(df.sw$dinopaw1),
+  sum(df.sw$dinopaw2),
+  sum(df.sw$dinopaw3))
 
 df.sw %>% group_by(condition) %>% summarise_all('mean', na.rm=T)
 
@@ -130,7 +131,7 @@ df.tw <- df.sw %>% gather(problem, correct, dinopaw1:hazard3) %>%
                                               "dinopaw3", "dabone3", "hazard3")),
          condition = factor(condition, levels = c('dinopaw1','dabone1','hazard1'),
                             labels = c('dinopaw', 'dabone','hazard'))) %>%
-  select(c(1:6, 34:37)) %>%
+  select(c(1:6, 34:38)) %>%
   arrange(upi, condition)
 
 for (t in 1:nrow(df.tw))
@@ -138,6 +139,8 @@ for (t in 1:nrow(df.tw))
   i<-which(df.sw$upi==df.tw$upi[t])
   j<-which(problems$id==df.tw$problem[t])
   df.tw$actions[t]<-paste0(ls.sw.all[[i]][[j]]$key, collapse = '')
+  df.tw$starts[t]<-paste0(rep('0', nchar(df.tw$actions[t])), collapse = '')
+  df.tw$starts[t]<-str_replace(df.tw$starts[t], sapply(ls.sw[[i]][[j]], nrow), '1')
   # for (k in 1:length(ls.sw.all[[i]][[j]]))
   # {
   #   ls.sw.all[[i]][[j]][[k]]
@@ -145,7 +148,7 @@ for (t in 1:nrow(df.tw))
   
 }
 
-save('./dat/results_processed_neil.rdata', df.sw, df.tw, ls.sw, ls.sw.all)
+save(file='./dat/results_processed_neil.rdata', df.sw, df.tw, ls.sw, ls.sw.all)
 
 
 
@@ -190,21 +193,21 @@ for (n in 1:n_runs)
   ts$hazard<-sample(which(df.sw$condition=='hazard1'), gs)
   ts$dinopaw<-sample(which(df.sw$condition=='dinopaw1'), gs)
   
-  ts$mixhit<-any(!is.na(df.sw$dabone2[ts$mix]))+any(!is.na(df.sw$dabone3[ts$mix]))+
-    any(!is.na(df.sw$hazard2[ts$mix]))+any(!is.na(df.sw$hazard3[ts$mix]))+
-    any(!is.na(df.sw$dinopaw2[ts$mix]))+any(!is.na(df.sw$dinopaw3[ts$mix]))
-  ts$mix2hit<-any(!is.na(df.sw$dabone2[ts$mix2]))+any(!is.na(df.sw$dabone3[ts$mix2]))+
-    any(!is.na(df.sw$hazard2[ts$mix2]))+any(!is.na(df.sw$hazard3[ts$mix2]))+
-    any(!is.na(df.sw$dinopaw2[ts$mix2]))+any(!is.na(df.sw$dinopaw3[ts$mix2]))
-  ts$dabonehit<-any(!is.na(df.sw$dabone2[ts$dabone]))+any(!is.na(df.sw$dabone3[ts$dabone]))+
-    any(!is.na(df.sw$hazard2[ts$dabone]))+any(!is.na(df.sw$hazard3[ts$dabone]))+
-    any(!is.na(df.sw$dinopaw2[ts$dabone]))+any(!is.na(df.sw$dinopaw3[ts$dabone]))
-  ts$hazardhit<-any(!is.na(df.sw$dabone2[ts$hazard]))+any(!is.na(df.sw$dabone3[ts$hazard]))+
-    any(!is.na(df.sw$hazard2[ts$hazard]))+any(!is.na(df.sw$hazard3[ts$hazard]))+
-    any(!is.na(df.sw$dinopaw2[ts$hazard]))+any(!is.na(df.sw$dinopaw3[ts$hazard]))
-  ts$dinopawhit<-any(!is.na(df.sw$dabone2[ts$dinopaw]))+any(!is.na(df.sw$dabone3[ts$dinopaw]))+
-    any(!is.na(df.sw$hazard2[ts$dinopaw]))+any(!is.na(df.sw$hazard3[ts$dinopaw]))+
-    any(!is.na(df.sw$dinopaw2[ts$dinopaw]))+any(!is.na(df.sw$dinopaw3[ts$dinopaw]))
+  ts$mixhit<-any(df.sw$dabone2[ts$mix])+any(df.sw$dabone3[ts$mix])+
+    any(df.sw$hazard2[ts$mix])+any(df.sw$hazard3[ts$mix])+
+    any(df.sw$dinopaw2[ts$mix])+any(df.sw$dinopaw3[ts$mix])
+  ts$mix2hit<-any(df.sw$dabone2[ts$mix2])+any(df.sw$dabone3[ts$mix2])+
+    any(df.sw$hazard2[ts$mix2])+any(df.sw$hazard3[ts$mix2])+
+    any(df.sw$dinopaw2[ts$mix2])+any(df.sw$dinopaw3[ts$mix2])
+  ts$dabonehit<-any(df.sw$dabone2[ts$dabone])+any(df.sw$dabone3[ts$dabone])+
+    any(df.sw$hazard2[ts$dabone])+any(df.sw$hazard3[ts$dabone])+
+    any(df.sw$dinopaw2[ts$dabone])+any(df.sw$dinopaw3[ts$dabone])
+  ts$hazardhit<-any(df.sw$dabone2[ts$hazard])+any(df.sw$dabone3[ts$hazard])+
+    any(df.sw$hazard2[ts$hazard])+any(df.sw$hazard3[ts$hazard])+
+    any(df.sw$dinopaw2[ts$hazard])+any(df.sw$dinopaw3[ts$hazard])
+  ts$dinopawhit<-any(df.sw$dabone2[ts$dinopaw])+any(df.sw$dabone3[ts$dinopaw])+
+    any(df.sw$hazard2[ts$dinopaw])+any(df.sw$hazard3[ts$dinopaw])+
+    any(df.sw$dinopaw2[ts$dinopaw])+any(df.sw$dinopaw3[ts$dinopaw])
   
   df.sim$mixhit[n]<-ts$mixhit
   df.sim$mix2hit[n]<-ts$mix2hit
