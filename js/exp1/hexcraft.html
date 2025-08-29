@@ -52,11 +52,11 @@ var instructions = {
           <div style='padding: 50px 300px; text-align: left;'>
             <p style='margin-bottom: 20px;'>
               <b>Nature of the study.</b>
-              You are about to participate in a study which involves completing a series of computer-based shape puzzles.  Once you finish, we may have some questions about you (e.g., age, gender). Your response will be recorded. Your session should last about 15 minutes. You will be given full instructions shortly. 
+              You are about to participate in a study which involves completing a series of computer-based shape puzzles.  Once you finish, we may have some questions about you (e.g., age, gender). Your response will be recorded. Your session should last about 30 minutes. You will be given full instructions shortly. 
             </p>
             <p style='margin-bottom: 20px;'>
               <b>Compensation.</b>
-              You will be paid £2.50 and an up to £1.80 bonus for your participation in this study.
+              You will be paid £3.00 and an up to £1.40 bonus for your participation in this study.
             </p>
             <p style='margin-bottom: 20px;'>
               <b>Risks and benefits.</b>
@@ -482,9 +482,11 @@ var survey_age = {
       }
 
       results.demographics.push([prolific_id, gender, age]);
-    
+      upiexp = prolific_id;
+      console.log(results);
       save_data();
   }
+  
 }
 
 var theEnd = {
