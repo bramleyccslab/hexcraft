@@ -820,6 +820,8 @@ function ResetBoard() {
     display_array = [];
     results.action_history = [];
     results.state_history = [];
+    key_times = [];
+    key_between_times = [];
 
     Update();  
     //document.getElementById("main_focus").innerHTML = "";
@@ -1017,29 +1019,17 @@ function insertArrayAt(array, index, arrayToInsert) {
 function save_data()    // TODO: highlighting this too 
 {
     var now = new Date();
-
-//     key_between_times.push({key: key_times[0].key, interval: key_times[0].time});   //for the first key pressed it just includes the key code and the output of performance.now
-
-//     for (let i = 1; i < key_times.length; i++) {    //for the other ones it calculates the differences in milliseconds
-//         key_between_times.push({
-//             key: key_times[i].key,
-//             interval: key_times[i].time - key_times[i - 1].time
-//     });
-// }
-
-//     results.performance = {steps:actions.length, errors:spillage};
-//     results.timestamps.push(key_between_times);
     results_str = JSON.stringify(results);
 
     //console.log('full results: ', results);
 
     jQuery.ajax({
-        url: './static/php/save_data.php',
+        url: './static/php/save_data.php', //breaking this thing for now to test
         type:'POST',
-        data:{results:results_str},
+        data:{results:results_str},   
         success:function(data)
         {
-            //console.log('Sent data to database');
+            console.log('Sent data to database');
             //alert('Nailed it in: ' + actions.length + ' actions, with ' + spillage + ' mistakes!');
             
         },
@@ -1047,8 +1037,29 @@ function save_data()    // TODO: highlighting this too
         {
             //Just print out what comes back if it doesn't work
             console.log(xhr, status, error);
+            //alert('Data not saved! Please email bramleylab@ed.ac.uk with the following information: ', xhr, status, error);
+            save_data_fallback();
         }
     })
+}
+
+function save_data_fallback() {
+
+    var fallback_data = JSON.stringify(results);
+    var fallback_filename = upiexp + "_FALLBACK.csv";  
+
+    jQuery.ajax({
+        url: './static/php/save_data_to_csv.php',
+        type: 'POST',
+        data: {filename: fallback_filename, filedata: fallback_data},
+        success: function(data) {
+            console.log('Fallback save successful');
+        },
+        error: function(xhr, status, error) {
+            console.error('Fallback save also failed:', xhr, status, error);
+            //alert('Unable to save your data. Please email bramleylab@ed.ac.uk');
+        }
+    });
 }
 
 
