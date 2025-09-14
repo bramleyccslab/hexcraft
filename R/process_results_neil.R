@@ -15,11 +15,50 @@ problems<-data.frame(id=c('train1','train2','train3','train4','train5','train6',
                                  'ZXD', 'ZXDWR', 'ZXDESZXDSR')) 
 # THIS IS THE CHRONOLOGICAL ORDER THEY APPEAR IN THE READ IN
 
-
 # var tutorial = ['A', 'ASW', 'Z', 'X', 'ZX', 'XD', 'ZKKK', 'ZF', 'ASSR'];
 # var dabone = ['XKX','ZXKXW','XKXWWXKXSSR'];
 # var hazard = ['ZSA', 'ZSARK', 'ZSAKZSARKX'];
 # var dinopaw = ['ZXD', 'ZXDWR', 'ZXDESZXDSR'];
+
+#These people had issues with their results getting cloned.
+cloned_result_ids<-c(
+  "676ada80fe4f612146e3c8b3", 
+  "634d7250a9dbe47b2b1d110f",
+  "6062d142077e1d0ec0c9361a",
+  "60211a7c07e6f203ccb99231",
+  "67e58fdd13f4a6a894472087",
+  "60455b1578f6f36a3e8ea81c",
+  "67665f7b0329bd3e30515ad2", 
+  "60be1a0b518652cbd71e0cb4",
+  "675cf75e3c237ff931f4a43e", 
+  "62b628e4351d179f1ff6cc59",
+  "67e0870d582edce0a2764d1f", 
+  "66d9cd06e207a93377f7820e",
+  "665bae8786e39a9d3071ef7c",
+  "667b369632ed2d5b2d3b9947",
+  "5c4f5967aac8be0001716a65", 
+  "6346921046fa377ce55acbc1",
+  "67448035804444614abdcc6c", 
+  "66435e2e5c5b5aceb2195908",
+  "571a78f06a1c6300114b8d80",
+  "665336b8da7328bc1558c1f6",
+  "672539aa74aa5a08ab440626", 
+  "5c39f0c686c1450001a983c4",
+  "5ea0b2cbf710490ac2644b7e",
+  "67607e34fb2abbf20ec24851",
+  "651ac88823e71c05dbc1ff63",
+  "5af5a5c3226ed5000133d67c",
+  "5b5f15f2fc072a00017da73d",
+  "6708da9c62672d0fe65b6683",
+  "5d68c8aa40524c00189e8ac2",
+  "5bb535574cb73b00011437d0",
+  "6730f965beb7513190d2be93",
+  "58cd0bc2a47dbb000171dc8b",
+  "6678a6336d90a3a9973585c3")
+
+
+df_fixed$timestamps_clean[[1]]
+
 
 df.sw<-data.frame(upi = sapply(df_fixed$demographics, '[[', 1), 
                   gender = sapply(df_fixed$demographics, '[[', 2),
