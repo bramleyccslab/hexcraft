@@ -35,17 +35,19 @@ for (p in 1:nrow(df.sw))
     string<-df.tw$actions[ix]
     actions<-strsplit(string, "")[[1]]
     locks<-strsplit(df.tw$locks[ix], "")[[1]]
-    state<-empty_state %>% mutate(target = 0, active=0)
+    locks[ which(locks=='1')[ls.whi[[p]][[which(problems$id==test_problems[t])]]]]<-'2' #Hopefully codes the trial where they got it right
     
+    state<-empty_state %>% mutate(target = 0, active=0)
+
     
     # One frequent bug? Sometimes the same sequence appears multiple times. Like they clicked 'complete several times but only attempted once.
-    if (sum(df.tw$attempts[ix])>1)
-    {
-      if (ls.sw[[p]][[which(problems==test_problems[t])]][[1]]$interval[1]==ls.sw[[p]][[which(problems==test_problems[t])]][[2]]$interval[1])
-      {
-        cat('p',p,'t', t, which(problems==test_problems[t]), 'ix', which(ix), df.tw$correct[t], df.tw$problem[t], df.sw$upi[p], '\n')
-      }
-    }
+    # if (sum(df.tw$attempts[ix])>1)
+    # {
+    #   if (ls.sw[[p]][[which(problems==test_problems[t])]][[1]]$interval[1]==ls.sw[[p]][[which(problems==test_problems[t])]][[2]]$interval[1])
+    #   {
+    #     cat('p',p,'t', t, which(problems==test_problems[t]), 'ix', which(ix), df.tw$correct[t], df.tw$problem[t], df.sw$upi[p], '\n')
+    #   }
+    # }
 
     
 
@@ -77,7 +79,7 @@ for (p in 1:nrow(df.sw))
 
       #DISPLAY WHAT IS LOCKED IN, IF ITS A LOCK
      
-      if(locks[a]=='1' & actions[a]=='L')
+      if(locks[a]%in%c('1','2') & actions[a]=='L')
       {
         board_polygons<-old_polygons
       } else {
@@ -95,7 +97,7 @@ for (p in 1:nrow(df.sw))
               axis.title.y=element_blank(),
               axis.text.y=element_blank(),
               axis.ticks.y=element_blank(),
-              plot.background = element_rect(fill = c('white','yellow')[as.numeric(locks[a]=='1')+1]))+
+              plot.background = element_rect(fill = c('white','yellow','green')[as.numeric(locks[a])+1]))+
         ggtitle(actions[a])
     }
       p_plot<-grid.arrange(grobs = p_save, nrow = round(sqrt(a)),
@@ -110,7 +112,7 @@ for (p in 1:nrow(df.sw))
 }
 
 
-df.tw %>% filter(upi=='5c4f5967aac8be0001716a65', problem=='dabone2')
-i<-which(df.sw$upi=='5c4f5967aac8be0001716a65')
-j<-which(problems$id=='dabone2')
-ls.sw[[i]][[j]][[1]]$interval[1]
+# df.tw %>% filter(upi=='5c4f5967aac8be0001716a65', problem=='dabone2')
+# i<-which(df.sw$upi=='5c4f5967aac8be0001716a65')
+# j<-which(problems$id=='dabone2')
+# ls.sw[[i]][[j]][[1]]$interval[1]

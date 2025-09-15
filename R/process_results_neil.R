@@ -57,8 +57,6 @@ cloned_result_ids<-c(
   "6678a6336d90a3a9973585c3")
 
 
-df_fixed$timestamps_clean[[1]]
-
 
 df.sw<-data.frame(upi = sapply(df_fixed$demographics, '[[', 1), 
                   gender = sapply(df_fixed$demographics, '[[', 2),
@@ -104,6 +102,8 @@ df.sw<-data.frame(upi = sapply(df_fixed$demographics, '[[', 1),
                   attempts_hazard3=NA,
                   exclude = 1:118 %in% exclude)
 
+df.sw$exclude[df.sw$upi%in%cloned_result_ids]<-T
+
 # Also need to create a dataframe with a row for every problem for every participant
 df.tw<-data.frame()
 ls.sw<-ls.sw.all<-ls.whi<-list()
@@ -112,7 +112,7 @@ i<-1
 for (i in 1:nrow(df.sw))
 {
   ls.sw[[i]]<-ls.sw.all[[i]]<-ls.whi[[i]]<-list()
-  if (!i%in%exclude)
+  if (df.sw$exclude[i]==F)
   {
     this_results<-df_fixed$level[[i]]
     completed<-rep(NA, nrow(problems))
@@ -123,6 +123,7 @@ for (i in 1:nrow(df.sw))
     {
       ix<-which(sapply(this_results, '[[', 'challenge') == problems$challenge[j])
       completed[j]<-any(sapply(this_results[ix], '[[', 'result'))
+      # Which trial do they succeed on, if they ever succeed?
       if (length(ix)>0)
       {
         ls.whi[[i]][[j]]<-which(sapply(this_results[ix], '[[', 'result'))[1]
@@ -148,11 +149,32 @@ for (i in 1:nrow(df.sw))
   
 }
 
+# Fixing timestep fixed -- Seems almost impossible. There are multiple overwritings going on.
+# for (i in 1:nrow(df.sw))
+# {
+#   if (df.sw$upi[i] %in% cloned_result_ids)
+#   {
+#     this_results<-df_fixed$level[[i]]
+#     
+#     for (j in 1:nrow(problems))
+#     {
+#       ix<-which(sapply(this_results, '[[', 'challenge') == problems$challenge[j])
+#       compound_seq<-df_fixed$timestamps_clean[[i]][[ix[1]]]
+#       
+#       which(unlist(lapply(compound_seq$key,  '==', 'L')))
+#       # df_fixed$timestamps_fixed[[i]][ix]
+#       ls.sw[[i]][[j]]<-df_fixed$timestamps_fixed[[i]][ix]
+#       ls.sw.all[[i]][[j]] <-data.frame(do.call(rbind.data.frame, df_fixed$timestamps_fixed[[i]][ix]))
+#     }
+#   }
+#  
+# }
+
 # EXCLUSIONS
 ls.sw<-ls.sw[df.sw$condition_problem_passed & !df.sw$exclude]
 ls.sw.all<-ls.sw.all[df.sw$condition_problem_passed & !df.sw$exclude]
 ls.whi<-ls.whi[df.sw$condition_problem_passed & !df.sw$exclude]
-df.sw <- filter(df.sw, condition_problem_passed & !exclude)
+df.sw <- filter(df.sw, condition_problem_passed & !df.sw$exclude)
 
 # REMOVE DUPLICATE ATTEMPTS:
 for (i in 1:length(ls.sw))
