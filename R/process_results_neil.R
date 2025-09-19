@@ -171,10 +171,10 @@ for (i in 1:nrow(df.sw))
 # }
 
 # EXCLUSIONS
-ls.sw<-ls.sw[df.sw$condition_problem_passed & !df.sw$exclude]
-ls.sw.all<-ls.sw.all[df.sw$condition_problem_passed & !df.sw$exclude]
-ls.whi<-ls.whi[df.sw$condition_problem_passed & !df.sw$exclude]
-df.sw <- filter(df.sw, condition_problem_passed & !df.sw$exclude)
+ls.sw<-ls.sw[!df.sw$exclude]
+ls.sw.all<-ls.sw.all[!df.sw$exclude]
+ls.whi<-ls.whi[!df.sw$exclude]
+df.sw <- filter(df.sw, !df.sw$exclude)
 
 # REMOVE DUPLICATE ATTEMPTS:
 for (i in 1:length(ls.sw))
