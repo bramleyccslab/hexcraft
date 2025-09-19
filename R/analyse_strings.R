@@ -77,6 +77,11 @@ removeDuplicates<-function(s)
 
 
 tmp<-strsplit(string, split=' ')[[1]]
+
+
+tmp<-recode(tmp, E='M', S='M', W='M')
+
+
 sstring<-c()
 i<-0
 while (i<((length(tmp)/1000)-1))
