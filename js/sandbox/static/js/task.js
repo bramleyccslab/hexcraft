@@ -734,20 +734,22 @@ function Flip(axis=1, this_state)
             s=-q-r;
             if (axis==1)
             {
-                q_flip=q;
-                r_flip=s;
-                s_flip=r;
-                
-            } else if (axis==2)
-            {
                 q_flip=s;
                 r_flip=r;
                 s_flip=q;
-            } else if (axis==3)
+                
+            } else if (axis==2)
             {
                 q_flip=r;
                 r_flip=q;
                 s_flip=s;
+            } else if (axis==3)
+            {
+                q_flip=q;
+                r_flip=s;
+                s_flip=r;
+
+
             }
            
             if (Math.abs(q)<=N & Math.abs(r)<=N & Math.abs(s)<=N)
@@ -770,20 +772,23 @@ function HexReflect(axis=1, this_state)
             s=-q-r;
             if (axis==1)
             {
-                q_flip=q;
-                r_flip=s;
-                s_flip=r;
-                
-            } else if (axis==2)
-            {
                 q_flip=s;
                 r_flip=r;
                 s_flip=q;
-            } else if (axis==3)
+                
+            } else if (axis==2)
             {
+
                 q_flip=r;
                 r_flip=q;
                 s_flip=s;
+                
+            } else if (axis==3)
+            {
+                q_flip=q;
+                r_flip=s;
+                s_flip=r;
+
             }
            
             if (Math.abs(q)<=N & Math.abs(r)<=N & Math.abs(s)<=N)
