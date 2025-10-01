@@ -121,23 +121,23 @@ for (axis in 1:3)
   {
     if (axis==1)
     {
-    tmp<-which(empty_state$q==empty_state$q[i] &
-                 empty_state$r==empty_state$s[i] &
-                 empty_state$s==empty_state$r[i])
-    }
-    
-    if (axis==2)
-    {
       tmp<-which(empty_state$q==empty_state$s[i] &
                    empty_state$r==empty_state$r[i] &
                    empty_state$s==empty_state$q[i])
     }
     
-    if (axis==3)
+    if (axis==2)
     {
       tmp<-which(empty_state$q==empty_state$r[i] &
                    empty_state$r==empty_state$q[i] &
                    empty_state$s==empty_state$s[i])
+    }
+    
+    if (axis==3)
+    {
+      tmp<-which(empty_state$q==empty_state$q[i] &
+                   empty_state$r==empty_state$s[i] &
+                   empty_state$s==empty_state$r[i])
     }
     
     if (any(tmp))

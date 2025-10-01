@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+
+<!-- DEMO OF HEX GRID TASK -->
+<head>
+    <title>IDCC</title>
+
+    <!-- Libraries -->
+    <script src="static/lib/jquery.min.js"></script>
+    <script src="static/lib/d3.min.js"></script>
+    <script src="static/lib/underscore-min.js"></script>
+    <script src="static/lib/rot.js"></script>
+    <script src="static/lib/lodash.min.js"></script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="static/css/main.css"/>
+
+    <!-- Scripts -->
+    <script>var cache = true;</script>
+    <script src="static/js/task.js" charset="utf-8"></script>
+
+</head>
+
+<body onload="Start();">
+
+
+
+<h1>Demo task interface with cachable actions</h1>
+
+<div id="board-and-cache">
+    <!-- Board will go here -->
+    <div id="caches">
+        <p>Optionally, cache sequences of actions here, then use them by pressing the corresponding key:</p>
+        <div class = "cache-container"><div id="test" class = "cache-label"> &nbsp"E"&larr;</div><div id="cache0" class = "cache"></div><button type="button" id = "cache-btn0" class="cache-btn">Cache</button></div>
+        <div class = "cache-container"><div class = "cache-label"> &nbsp"S"&larr;</div><div id="cache1" class = "cache"></div><button type="button" id = "cache-btn1" class="cache-btn" >Cache</button></div>
+        <div class = "cache-container"><div class = "cache-label"> &nbsp"Z"&larr;</div><div id="cache2" class = "cache"></div><button type="button" id = "cache-btn2" class="cache-btn">Cache</button></div>
+        <div class = "cache-container"><div class = "cache-label"> &nbsp"X"&larr;</div><div id="cache3" class = "cache"></div><button type="button" id = "cache-btn3" class="cache-btn">Cache</button></div>
+        <div class = "cache-container"><div class = "cache-label"> &nbsp"C"&larr;</div><div id="cache4" class = "cache"></div><button type="button" id = "cache-btn4" class="cache-btn">Cache</button></div>
+        <div class = "cache-container"><div class = "cache-label"> &nbsp"V"&larr;</div><div id="cache5" class = "cache"></div><button type="button" id = "cache-btn5" class="cache-btn">Cache</button></div>
+        <p style="font-size: 1em;" onclick="Hint1()" id="hintbtn1">Hint 1 (click to reveal)</p>
+        <p style="font-size: 1em; display:none;" id="hint1">For this demo, the default caches for <b>E,S,Z</b> & <b>X</b> above recreate how these keys worked <a href="https://eco.ppls.ed.ac.uk/~nbramley/hexcraft/demo_nocache.html?pattern=ZXDESZXDSR">here</a> (reminders at bottom of page).</p>
+        <p style="font-size: 1em;" onclick="Hint2()" id="hintbtn2">Hint 2 (click to reveal)</p>
+        <p style="font-size: 1em; display:none;" id="hint2">Try caching a sequence that creates a circle (e.g. <b>ZXD</b>) as <b>C</b>. Does this make it easier to solve <a href="https://eco.ppls.ed.ac.uk/~nbramley/hexcraft/demo.html?pattern=ZXDWZXD">this</a> example puzzle?</p>
+    </div>
+</div>
+
+<p id="response_area">
+    Try to match the green pattern using the actions. Your action sequence appears below:
+</p>
+<div id="main_focus"></div>
+<img src="static/img/keys_cache.png" style="width:800px">
+
+<p>These actions are hard coded:</p>
+<ul>
+    <li><b>A</b> adds a single piece in the center of the board
+    <li><b>D</b> removes any piece in the center of the board
+    <li><b>ENTER ("↵")</b> <i>locks</i> in the positions of the pieces you have added (you can do this multiple times)
+    <li><b>SPACE ("∠")</b> rotates all (unlocked) pieces clockwise
+    <li><b>F</b> flips all (unlocked) pieces on an axis from North-West to South-East
+    <li><b>W</b> shift all (unlocked) pieces one space to the West. Any pieces that fall off the edge of the board are deleted
+</ul>
+<p>The default cache for these actions are:</p>
+    <ul>
+        <li><b>Z</b> adds three pieces in a triangular arrangement
+        <li><b>X</b> adds three pieces in a straight line
+        <li><b>E,R</b>,and <b>S</b> shift all (unlocked) pieces one space to the East, North-West, and South-West respectively.
+    </ul> 
+    <p>Your additions can overlap existing pieces. You complete the puzzle by covering all the green hexes with locked in pieces. You lose a point for each white hex you cover in your final pattern.</p>
+    <p><b>Demo options</b></p>
+<ol>
+    <li>Try procedurally generated target patterns (click <a href=https://eco.ppls.ed.ac.uk/~nbramley/hexcraft/demo.html>here</a> & refresh for new patterns)
+    <li>Set the depth of the procedural generation by adding a url "depth" parameter <a href="https://eco.ppls.ed.ac.uk/~nbramley/hexcraft/demo.html?depth=100">like this</a>
+    <li>Include a "pattern" parameter to load your own challenge problem like <a href=https://eco.ppls.ed.ac.uk/~nbramley/hexcraft/demo.html?pattern=ZXDESZXDSR>this</a><br>(note, these use K instead of SPACE)
+    <li>Navigate to the demo with <a href = "https://eco.ppls.ed.ac.uk/~nbramley/hexcraft/demo_nocache.html">fixed actions</a>
+</ol>     
+</body>

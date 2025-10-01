@@ -78,6 +78,7 @@ removeDuplicates<-function(s)
 
 tmp<-strsplit(string, split=' ')[[1]]
 
+sort(summary(factor(tmp)))
 
 tmp<-recode(tmp, E='M', S='M', W='M')
 

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+
+<!-- DEMO OF HEX GRID TASK -->
+<head>
+    <title>IDCC</title>
+
+    <!-- Libraries -->
+    <script src="static/lib/jquery.min.js"></script>
+    <script src="static/lib/d3.min.js"></script>
+    <script src="static/lib/underscore-min.js"></script>
+    <script src="static/lib/rot.js"></script>
+    <script src="static/lib/lodash.min.js"></script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="static/css/main.css"/>
+
+    <!-- Scripts -->
+    <script>var cache = false;</script>
+    <script src="static/js/task.js" charset="utf-8"></script>
+
+</head>
+
+<body onload="Start();">
+
+
+
+<h3>Demo "Hexcraft" task interface with fixed actions</h3>
+
+<div id="board-and-cache">
+    <!-- Board will go here -->
+    
+    <div id="caches">
+        <p style="font-size: 1em;" onclick="Instructions1()" id="insbtn1">Click to view instructions</p>
+           <div style="display:none;" id="instructions">
+            <p>Instructions:</p>
+            <p style="font-size: 0.9em;">You are a scientist working on synthetic protein folding.</p>
+            <p style="font-size: 0.9em;">Your goal is to find a sequence of actions (button presses) to replicate the target protein (green pattern).</p>
+            <p style="font-size: 0.9em;">There are 10 basic actions you can use to achieve this:</p>
+            <ul style="font-size: 0.6em;">
+            <li><b>A</b> adds a single tile in the center
+            <li><b>X</b> adds three tiles in a corner shape
+            <li><b>Z</b> adds three tiles in a bar shape
+            <li><b>D</b> removes any piece in the center of the board
+            <li><b>F</b> flips all tiles on an axis from North-West to South-East
+            <li><b>R</b> reflects all tiles on an axis from North-West to South-East duplicating them
+            <li><b>W,E,S</b> shift all tiles one space to the West, North-East, and South-East, respectively. Any pieces that fall off the edge of the board are lost
+            <li><b>SPACE ("∠")</b> rotates all tiles 60 degrees clockwise
+            <li><b>ENTER ("↵")</b> locks in your solution (and clears the board so you can try again)
+            </ul>
+            <p style="font-size: 0.9em;">Your additions can overlap existing tiles. You complete the puzzle by covering all the green hexes with locked in pieces and none of the others. Press Shift+Button to preview what the action will do without committing to it.</p>
+            <p style="font-size: 1em;"><b>Try to match the green pattern!</b></p>
+            <p style="font-size: 1em;" onclick="Hint1()" id="hintbtn1">Hint 1 (click to reveal)</p>
+            <p style="font-size: 1em; display:none;" id="hint1"><b>ZXD</b> is one way to make a 'dinopaw' shape.</p>
+    <!--         <p style="font-size: 1em;" onclick="Hint2()" id="hintbtn2">Hint 2 (click to reveal)</p>
+            <p style="font-size: 1em; display:none;" id="hint2">Having made a circle, you can move it with <b>W,E,R,S</b> or,<b>C</b>, then lock it in position with ↵. E.g. Try typing <b>X∠X∠XD RRR↵</b></p> -->
+        </div>
+    </div>
+</div>
+
+<p id="response_area">
+    Your action sequence appears below:
+</p>
+<div id="main_focus"></div>
+<img src="static/img/keys.png" style="width:800px">
+   <p><b>Demo options</b></p>
+<ol>
+    <li>Try procedurally generated target patterns (click <a href=https://eco.ppls.ed.ac.uk/~nbramley/hexcraft/demo_nocache.html>here</a> & refresh for new patterns)
+    <li>Set the depth of the procedural generation by adding a url "depth" parameter <a href="https://eco.ppls.ed.ac.uk/~nbramley/hexcraft/demo_nocache.html?depth=100">like this</a>
+    <li>Or add "pattern" parameter to load your own challenge problem like <a href=https://eco.ppls.ed.ac.uk/~nbramley/hexcraft/demo_nocache.html?pattern=ZXDESZXDSR>this</a><br>(note, these use K instead of SPACE)
+    <li>Navigate to the demo with <a href = "https://eco.ppls.ed.ac.uk/~nbramley/hexcraft/demo.html">cachable actions</a>
+</ol>
+</body>
