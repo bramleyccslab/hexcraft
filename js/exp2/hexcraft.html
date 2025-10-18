@@ -93,7 +93,7 @@ var instructions = {
         <div style='padding: 100px 300px; text-align: left;'>
         <p style = 'margin-bottom: 20px; font-size: 1.5em'>Task:</p>
         <p style='margin-bottom: 20px;'>In this experiment, you will solve seven shape puzzles. For each puzzle, you can choose from 10 actions to recreate the target shape. Each action is mapped to a specific key on your keyboard. There will be a tutorial before the actual puzzles to familiarize you with the available actions.</p>
-        <img src="static/img/board.png" style="height:350px">
+        <img src="static/img/ins1.png" style="height:350px">
         <p style='margin-bottom: 20px;'>Your objective is to match the target shape using these actions. For each puzzle you solve, you will get a bonus of £0.20. You are free to attempt each puzzle as many times as you want. However, you will need to make at least <b>five</b> attempts before you can skip a puzzle if you are stuck. Please note that you can perform a maximum of 30 actions per puzzle before your answer is automatically locked in.</p>
         <p><b>Important:</b> If you get stuck or want to try a puzzle again, <b>do not refresh the page.</b> Instead, lock in your answer and you will be able to retry the puzzle.</p> 
         </div>`
@@ -124,27 +124,24 @@ var trialNumber = 1;
 
 
 // testing trials: 
-var dabone = ['XKX','ZXKXW','XKXWWXKXSSR'];   //'[XKX]','Z[XKX]W','[XKX]WW[XKX]SSR'
-var hazard = ['ZSA', 'ZSARK', 'ZSAKZSARKX'];      //'[ZSA]', '[ZSA]RK', '[ZSA]K[ZSA]RKX' 
-var dinopaw = ['ZXD', 'ZXDWR', 'ZXDESZXDSR'];     // '[ZXD]', '[ZXD]WR', '[ZXD]ES[ZXD]SR'
+// var dabone = ['XKX','ZXKXW','XKXWWXKXSSR'];   //'[XKX]','Z[XKX]W','[XKX]WW[XKX]SSR'
+// var hazard = ['ZSA', 'ZSARK', 'ZSAKZSARKX'];      //'[ZSA]', '[ZSA]RK', '[ZSA]K[ZSA]RKX' 
+// var dinopaw = ['ZXD', 'ZXDWR', 'ZXDESZXDSR'];     // '[ZXD]', '[ZXD]WR', '[ZXD]ES[ZXD]SR'
 
 //var triangle = ['ASAEA', 'ASAEAEASAEAK', 'ASAEASASAEAEASAEA'];     //the cache is a bit too long 
 
-var empty = ['K'];
+var reflector_tasks = ['AWWRKRKR', 'AWAWWRKRKR', 'ZKKDWWRKRKR']
+var circles_tasks = ['XRKRD','XRKRDWR','XRKRDEESRKRK'];
+var reflector_circles_tasks = ['XRKRDWWRKRKR']
 
-//ignore all tutorial stuff for now
-var tutorial = ['A', 'ASW', 'Z', 'X', 'ZX', 'XD', 'ZKKK', 'ZF', 'ASSR'];
+//
+var tutorial_tasks = ['A', 'ASW', 'Z', 'X', 'ZX', 'XD', 'ZKKK', 'ZF', 'ASSR'];
 
-var allTrials = dabone.concat(hazard, dinopaw);
+var all_tasks = dabone.concat(reflector_tasks, circles_tasks, reflector_circles_tasks);
 //var expTrials = [dabone[1], dabone[2], hazard[1], hazard[2], dinopaw[1], dinopaw[2]];
 
-function shuffle(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    let j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-}
 
+//TODO CREATE THREE EASIER VARIANTS OF BOTH TYPES?
 var medTrials = [dabone[1], hazard[1], dinopaw[1]];
 shuffle(medTrials);
 
