@@ -34,6 +34,7 @@
 <script>
 
 
+
     var jsPsych = initJsPsych({
     on_finish: function() {
         //jsPsych.data.displayData('csv');
@@ -92,10 +93,29 @@ var instructions = {
         `<p style = 'font-size: 2em'>Task instructions</p>
         <div style='padding: 100px 300px; text-align: left;'>
         <p style = 'margin-bottom: 20px; font-size: 1.5em'>Task:</p>
-        <p style='margin-bottom: 20px;'>In this experiment, you will solve seven shape puzzles. For each puzzle, you can choose from 10 actions to recreate the target shape. Each action is mapped to a specific key on your keyboard. There will be a tutorial before the actual puzzles to familiarize you with the available actions.</p>
-        <img src="static/img/ins1.png" style="height:350px">
-        <p style='margin-bottom: 20px;'>Your objective is to match the target shape using these actions. For each puzzle you solve, you will get a bonus of £0.20. You are free to attempt each puzzle as many times as you want. However, you will need to make at least <b>five</b> attempts before you can skip a puzzle if you are stuck. Please note that you can perform a maximum of 30 actions per puzzle before your answer is automatically locked in.</p>
-        <p><b>Important:</b> If you get stuck or want to try a puzzle again, <b>do not refresh the page.</b> Instead, lock in your answer and you will be able to retry the puzzle.</p> 
+        <p style='margin-bottom: 20px;'>In this experiment, you will solve seven shape-making puzzles. For each puzzle, your goal will be to recreate a target shape. Here is an example of a target shape.</p>
+        <img src="static/img/ins1_puzzles.png" style="height:350px">
+        </div>`,
+
+        `<p style = 'font-size: 2em'>Task instructions</p>
+        <div style='padding: 100px 300px; text-align: left;'>
+        <p style = 'margin-bottom: 20px; font-size: 1.5em'>Task:</p>
+        <p style='margin-bottom: 20px;'>To recreate the shape you perform actions by pressing keyboard keys. There are 10 possible actions you can perform. Each action is mapped to a specific key on your keyboard. Before the actual puzzles, you will complete nine guided tutorial problems, which will help familiarize you with how the interface works, and what each of these actions does.</p>
+        <img src="static/img/ins2_keys.png" style="height:350px">
+        </div>`,
+
+        `<p style = 'font-size: 2em'>Task instructions</p>
+        <div style='padding: 100px 300px; text-align: left;'>
+        <p style = 'margin-bottom: 20px; font-size: 1.5em'>Task:</p>
+        <p style='margin-bottom: 20px;'>When you think you have solved a puzzle or what to give up on your attempt you will press ENTER to lock in your solution</p>
+        <img src="static/img/ins2_keys.png" style="height:350px">
+        <p style='margin-bottom: 20px;'>If you solved the puzzle successfully you will be able to move onto the next one. If you did not solve it you will be able to try again.</p>
+        <p style='baring-bottom: 20px;'>You are free to attempt each puzzle as many times as you want. However, after five unsuccessful attempts you will have the option to move to the next puzzle if you like.</p>
+        <p style='margin-bottom: 20px;'>On each attempt you can perform a maximum of 30 actions, after which your attempt will be locked in automatically and you will be able to try again or move on (if you have already had five attempts).</p>
+        <p style='margin-bottom: 20px;'>For each of the puzzles you solve successfully, you will win a bonus of £0.20.</p>
+        <p style='margin-bottom: 20px;'>If you get stuck or want to try a puzzle again, just lock in your current answer and you will be able to start over.
+        <p style='margin-bottom: 20px;'><b>Important: Do not refresh the page, as this will restart the experiment and make you ineligible to complete it.</b></p> 
+        <p style='margin-bottom: 20px;'>Lastly, do not worry if you are not able to solve all or even most of the puzzles. They are designed to be difficult and we are interested in the actions you try as well as the results you get. Just do your best. Good luck!</p>
         </div>`
     ],
     button_label_next: "Continue",
@@ -103,10 +123,12 @@ var instructions = {
     show_clickable_nav: true
 }
 
+
+
 var tutEnd = {
     type: jsPsychInstructions,
     pages: [
-        'Thank you for completing the tutorial! The actual puzzles will begin now.'
+        'Thank you for completing the tutorial! The actual puzzles will begin now. TODO ADD COMP CHECK.'
     ],
     on_load: function() {
         const oldButtons = document.getElementById("control-buttons");
@@ -118,10 +140,10 @@ var tutEnd = {
 }
 
 var tutCounter = 0;
-var patternCounter = 0;
+// var patternCounter = 0;
 let currentIndex = 0;
-var trialNumber = 1;
-
+var trialNumber = 0;
+var tutorial_phase = true;
 
 // testing trials: 
 // var dabone = ['XKX','ZXKXW','XKXWWXKXSSR'];   //'[XKX]','Z[XKX]W','[XKX]WW[XKX]SSR'
@@ -130,38 +152,36 @@ var trialNumber = 1;
 
 //var triangle = ['ASAEA', 'ASAEAEASAEAK', 'ASAEASASAEAEASAEA'];     //the cache is a bit too long 
 
-var reflector_tasks = ['AWWRKRKR', 'AWAWWRKRKR', 'ZKKDWWRKRKR']
-var circles_tasks = ['XRKRD','XRKRDWR','XRKRDEESRKRK'];
-var reflector_circles_tasks = ['XRKRDWWRKRKR']
+var training_tasks1 = ['AWWRKRKR','AWAWWRKRKR','AWAWAWWRKRKR']
+var training_tasks2 = ['XRKRD','XRKRDSSW','XRKRKDESES'];
+var test_tasks = ['ZKKWWRKRKR','ZKKDWWRKRKR','XRKRDWR','XRKRDEESRKR','XRKRDWWRKRKR']
 
 //
-var tutorial_tasks = ['A', 'ASW', 'Z', 'X', 'ZX', 'XD', 'ZKKK', 'ZF', 'ASSR'];
+var tutorial = ['A', 'ASW', 'Z', 'X', 'ZX', 'XD', 'ZKKK', 'ZF', 'ASSR'];
 
-var all_tasks = dabone.concat(reflector_tasks, circles_tasks, reflector_circles_tasks);
+// var all_tasks = training_tasks1.concat(training_tasks2, test_tasks); //For what?
+
 //var expTrials = [dabone[1], dabone[2], hazard[1], hazard[2], dinopaw[1], dinopaw[2]];
 
+// var medTrials = [dabone[1], hazard[1], dinopaw[1]];
+// shuffle(medTrials);
 
-//TODO CREATE THREE EASIER VARIANTS OF BOTH TYPES?
-var medTrials = [dabone[1], hazard[1], dinopaw[1]];
-shuffle(medTrials);
+// var hardTrials = [dabone[2], hazard[2], dinopaw[2]];
+// shuffle(hardTrials);
 
-var hardTrials = [dabone[2], hazard[2], dinopaw[2]];
-shuffle(hardTrials);
-
-var expTrials = medTrials.concat(hardTrials);
+// var expTrials = medTrials.concat(hardTrials);
 
 
-var condition = Math.floor(Math.random() * 3);
+var condition = Math.floor(Math.random() * 2);
 
 switch(condition){
     case 0:
-        expTrials.unshift(dabone[0]);
+        var expTrials = training_tasks1.concat(test_tasks);
+        // expTrials.unshift(dabone[0]);
         break;
     case 1:
-        expTrials.unshift(hazard[0]);
-        break;
-    case 2:
-        expTrials.unshift(dinopaw[0]);
+        var expTrials = training_tasks2.concat(test_tasks);
+        // expTrials.unshift(hazard[0]);
         break;
 }
 
@@ -203,16 +223,18 @@ var hexTutorial = {
 </p>
 <!-- <div id="main_focus"></div> -->
 <div id="progressContainer"></div>
-<img src="static/img/keyboard_full.png" style="width:600px; padding:5px">
+<img src="static/img/keys.png" style="width:600px; padding:5px">
 `,
     on_load: function() {
         //trial counter
         var oldCounter = document.getElementById("trial-counter");
         if (oldCounter) oldCounter.remove();
 
+        tutorial_phase = false;
+        
         var trialCounter = document.createElement("div");
         trialCounter.id = "trial-counter";
-        trialCounter.textContent = "Tutorial " + (tutCounter+1) + " / 9";
+        trialCounter.textContent = "Tutorial " + (tutCounter+1) + " / " + tutorial.length;
         Object.assign(trialCounter.style, {
             position: "absolute",
             top: "10px",
@@ -246,7 +268,8 @@ var hexTutorial = {
         currentIndex = 0;
         const keyHandler = (e) => {
             if (currentIndex >= NUM_SEGMENTS) return;
-            if (validKeys.includes(e.key) || e.key === ' ') {
+            if (!inputLocked && (validKeys.includes(e.key) || e.key === ' ')) {
+
                 const segments = document.querySelectorAll('#progressContainer .segment');
                 segments[currentIndex].style.backgroundColor = FILL_COLOR;
                 segments[currentIndex].style.color = 'white';
@@ -282,15 +305,15 @@ var hexTutorial = {
 }
 
 
+
+
 //actual trials:
 var hexTrial = {
     type: jsPsychHtmlKeyboardResponse,
     stimulus: `<div id="board-and-cache">
     <!-- Board will go here -->
     <div id="caches">
-        <p style="font-size: 0.9em;"><b>Instructions:</b> Your goal is to match the green pattern. There are 12 actions you can use to achieve this. Take actions by pressing keys on the keyboard:</p>
-        <ul style="font-size: 0.6em;">
-        <img src="static/img/instructions.png" style="height:350px">
+        <p style="font-size: 0.9em;"><b>Instructions:</b> Your goal is to match the green pattern. There are 10 actions you can use to achieve this. Take actions by pressing keys on the keyboard:</p>
         <p style="font-size: 0.9em;">You complete the puzzle by covering all the green hexes with locked in pieces. Remember, if you are stuck you can try again by <b>Locking in</b> your answer and then pressing <b>Try Again</b>. <b>Any pieces that go beyond the board will be deleted.</b></p>
         <p style="font-size: 1em;"><b>Try to match the green pattern!</b></p>
     </div>
@@ -301,7 +324,7 @@ var hexTrial = {
 </p>
 <!-- <div id="main_focus"></div> -->
 <div id="progressContainer"></div>
-<img src="static/img/keyboard_full.png" style="width:400px">
+<img src="static/img/keys.png" style="width:800px">
 `,
     on_load: function() {
         //trial counter
@@ -310,7 +333,7 @@ var hexTrial = {
 
         const trialCounter = document.createElement("div");
         trialCounter.id = "trial-counter";
-        trialCounter.textContent = "Trial " + trialNumber + " / 7";
+        trialCounter.textContent = "Trial " + (trialNumber+1) + " / " + expTrials.length;
         Object.assign(trialCounter.style, {
             position: "absolute",
             top: "10px",
@@ -321,12 +344,17 @@ var hexTrial = {
         });
         document.body.appendChild(trialCounter);
         
+
+
         const oldButtons = document.getElementById("control-buttons");
         if (oldButtons) oldButtons.remove();
         inputLocked = false;
         //attemptCount = 0;
-        Start(expTrials[patternCounter]);   //change allTrials to the specific cache-array if needed
-        patternCounter = patternCounter + 1;
+        
+        //hexKeyListener(expTrials[patternCounter]);   //UNSURE WHY THIS WAS CALLED INSTEAD OF START?
+
+        Start(expTrials[trialNumber]);   //change allTrials to the specific cache-array if needed
+        // patternCounter = patternCounter + 1;
 
         const container = document.getElementById('progressContainer');
         container.innerHTML = '';
@@ -340,7 +368,9 @@ var hexTrial = {
         currentIndex = 0;
         const keyHandler = (e) => {
             if (currentIndex >= NUM_SEGMENTS) return;
-            if (validKeys.includes(e.key) || e.key === ' ') {
+            if (!inputLocked && (validKeys.includes(e.key) || e.key === ' '))  {
+                
+
                 const segments = document.querySelectorAll('#progressContainer .segment');
                 segments[currentIndex].style.backgroundColor = FILL_COLOR;
                 segments[currentIndex].style.color = 'white';
@@ -515,7 +545,12 @@ var theEnd = {
 
 
 
-var timeline = [instructions, survey_ID, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, tutEnd, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, debrief, survey_gender, survey_age, theEnd];
+var timeline = [
+    survey_ID, instructions,
+    hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial,
+    tutEnd,
+    hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, 
+    debrief, survey_gender, survey_age, theEnd];
 
 //hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, tutEnd, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial,
 

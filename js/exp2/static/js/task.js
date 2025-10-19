@@ -1,5 +1,7 @@
 var N = 4 //Hexagon radius (excluding centre, other stuff should scale with this)
 
+
+
 //TODO: UPDATE PRIMITIVE KEY MAPPINGS
 
 var empty_state = Array.apply(null, Array(2*N+1))
@@ -19,6 +21,7 @@ var key_times = []; //list for recording time when keys were pressed
 var key_between_times = []; //list for time diffs between key presses
 var level_result = []; //list to record the trial that the user has completed and fail / complete
 var number_correct = 0;
+var trial_results = [];
 
 var d //The canvas identifier
 
@@ -35,21 +38,7 @@ var library = [[32, 32, 32, 87, 32, 32, 32], //East
                [65, 82, 65, 83, 69, 83, 69, 65, 82],//Bar65, 87, 82, 65, 83, 83, 69, 69, 65, 87, 82
                []]; //Store the action sequences they cache
 
-var results = {target:[], performance:[], action_history:[], state_history:[], library_history:[], library_update_at:[0], timestamps:[], level:[], demographics:[]};
-//TMP BOB FOR DEMO
-// library = [[32, 32, 87, 32, 32, 32,32], //SE
-//                [32,32,32,32,87,32,32], //NW
-//                [32,87,32,32,32,32,32],//SW
-//                [65, 87, 65, 87, 65, 69, 65, 69, 65, 82, 65],//Corner65, 87, 65, 69, 82, 65, 83]
-//                [90, 68, 87, 68, 82, 68],//Bar65, 87, 82, 65, 83, 83, 69, 69, 65, 87, 82
-//                []];
-//TMP FOR CIRCLES LIBRARY
-// var library = [[32, 32, 32, 87, 32, 32, 32], //East
-//                [32,32,32,32,32,87,32], //NE
-//                [32,87,32,32,32,32,32],//SW
-//                [88,32,88,32,88,68,13],//Corner65, 87, 65, 69, 82, 65, 83]
-//                [65, 82, 65, 83, 69, 83, 69, 65, 82],//Bar65, 87, 82, 65, 83, 83, 69, 69, 65, 87, 82
-//                [88,32,88,32,88,68]]; //Store the action sequences they cache
+var results = {target:[], performance:[], action_history:[], state_history:[], library:[], timestamps:[], trial:[], demographics:[]};
 
 var pattern = [];
 var mode = '';
@@ -80,9 +69,6 @@ if (cache)
     action_keycodes = [87, 65, 68, 70, 13, 32,
                        69,82,83,90, 88];//76, 75
 
-
-
-
 }
 
 const VALID_CODES = new Set(action_keycodes);
@@ -105,7 +91,8 @@ function Start(fpattern)
 
     key_times = [];
     key_between_times = [];
-    level_result = [{trial: tutCounter + patternCounter, result: null, challenge: null} ]
+    //trial_result = [{tutorial: tutorial_phase, trial: trialNumber, result: false, challenge: pattern} ]; WHY DO THIS HERE?
+
     pattern = fpattern;
 
     state = _.cloneDeep(empty_state);
@@ -160,11 +147,11 @@ function Start(fpattern)
 
     results.target = _.cloneDeep(target);//Store the target pattern
 
-    if (cache)
-    {
-        results.library_history.push(_.cloneDeep(library));
-    }
-
+    // if (cache)
+    // {
+    //     results.library_history.push(_.cloneDeep(library));
+    // }
+    results.library.push(_.cloneDeep(library));
     //Plot the hexagons onto it
     for (var y = 0; y < (2*N+1); y++) {
         for (var x = y%2; x < 2*(2*N+1); x += 2) {
@@ -448,7 +435,7 @@ function oddr_to_cube(x,y)
     return [q, r, s];
 }
 
-function AddUnit(this_state, real)
+function AddUnit(this_state)
 {
     //Clone the current state (for undo)
     old_state = _.cloneDeep(this_state);
@@ -457,7 +444,7 @@ function AddUnit(this_state, real)
     this_state[N][N] = 1;
 }
 
-function RemoveUnit(this_state, real)
+function RemoveUnit(this_state)
 {
     //Clone the current state (for undo)
     old_state = _.cloneDeep(this_state);
@@ -467,7 +454,7 @@ function RemoveUnit(this_state, real)
     this_state[N][N] = 0;
 }
 
-function AddBar(this_state, real)
+function AddBar(this_state)
 {
     //Clone the current state (for undo)
     old_state = _.cloneDeep(this_state);
@@ -478,7 +465,7 @@ function AddBar(this_state, real)
     this_state[N][N+1] = 1;
 }
 
-function AddCorner(this_state, real)
+function AddCorner(this_state)
 {
     //Clone the current state (for undo)
     old_state = _.cloneDeep(this_state);
@@ -490,7 +477,7 @@ function AddCorner(this_state, real)
 }
 
 
-function Shift(dir, this_state, real)
+function Shift(dir, this_state)
 {
     //Clone the current state
     old_state = _.cloneDeep(this_state);
@@ -568,8 +555,17 @@ function RotateClockwise(this_state, real)
     }
 }
 
-function Flip(axis=1, this_state, real)
+
+
+
+function Flip(axis=1, this_state)
 {
+    
+    // old_bo = _.cloneDeep(board_orientation);
+    // board_orientation[0]=old_bo[0];
+    // board_orientation[1]=old_bo[2];
+    // board_orientation[2]=old_bo[1];
+
     old_state = _.cloneDeep(this_state);
     for (var q=-N; q<=N; q++)
     {
@@ -578,20 +574,22 @@ function Flip(axis=1, this_state, real)
             s=-q-r;
             if (axis==1)
             {
-                q_flip=q;
-                r_flip=s;
-                s_flip=r;
-                
-            } else if (axis==2)
-            {
                 q_flip=s;
                 r_flip=r;
                 s_flip=q;
-            } else if (axis==3)
+                
+            } else if (axis==2)
             {
                 q_flip=r;
                 r_flip=q;
                 s_flip=s;
+            } else if (axis==3)
+            {
+                q_flip=q;
+                r_flip=s;
+                s_flip=r;
+
+
             }
            
             if (Math.abs(q)<=N & Math.abs(r)<=N & Math.abs(s)<=N)
@@ -604,7 +602,7 @@ function Flip(axis=1, this_state, real)
     }
 }
 
-function HexReflect(axis=1, this_state, real)
+function HexReflect(axis=1, this_state)
 {
     old_state = _.cloneDeep(this_state);
     for (var q=-N; q<=N; q++)
@@ -614,20 +612,23 @@ function HexReflect(axis=1, this_state, real)
             s=-q-r;
             if (axis==1)
             {
-                q_flip=q;
-                r_flip=s;
-                s_flip=r;
-                
-            } else if (axis==2)
-            {
                 q_flip=s;
                 r_flip=r;
                 s_flip=q;
-            } else if (axis==3)
+                
+            } else if (axis==2)
             {
+
                 q_flip=r;
                 r_flip=q;
                 s_flip=s;
+                
+            } else if (axis==3)
+            {
+                q_flip=q;
+                r_flip=s;
+                s_flip=r;
+
             }
            
             if (Math.abs(q)<=N & Math.abs(r)<=N & Math.abs(s)<=N)
@@ -639,6 +640,8 @@ function HexReflect(axis=1, this_state, real)
         }
     }
 }
+
+
 
 // function RotateAnticlockwise(this_state, real)
 // {
@@ -755,19 +758,19 @@ function Lock(this_state, real)
         tryAgainBtn.onclick = function () {
             inputLocked = false;
             //recording the data even if the try was incorrect
-            level_result = [{trial: tutCounter + patternCounter, result: false, challenge: pattern} ];
+            trial_result = [{tutorial: tutorial_phase, trial: trialNumber, attempt: attemptCount, result: false, challenge: pattern} ];
             key_between_times.push({key: key_times[0].key, interval: key_times[0].time});   //for the first key pressed it just includes the key code and the output of performance.now
 
-                for (let i = 1; i < key_times.length; i++) {    //for the other ones it calculates the differences in milliseconds
-                    key_between_times.push({
-                        key: key_times[i].key,
-                        interval: key_times[i].time - key_times[i - 1].time
-                    });
-                }
+            for (let i = 1; i < key_times.length; i++) {    //for the other ones it calculates the differences in milliseconds
+                key_between_times.push({
+                    key: key_times[i].key,
+                    interval: key_times[i].time - key_times[i - 1].time
+                });
+            }
 
-                results.performance.push({steps:actions.length, errors:spillage}); 
-                results.timestamps.push(key_between_times); 
-                results.level.push(level_result);
+            results.performance.push({steps:actions.length, errors:spillage}); 
+            results.timestamps.push(key_between_times); 
+            results.trial.push(trial_result);
             ResetBoard();
         };
         btnContainer.appendChild(tryAgainBtn);
@@ -779,13 +782,13 @@ function Lock(this_state, real)
         moveOnBtn.onclick = function () {
             attemptCount = 0;
             if (match) {
-                level_result = [{trial: tutCounter + patternCounter, result: true, challenge: pattern} ];
+                trial_result = [{tutorial: tutorial_phase, trial: trialNumber, attempt: attemptCount, result: true, challenge: pattern} ];
                 if (!isTutorial){
                     number_correct = number_correct +1;
                 }
             }
             else{
-                level_result = [{trial: tutCounter + patternCounter, result: false, challenge: pattern} ];
+                trial_result = [{tutorial: tutorial_phase, trial: trialNumber, attempt: attemptCount, result: false, challenge: pattern} ];
             }
                 key_between_times.push({key: key_times[0].key, interval: key_times[0].time});   //for the first key pressed it just includes the key code and the output of performance.now
 
@@ -798,7 +801,7 @@ function Lock(this_state, real)
 
                 results.performance.push({steps:actions.length, errors:spillage}); 
                 results.timestamps.push(key_between_times);     
-                results.level.push(level_result);
+                results.trial.push(trial_result);
             
             // if(trialNumber==1){ //don't forget to change to 7
             //     save_data();
@@ -846,27 +849,27 @@ function ResetBoard() {
 }
 
 
-function RandomPattern()
-{
-    var target_pattern = _.cloneDeep(state);
+// function RandomPattern()
+// {
+//     var target_pattern = _.cloneDeep(state);
 
-    for (var x=0; x<(2*N+1); x++)
-    {
-        for (var y=0; y<(2*N+1); y++)
-        {
-            var these_cube_coords = oddr_to_cube(Math.floor((x-2*N)/2),y-N);
-            //oddr_to_cube(Math.floor(prx[x]/2),pry[y]);
-            if (Math.abs(these_cube_coords[0])<=N & Math.abs(these_cube_coords[1])<=N & Math.abs(these_cube_coords[2])<=N)
-            {
-                if (Math.random()>.5)
-                {
-                    target_pattern[x][y]=1;
-                }
-            }
-        }  
-    }
-    return target_pattern;
-}
+//     for (var x=0; x<(2*N+1); x++)
+//     {
+//         for (var y=0; y<(2*N+1); y++)
+//         {
+//             var these_cube_coords = oddr_to_cube(Math.floor((x-2*N)/2),y-N);
+//             //oddr_to_cube(Math.floor(prx[x]/2),pry[y]);
+//             if (Math.abs(these_cube_coords[0])<=N & Math.abs(these_cube_coords[1])<=N & Math.abs(these_cube_coords[2])<=N)
+//             {
+//                 if (Math.random()>.5)
+//                 {
+//                     target_pattern[x][y]=1;
+//                 }
+//             }
+//         }  
+//     }
+//     return target_pattern;
+// }
 
 
 function ChallengePattern(sequence)
@@ -898,118 +901,118 @@ function ChallengePattern(sequence)
 }
 
 
-function ProceduralPattern(depth)
-{
-    var target_pattern = _.cloneDeep(state);
-    var generation_procedure = [];
-    for (var step =0; step<depth; step++)
-    {
-        this_key = ROT.RNG.getItem(action_keycodes.concat(cachable_keycodes));
-        //Remove the cachable keycode concatenation to use prior
-        generation_procedure.push(this_key);
-        Action(this_key, target_pattern, false);
-    }
+// function ProceduralPattern(depth)
+// {
+//     var target_pattern = _.cloneDeep(state);
+//     var generation_procedure = [];
+//     for (var step =0; step<depth; step++)
+//     {
+//         this_key = ROT.RNG.getItem(action_keycodes.concat(cachable_keycodes));
+//         //Remove the cachable keycode concatenation to use prior
+//         generation_procedure.push(this_key);
+//         Action(this_key, target_pattern, false);
+//     }
 
-    for (var q=-N; q<=N; q++)
-    {
-        for (var r=-N; r<=N; r++)
-        {
-            if (target_lock_tmp[q+N][r+N]==1)
-            {
-                target_pattern[q+N][r+N]=1;
-            } 
-        }
-    }
-    //console.log('gen proc', generation_procedure, action_keycodes.concat(primitive_keycodes));
-    var tmp_key_array = [];
-    for (var i=0; i<generation_procedure.length; i++)
-    {
-        var tmp= action_keycodes.concat(cachable_keycodes).indexOf(generation_procedure[i]);
-        tmp_key_array.push(action_keys[tmp]);
-        // console.log(tmp_key_array, tmp);
-    }
-    pattern = tmp_key_array.join('');
+//     for (var q=-N; q<=N; q++)
+//     {
+//         for (var r=-N; r<=N; r++)
+//         {
+//             if (target_lock_tmp[q+N][r+N]==1)
+//             {
+//                 target_pattern[q+N][r+N]=1;
+//             } 
+//         }
+//     }
+//     //console.log('gen proc', generation_procedure, action_keycodes.concat(primitive_keycodes));
+//     var tmp_key_array = [];
+//     for (var i=0; i<generation_procedure.length; i++)
+//     {
+//         var tmp= action_keycodes.concat(cachable_keycodes).indexOf(generation_procedure[i]);
+//         tmp_key_array.push(action_keys[tmp]);
+//         // console.log(tmp_key_array, tmp);
+//     }
+//     pattern = tmp_key_array.join('');
 
-    return target_pattern;
-}
+//     return target_pattern;
+// }
 
 
 
-function UseCache(n, this_state, this_real)
-{    
-   //Read the cached pattern TODO KEEP THIS NOT IN THE STRING
-   var cache_pattern = _.cloneDeep(library[n]);//Array.from($('#cache' + n).text());
-   //console.log('before expanding:', cache_pattern);
+// function UseCache(n, this_state, this_real)
+// {    
+//    //Read the cached pattern TODO KEEP THIS NOT IN THE STRING
+//    var cache_pattern = _.cloneDeep(library[n]);//Array.from($('#cache' + n).text());
+//    //console.log('before expanding:', cache_pattern);
 
-   //Get rid of any nesting before the display process begins
+//    //Get rid of any nesting before the display process begins
    
-   while (cache_pattern.includes(cachable_keycodes[0]) |
-          cache_pattern.includes(cachable_keycodes[1]) | 
-          cache_pattern.includes(cachable_keycodes[2]) | 
-          cache_pattern.includes(cachable_keycodes[3]) | 
-          cache_pattern.includes(cachable_keycodes[4]) | 
-          cache_pattern.includes(cachable_keycodes[5]) )
-   {
-        for (var i=0; i<cache_pattern.length; i++)
-        {
-            for (var j=0; j<cachable_keycodes.length; j++)
-            {
-                if (cache_pattern[i]==cachable_keycodes[j])
-                {
-                    cache_pattern.splice(i, 1);
-                    insertArrayAt(cache_pattern, i, library[j]);
-                    break;
-                };
-            }
-        }
-   }
-   //How long is the fully expanded string?
-   var cpl = cache_pattern.length;
+//    while (cache_pattern.includes(cachable_keycodes[0]) |
+//           cache_pattern.includes(cachable_keycodes[1]) | 
+//           cache_pattern.includes(cachable_keycodes[2]) | 
+//           cache_pattern.includes(cachable_keycodes[3]) | 
+//           cache_pattern.includes(cachable_keycodes[4]) | 
+//           cache_pattern.includes(cachable_keycodes[5]) )
+//    {
+//         for (var i=0; i<cache_pattern.length; i++)
+//         {
+//             for (var j=0; j<cachable_keycodes.length; j++)
+//             {
+//                 if (cache_pattern[i]==cachable_keycodes[j])
+//                 {
+//                     cache_pattern.splice(i, 1);
+//                     insertArrayAt(cache_pattern, i, library[j]);
+//                     break;
+//                 };
+//             }
+//         }
+//    }
+//    //How long is the fully expanded string?
+//    var cpl = cache_pattern.length;
 
-   //Feed the string to the Action function with short timeouts so you can see it play out
-   //console.log('after expanding:', cache_pattern);
+//    //Feed the string to the Action function with short timeouts so you can see it play out
+//    //console.log('after expanding:', cache_pattern);
 
 
-   while (cache_pattern.length>0)
-   {
-        cur_keycode = cache_pattern.shift();
-        Action(cur_keycode, this_state=this_state, real=this_real, midcache = true);
-   }
-   if (this_real)
-   {
-       Update();
-       actions.push(cachable_keycodes[n]);
-       UpdateStringVis();
-   }
+//    while (cache_pattern.length>0)
+//    {
+//         cur_keycode = cache_pattern.shift();
+//         Action(cur_keycode, this_state=this_state, real=this_real, midcache = true);
+//    }
+//    if (this_real)
+//    {
+//        Update();
+//        actions.push(cachable_keycodes[n]);
+//        UpdateStringVis();
+//    }
 
-    // if (cache_pattern.length>0)
-    // {
-    //     console.log('used cache: ', n);
-    //     var i = 1;                  //  set your counter to 1
-    //     var i_max = cache_pattern.length;
+//     // if (cache_pattern.length>0)
+//     // {
+//     //     console.log('used cache: ', n);
+//     //     var i = 1;                  //  set your counter to 1
+//     //     var i_max = cache_pattern.length;
         
-    //     function ActLoop() {         //  create a loop function
-    //         setTimeout(function() {   //  call a setTimeout when the loop is called
-    //             cur_keycode = cache_pattern.shift();
-    //             Action(cur_keycode);   //  your code here
-    //             i++;                    //  increment the counter
-    //             if (i <= i_max) {           //  if the counter is less then original expanded pattern length, 
-    //               ActLoop();             //  .. call the loop function again 
-    //             }  else {
-    //                 actions.splice(actions.length - cpl, cpl);
-    //                 //actions.push(cachable_keycodes[n]);
-    //                 UpdateStringVis();
-    //                 //$('#main_focus').text(actions.join(''));//
+//     //     function ActLoop() {         //  create a loop function
+//     //         setTimeout(function() {   //  call a setTimeout when the loop is called
+//     //             cur_keycode = cache_pattern.shift();
+//     //             Action(cur_keycode);   //  your code here
+//     //             i++;                    //  increment the counter
+//     //             if (i <= i_max) {           //  if the counter is less then original expanded pattern length, 
+//     //               ActLoop();             //  .. call the loop function again 
+//     //             }  else {
+//     //                 actions.splice(actions.length - cpl, cpl);
+//     //                 //actions.push(cachable_keycodes[n]);
+//     //                 UpdateStringVis();
+//     //                 //$('#main_focus').text(actions.join(''));//
 
-    //                 console.log(n, 'original actions', actions, 'removed', tmp);
-    //             }                     //  ..  setTimeout()
-    //         }, 50)
-    //     }
+//     //                 console.log(n, 'original actions', actions, 'removed', tmp);
+//     //             }                     //  ..  setTimeout()
+//     //         }, 50)
+//     //     }
 
-    //     ActLoop();
-    // }   
+//     //     ActLoop();
+//     // }   
 
-} 
+// } 
 
 
 function insertArrayAt(array, index, arrayToInsert) {
@@ -1143,7 +1146,7 @@ function tutorialText(step) {
             var tutText = '<p style="font-size: 1em;">Pressing <b>Space</b> <b>rotates</b> all the pieces clockwise.</p><p style="font-size: 1em;">Place a <b>Corner</b> and <b>Rotate</b> it until it matches the target shape.</p>';
             break;
         case 8:
-            var tutText = '<p style="font-size: 1em;">Pressing <b>F</b> makes the board <b>Flip</b> from South-East to North-West (and vice-versa).</p><p style="font-size: 1em;">Place a <b>Corner</b> and <b>Flip</b> it to match the target shape.</p>';
+            var tutText = '<p style="font-size: 1em;">Pressing <b>F</b> makes the board <b>Flip</b> from West to East (and vice-versa).</p><p style="font-size: 1em;">Place a <b>Corner</b> and <b>Flip</b> it to match the target shape.</p>';
             break;
         case 9:
             var tutText = '<p style="font-size: 1em;">Pressing <b>R</b> serves a similar function to <b>Flip</b>, but instead the board <b>Reflects</b>, so the original pieces are copied on the other side of the board.</p><p style="font-size: 1em;">Place a <b>Piece</b> and <b>Move</b> it to match one of the target locations, then <b>Reflect</b> the board.</p>';
