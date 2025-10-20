@@ -14,7 +14,7 @@
 	$results = $_POST['results'];
 
 	//Create a query
-	$query = "INSERT INTO hexcraft_ana_exp1 (ip, date, results) VALUES ('{$ip}', '{$date}', '{$results}')";
+	$query = "INSERT INTO hexcraft_exp2 (ip, date, results) VALUES ('{$ip}', '{$date}', '{$results}')";
 	
 	//Do it
 	mysqli_query($mysqli, $query);

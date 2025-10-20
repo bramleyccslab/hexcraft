@@ -296,7 +296,7 @@ function Action(keycode, this_state=state, real=true, midcache = false)
         //console.log('got here');
         actions.push(keycode);
         
-        results.action_history.push(_.cloneDeep(actions));
+        results.action_history.push(keycode);
         results.state_history.push(_.cloneDeep(this_state));
 
         //Update the visual (player's) state
@@ -728,6 +728,14 @@ function Lock(this_state, real)
         inputLocked = true;
         attemptCount++;
 
+        if (tutorial_phase)
+        {
+            var tmp = tutCounter;
+        } else 
+        {
+            var tmp = trialNumber;
+        }
+
         const existingControls = document.getElementById("control-buttons");
         if (existingControls) existingControls.remove();
 
@@ -758,7 +766,8 @@ function Lock(this_state, real)
         tryAgainBtn.onclick = function () {
             inputLocked = false;
             //recording the data even if the try was incorrect
-            trial_result = [{tutorial: tutorial_phase, trial: trialNumber, attempt: attemptCount, result: false, challenge: pattern} ];
+
+            trial_result = [{tutorial: tutorial_phase, trial: tmp, attempt: attemptCount, result: false, challenge: pattern, actions:actions, state:state} ];
             key_between_times.push({key: key_times[0].key, interval: key_times[0].time});   //for the first key pressed it just includes the key code and the output of performance.now
 
             for (let i = 1; i < key_times.length; i++) {    //for the other ones it calculates the differences in milliseconds
@@ -780,15 +789,15 @@ function Lock(this_state, real)
         moveOnBtn.textContent = "Move On";
         moveOnBtn.style.marginLeft = "1em";
         moveOnBtn.onclick = function () {
-            attemptCount = 0;
+            //attemptCount = 0;
             if (match) {
-                trial_result = [{tutorial: tutorial_phase, trial: trialNumber, attempt: attemptCount, result: true, challenge: pattern} ];
+                trial_result = [{tutorial: tutorial_phase, trial: tmp, attempt: attemptCount, result: true, challenge: pattern, actions:actions, state:state} ];
                 if (!isTutorial){
                     number_correct = number_correct +1;
                 }
             }
             else{
-                trial_result = [{tutorial: tutorial_phase, trial: trialNumber, attempt: attemptCount, result: false, challenge: pattern} ];
+                trial_result = [{tutorial: tutorial_phase, trial: tmp, attempt: attemptCount, result: false, challenge: pattern, actions:actions, state:state} ];
             }
                 key_between_times.push({key: key_times[0].key, interval: key_times[0].time});   //for the first key pressed it just includes the key code and the output of performance.now
 

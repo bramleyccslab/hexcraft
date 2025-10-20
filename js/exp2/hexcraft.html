@@ -230,7 +230,7 @@ var hexTutorial = {
         var oldCounter = document.getElementById("trial-counter");
         if (oldCounter) oldCounter.remove();
 
-        tutorial_phase = false;
+        tutorial_phase = true;
         
         var trialCounter = document.createElement("div");
         trialCounter.id = "trial-counter";
@@ -330,6 +330,8 @@ var hexTrial = {
         //trial counter
         const oldCounter = document.getElementById("trial-counter");
         if (oldCounter) oldCounter.remove();
+
+        tutorial_phase = false;
 
         const trialCounter = document.createElement("div");
         trialCounter.id = "trial-counter";
@@ -549,7 +551,7 @@ var timeline = [
     survey_ID, instructions,
     hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial,
     tutEnd,
-    hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, 
+    hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, 
     debrief, survey_gender, survey_age, theEnd];
 
 //hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, tutEnd, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial,
