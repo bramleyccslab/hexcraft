@@ -105,6 +105,11 @@ def flip_ne_to_sw(a, b):
     q, r = offset_to_axial(a, b)
     return axial_to_offset(q, -q - r)
 
+def flip_w_to_e(a, b):
+    q, r = offset_to_axial(a, b)
+    # s = -q - r
+    return axial_to_offset(-q - r, r)
+
 def rotate(shapes):
     for shape in shapes:
         for i in range(len(shape)):
@@ -116,14 +121,14 @@ def flip(shapes):
     for shape in shapes:
         for i in range(len(shape)):
             x, y = shape[i]
-            shape[i] = flip_ne_to_sw(x, y)
+            shape[i] = flip_w_to_e(x, y)
     return shapes
 
 def reflect(shapes):
     reflected_shapes = []
     for shape in shapes:
         original = shape[:]
-        flipped = [flip_ne_to_sw(x, y) for (x, y) in shape]
+        flipped = [flip_w_to_e(x, y) for (x, y) in shape]
         combined = list(set(original + flipped))
         reflected_shapes.append(combined)
     return reflected_shapes
@@ -139,6 +144,8 @@ ACTIONS = {
     'f': flip,
     'r': reflect,
     ' ': rotate,
+
+    # 'xzd': lambda shapes: delete_center(add_corner(add_bar(shapes)))
 }
 
 def goal_solver(goal_shape, max_depth=7):
@@ -167,10 +174,10 @@ def convert_string(s):
     return result
 
 def main():
-    GOAL_SHAPE = get_shape_from_sequence(convert_string('ZSAZSAR'))
+    GOAL_SHAPE = get_shape_from_sequence(convert_string('XRKRDSSW'))
 
     print("Searching for solutions...")
-    sols = goal_solver(GOAL_SHAPE, max_depth=6)
+    sols = goal_solver(GOAL_SHAPE, max_depth=7)
     for i, sol in enumerate(sols):
         print(f"Solution {i+1}: {' -> '.join(sol)}")
     print(f"Total solutions found: {len(sols)}")
