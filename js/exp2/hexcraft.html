@@ -79,7 +79,7 @@ var instructions = {
               Your participation is voluntary, and you may withdraw from the study at any time and for any reason. If you withdraw from the study during or after data gathering, we will delete your data and there is no penalty or loss of benefits to which you are otherwise entitled.
             </p>
             <p style='margin-bottom: 20px;'>
-              If you have any questions about what you’ve just read, please feel free to ask, or contact us later. You can contact us by email at s2743602@ed.ac.uk. This project has been approved by PPLS Ethics committee. If you have questions or comments regarding your own rights as a participant, please contact the School Research Ethics Convenor at ppls.rec@ed.ac.uk.</p>
+              If you have any questions about what you’ve just read, please feel free to ask, or contact us later. You can contact us by email at neil.bramley@ed.ac.uk. This project has been approved by PPLS Ethics committee. If you have questions or comments regarding your own rights as a participant, please contact the School Research Ethics Convenor at ppls.rec@ed.ac.uk.</p>
             <p style='margin-bottom: 20px;'>By accepting this HIT, you consent to the following:</p>
             <ol>
                 <li><b>I agree to participate in this study.</b></li>
@@ -92,30 +92,53 @@ var instructions = {
 
         `<p style = 'font-size: 2em'>Task instructions</p>
         <div style='padding: 100px 300px; text-align: left;'>
-        <p style = 'margin-bottom: 20px; font-size: 1.5em'>Task:</p>
-        <p style='margin-bottom: 20px;'>In this experiment, you will solve seven shape-making puzzles. For each puzzle, your goal will be to recreate a target shape. Here is an example of a target shape.</p>
-        <img src="static/img/ins1_puzzles.png" style="height:350px">
+        <p style='margin-bottom: 20px;'>- In this experiment, you will try to solve a series of shape-making puzzles.</p>
+        <p style='margin-bottom: 20px;'>- For each puzzle, your goal will be to recreate a target shape.</p>
+        <p style='margin-bottom: 20px;'>- There will be seven puzzles in total.</p>
+        <p style='margin-bottom: 20px;'>- Below are some examples of what the puzzles look like:</p>
+        <div style='padding: 20px 20px; text-align: centre;'>
+            <img src="static/img/example_puzzles.png" style="width:600px">
+        </div>
         </div>`,
 
         `<p style = 'font-size: 2em'>Task instructions</p>
         <div style='padding: 100px 300px; text-align: left;'>
-        <p style = 'margin-bottom: 20px; font-size: 1.5em'>Task:</p>
-        <p style='margin-bottom: 20px;'>To recreate the shape you perform actions by pressing keyboard keys. There are 10 possible actions you can perform. Each action is mapped to a specific key on your keyboard. Before the actual puzzles, you will complete nine guided tutorial problems, which will help familiarize you with how the interface works, and what each of these actions does.</p>
-        <img src="static/img/ins2_keys.png" style="height:350px">
+        <p style='margin-bottom: 20px;'>- In each puzzle the goal is to add tiles to the board to match the green target shape.</p>
+        <p style='margin-bottom: 20px;'>- You do this by performing a series of actions by pressing keyboard keys.</p>
+        <p style='margin-bottom: 20px;'>- All the actions add, remove or move (transparant) grey tiles on the board.</p>
+        <p style='margin-bottom: 20px;'>- If you can make these grey tiles cover up the light green pattern exactly, then you have successfully solved the puzzle.</p>
+        <p style='margin-bottom: 20px;'>- The actions are shown below:</p>
+
+        <div style='padding: 50px 50px; text-align: centre;'>
+            <img src="static/img/keys_square.png" style='height:350px;'>
+        </div>
+        <p style='margin-bottom: 20px;'>- Don't worry, you do not need to memorise these now. Before facing the 7 test puzzles, you will complete a series of guided tutorial puzzles. These will familiarise you with how the interface works, and introduce each of these actions, one at a time.</p>
         </div>`,
 
         `<p style = 'font-size: 2em'>Task instructions</p>
         <div style='padding: 100px 300px; text-align: left;'>
-        <p style = 'margin-bottom: 20px; font-size: 1.5em'>Task:</p>
-        <p style='margin-bottom: 20px;'>When you think you have solved a puzzle or what to give up on your attempt you will press ENTER to lock in your solution</p>
-        <img src="static/img/ins2_keys.png" style="height:350px">
-        <p style='margin-bottom: 20px;'>If you solved the puzzle successfully you will be able to move onto the next one. If you did not solve it you will be able to try again.</p>
-        <p style='baring-bottom: 20px;'>You are free to attempt each puzzle as many times as you want. However, after five unsuccessful attempts you will have the option to move to the next puzzle if you like.</p>
-        <p style='margin-bottom: 20px;'>On each attempt you can perform a maximum of 30 actions, after which your attempt will be locked in automatically and you will be able to try again or move on (if you have already had five attempts).</p>
-        <p style='margin-bottom: 20px;'>For each of the puzzles you solve successfully, you will win a bonus of £0.20.</p>
-        <p style='margin-bottom: 20px;'>If you get stuck or want to try a puzzle again, just lock in your current answer and you will be able to start over.
-        <p style='margin-bottom: 20px;'><b>Important: Do not refresh the page, as this will restart the experiment and make you ineligible to complete it.</b></p> 
-        <p style='margin-bottom: 20px;'>Lastly, do not worry if you are not able to solve all or even most of the puzzles. They are designed to be difficult and we are interested in the actions you try as well as the results you get. Just do your best. Good luck!</p>
+        <p style='margin-bottom: 20px;'>- When you think you have solved a puzzle, or want to give up on your attempt you press ENTER to lock in your solution.</p>
+        <p style='margin-bottom: 20px;'>- The picture below shows what you will see if you lock in an incorrect solution:</p>
+        <div style='padding: 50px 50px; text-align: centre;'>
+            <img src="static/img/example_solution.png" style="width:600px">
+        </div>
+        <p style='margin-bottom: 20px;'>- If you make a mistake you can press "U" to go back a step. However, both actions stll count toward your total steps.
+        <p style='margin-bottom: 20px;'>- You can only Undo the most recent action.</p>
+        </div>`,
+
+        `<p style = 'font-size: 2em'>Task instructions</p>
+        <div style='padding: 100px 300px; text-align: left;'>
+        <p style='margin-bottom: 20px;'>- If you solved the puzzle successfully, all the squares will appear in dark green, and you will be able to move onto the next puzzle. If you did not solve the puzzle correctly, you will be able to try again.</p>
+        <p style='margin-bottom: 20px;'>- You are free to attempt each puzzle as many times as you want. However, after 5 unsuccessful attempts you will have the option to move to the next puzzle.</p>
+        <p style='margin-bottom: 20px;'>- On each attempt you can perform a maximum of 30 actions, after which your attempt will be locked in automatically and you will be able to try again or move on (if you have already had five attempts).</p>
+        </div>`,
+
+        `<p style = 'font-size: 2em'>Task instructions</p>
+        <div style='padding: 100px 300px; text-align: left;'>
+        <p style='margin-bottom: 20px;'>- Whenever you solve a puzzle solve successfully, you will win a bonus of £0.20. This does not depend on how many attempts it took you.</p>
+        <p style='margin-bottom: 20px;'>- Whenever you get stuck or want to try a puzzle again, just lock in your current answer and you will be able to start again.
+        <p style='margin-bottom: 20px;'><b>- Important: Do not refresh the page, as this will restart the experiment and make you ineligible to complete it.</b></p> 
+        <p style='margin-bottom: 20px;'>- Lastly, do not worry if you are not able to solve all or even most of the puzzles. They are designed to be difficult, you will still be able to get to the end of the experiment, and we are interested in the actions you try as well as the results you get. Just do your best. Good luck!</p>
         </div>`
     ],
     button_label_next: "Continue",
@@ -153,9 +176,8 @@ var tutorial_phase = true;
 //var triangle = ['ASAEA', 'ASAEAEASAEAK', 'ASAEASASAEAEASAEA'];     //the cache is a bit too long 
 
 var training_tasks1 = ['AWWRKRKR','AWAWWRKRKR','AWAWAWWRKRKR']
-var training_tasks2 = ['XRKRD','XRKRDSSW','XRKRKDESES'];
-var test_tasks = ['ZKKWWRKRKR','ZKKDWWRKRKR','XRKRDWR','XRKRDEESRKR','XRKRDWWRKRKR']
-
+var training_tasks2 = ['ZXDR','ZXDRWWE','ZXDRWWF'];
+var test_tasks = ['ZKKWWRKRKR','ZKKDWWRKRKR','ZXDRWR','ZXDREESRKR','ZXDRWWRKRKR']
 //
 var tutorial = ['A', 'ASW', 'Z', 'X', 'ZX', 'XD', 'ZKKK', 'ZF', 'ASSR'];
 
