@@ -1,64 +1,68 @@
+from typing import Iterator, List, Tuple, Union
 import random
-import re
-from collections import defaultdict
+import nltk  # type: ignore
+from nltk.grammar import ProbabilisticProduction  # type: ignore
+from nltk.grammar import Nonterminal  # type: ignore
 
-def parse_grammar_string(grammar_str):
-    rules = defaultdict(list)
-    for line in grammar_str.strip().splitlines():
-        if not line.strip():
-            continue
-        lhs, rhs_part = line.split("->")
-        lhs = lhs.strip()
-        rhs_options = rhs_part.split("|")
-        for option in rhs_options:
-            match = re.match(r"(.*)\[(.*)\]", option.strip())
-            if not match:
-                continue
-            rhs_symbols = match.group(1).strip().split()
-            weight = float(match.group(2).strip())
-            rules[lhs].append((rhs_symbols, weight))
-    return rules
+Symbol = Union[str, Nonterminal]
 
-def generate_sentence(rules, start_symbol="S", max_depth=50, max_length=20):
-    def expand(symbol, depth=0):
-        nonlocal token_count
-        if depth > max_depth or token_count >= max_length:
-            return []
-        if symbol.startswith("'") and symbol.endswith("'"):
-            token = symbol.strip("'")
-            token_count += 1
-            return [token]
-        if symbol not in rules:
-            return [symbol]
-        
-        rhs_options = []
-        adjusted_weights = []
-        for rhs, weight in rules[symbol]:
-            rhs_len = sum(1 for s in rhs if s.startswith("'"))
-            penalty = 1.0 if token_count + rhs_len <= max_length else 0.1
-            rhs_options.append(rhs)
-            adjusted_weights.append(weight * penalty)
 
-        if sum(adjusted_weights) == 0:  # fallback，避免权重全为0
-            adjusted_weights = [w for _, w in rules[symbol]]
+class PCFG(nltk.grammar.PCFG):
+    def generate(self, n: int, max_len=10) -> Iterator[str]:
+        """Probabilistically, recursively reduce the start symbol `n` times,
+        yielding a valid sentence each time.
 
-        chosen_rhs = random.choices(rhs_options, weights=adjusted_weights)[0]
-        result = []
-        for sym in chosen_rhs:
-            result.extend(expand(sym, depth + 1))
-            if token_count >= max_length:
+        Args:
+            n: The number of sentences to generate.
+
+        Yields:
+            The next generated sentence.
+        """
+        for _ in range(n):
+            yield self._generate_derivation(self.start(), max_len=max_len)
+
+    def _generate_derivation(self, nonterminal: Nonterminal, max_len=10, current_len=0) -> str:
+        if current_len >= max_len:
+            return ""
+
+        sentence: List[str] = []
+        for symbol in self._reduce_once(nonterminal):
+            if isinstance(symbol, str):
+                derivation = symbol
+                current_len += 1
+            else:
+                derivation = self._generate_derivation(symbol, max_len, current_len)
+                current_len += len(derivation.split())
+
+            if current_len > max_len:
                 break
-        return result
+            if derivation != "":
+                sentence.append(derivation)
+        return " ".join(sentence)
 
-    token_count = 0
-    return expand(start_symbol)
+    def _reduce_once(self, nonterminal: Nonterminal) -> Tuple[Symbol]:
+        """Probabilistically choose a production to reduce `nonterminal`, then
+        return the right-hand side.
 
-grammar_text = """
-S -> S S [0.5] | A [0.5]
-A -> 'a' [0.07692307692307693] | 'b' [0.07692307692307693] | 'c' [0.07692307692307693] | 'a' 'b' 'c' [0.7692307692307693]
-"""
+        Args:
+            nonterminal: The non-terminal symbol to derive.
 
-rules = parse_grammar_string(grammar_text)
-for _ in range(10):
-    sentence = generate_sentence(rules, max_length=10)
-    print("".join(sentence))
+        Returns:
+            The right-hand side of the chosen production.
+        """
+        return self._choose_production_reducing(nonterminal).rhs()
+
+    def _choose_production_reducing(
+        self, nonterminal: Nonterminal
+    ) -> ProbabilisticProduction:
+        """Probabilistically choose a production that reduces `nonterminal`.
+
+        Args:
+            nonterminal: The non-terminal symbol for which to choose a production.
+
+        Returns:
+            The chosen production.
+        """
+        productions: List[ProbabilisticProduction] = self._lhs_index[nonterminal]
+        probabilities: List[float] = [production.prob() for production in productions]
+        return random.choices(productions, weights=probabilities)[0]
