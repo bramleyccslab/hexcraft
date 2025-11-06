@@ -65,4 +65,5 @@ class PCFG(nltk.grammar.PCFG):
         """
         productions: List[ProbabilisticProduction] = self._lhs_index[nonterminal]
         probabilities: List[float] = [production.prob() for production in productions]
+
         return random.choices(productions, weights=probabilities)[0]
