@@ -1,6 +1,6 @@
 import random
 import json
-import itertools
+from tqdm import tqdm
 
 BOARD_SIZE = 9
 
@@ -42,12 +42,15 @@ def get_best_action(Q, state, actions):
 def check_goal(shapes, goal_shape):
     return set(shapes[0]) == set(goal_shape)
 
-def get_shape_from_sequence(sequence):
-    shapes = [[]]
-    for cmd in sequence:
-        func = ACTIONS[cmd]
-        shapes = func(shapes)
-    return shapes[0]
+def convert_string(s):
+    # convert action sequences to usable input to our program
+    result = []
+    for char in s:
+        if char == 'K':
+            result.append(' ')
+        else:
+            result.append(char.lower())
+    return result
 
 def create_center(shapes):
     cx, cy = BOARD_SIZE // 2, BOARD_SIZE // 2
@@ -183,34 +186,32 @@ ACTIONS = {
     ' ': rotate,
 }
 
-def goal_solver(goal_shape, max_depth=7):
-    action_keys = list(ACTIONS.keys())
-    solutions = []
-
-    for length in range(1, max_depth + 1):
-        for cmd_seq in itertools.product(action_keys, repeat=length):
-            shapes = [[]]
-            for cmd in cmd_seq:
-                func = ACTIONS[cmd]
-                shapes = func(shapes)
-            if check_goal(shapes, goal_shape):
-                solutions.append(list(cmd_seq))
-
-    return solutions
+def get_shape_from_sequence(sequence):
+    shapes = [[]]
+    for cmd in sequence:
+        func = ACTIONS[cmd]
+        shapes = func(shapes)
+    return shapes[0]
 
 # We can change the reward function as we need
 def get_reward(state, goal_state):
     return 1.0 if check_goal(state, goal_state) else 0.0
 
+# A simple generation from the ACTIONS, not the probabilistic generation
+def generate_simple(char_list, length, number):
+    return [random.choices(char_list, k=length) for _ in range(number)]
+
 # The main Q-learning function
-def q_learning(filename, goal_states, alpha=0.1, gamma=0.9, epsilon=0.2, episodes=1000, max_steps=100):
+def q_learning(filename, goal_states, alpha=0.1, gamma=0.9, epsilon=0.2, episodes=1000, max_steps=10):
     Q = {}
     actions = list(ACTIONS.keys())
 
-    for ep in range(episodes):
+    assert len(goal_states) == episodes
+
+    for ep in tqdm(range(episodes)):
         state = [[]]
         goal_state = goal_states[ep]
-        for _ in range(max_steps):
+        for _ in tqdm(range(max_steps)):
             action = choose_action(Q, state, actions, epsilon)
 
             func = ACTIONS[action]
@@ -233,13 +234,13 @@ def q_learning(filename, goal_states, alpha=0.1, gamma=0.9, epsilon=0.2, episode
 
 # The function for inference after having learned a Q dictionary
 # no MCMC-like caches
-def q_inference(filename, goal_state, max_steps=100):
+def q_inference(filename, goal_state, max_steps=10):
     Q = load_Q(filename)
     state = [[]]
     actions_list = []
     actions = list(ACTIONS.keys())
 
-    for _ in range(max_steps):
+    for _ in tqdm(range(max_steps)):
         action = get_best_action(Q, state, actions)
 
         func = ACTIONS[action]
@@ -250,3 +251,18 @@ def q_inference(filename, goal_state, max_steps=100):
             break
 
     return actions_list
+
+def main():
+    # We use <episodes> training shapes with a length of <train_sequence_length> to train the model 
+    episodes = 10
+    train_sequence_length = 5
+    train_actions = generate_simple(list(ACTIONS.keys()), train_sequence_length, episodes)
+    train_goal_shapes = [get_shape_from_sequence(actions) for actions in train_actions]
+    q_learning("q.json", train_goal_shapes, episodes=episodes)
+
+    inference_goal_shape = get_shape_from_sequence(convert_string('ZXDRWWRKRKR'))
+    print(q_inference("q.json", inference_goal_shape))
+    
+
+if __name__ == "__main__":
+    main()
