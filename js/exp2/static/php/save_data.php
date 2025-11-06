@@ -10,8 +10,9 @@
 	// Get values passed from JS
 	$ip = $_SERVER['REMOTE_ADDR'];
 	$date = date('Y-m-d');
-	$subject = $_POST['subject'];
+	//$subject = $_POST['subject'];
 	$results = $_POST['results'];
+	//$jsPsychResults = $_POST['jsPsychResults'];
 
 	//Create a query
 	$query = "INSERT INTO hexcraft_exp2 (ip, date, results) VALUES ('{$ip}', '{$date}', '{$results}')";

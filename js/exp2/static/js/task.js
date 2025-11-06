@@ -1,7 +1,6 @@
 var N = 4 //Hexagon radius (excluding centre, other stuff should scale with this)
 
 
-
 //TODO: UPDATE PRIMITIVE KEY MAPPINGS
 
 var empty_state = Array.apply(null, Array(2*N+1))
@@ -21,7 +20,10 @@ var key_times = []; //list for recording time when keys were pressed
 var key_between_times = []; //list for time diffs between key presses
 var level_result = []; //list to record the trial that the user has completed and fail / complete
 var number_correct = 0;
-var trial_results = [];
+var trial_result = [];
+var action_history = [];
+var state_history = [];
+var completed = false;
 
 var d //The canvas identifier
 
@@ -31,14 +33,19 @@ var cdv = {NE:[+1, -1, 0], E:[+1, 0, -1], SE:[0, +1, -1],
 var actions = []; //Store the sequence of actions the user performs
 
 //so these are premade caches 
-var library = [[32, 32, 32, 87, 32, 32, 32], //East
-               [32,32,32,32,32,87,32], //NW
-               [32,87,32,32,32,32,32],//SW
-               [65, 87, 65, 69, 82, 69, 65, 83],//Corner65, 87, 65, 69, 82, 65, 83]
-               [65, 82, 65, 83, 69, 83, 69, 65, 82],//Bar65, 87, 82, 65, 83, 83, 69, 69, 65, 87, 82
-               []]; //Store the action sequences they cache
+// var library = [[32, 32, 32, 87, 32, 32, 32], //East
+//                [32,32,32,32,32,87,32], //NW
+//                [32,87,32,32,32,32,32],//SW
+//                [65, 87, 65, 69, 82, 69, 65, 83],//Corner65, 87, 65, 69, 82, 65, 83]
+//                [65, 82, 65, 83, 69, 83, 69, 65, 82],//Bar65, 87, 82, 65, 83, 83, 69, 69, 65, 87, 82
+//                []]; //Store the action sequences they cache
 
-var results = {target:[], performance:[], action_history:[], state_history:[], library:[], timestamps:[], trial:[], demographics:[]};
+var results = {subjectwise:{},
+                tutorials:[[],[],[],[],[],[],[],[],[]],
+                trials:[[],[],[],[],[],[],[],[]],
+                targets:[[],[],[],[],[],[],[],[]],
+                state_history_tutorials:[[],[],[],[],[],[],[],[],[]],
+                state_history_tests:[[],[],[],[],[],[],[],[]],};
 
 var pattern = [];
 var mode = '';
@@ -145,13 +152,13 @@ function Start(fpattern)
         //zfzsslzfzccclzfzrrrlzfzkeelzfzkkwwwlzfzkkkkeerrl circle of bones
     }
 
-    results.target = _.cloneDeep(target);//Store the target pattern
-
+    //results.condition.push(condition);
     // if (cache)
     // {
     //     results.library_history.push(_.cloneDeep(library));
     // }
-    results.library.push(_.cloneDeep(library));
+    //results.library.push(_.cloneDeep(library));
+
     //Plot the hexagons onto it
     for (var y = 0; y < (2*N+1); y++) {
         for (var x = y%2; x < 2*(2*N+1); x += 2) {
@@ -209,36 +216,36 @@ function Start(fpattern)
     //     Action(code);
     // };
     
-    if (cache)
-    {
-        //Functionality for using caches
-        $(".cache-btn").click(function(){
-            var tmp = this.id
-            //console.log('clicked', this.id, tmp.charAt(tmp.length-1));
-            var which_cache = Number(tmp.charAt(tmp.length-1));
+    // if (cache)
+    // {
+    //     //Functionality for using caches
+    //     $(".cache-btn").click(function(){
+    //         var tmp = this.id
+    //         //console.log('clicked', this.id, tmp.charAt(tmp.length-1));
+    //         var which_cache = Number(tmp.charAt(tmp.length-1));
 
-            // console.log('hihi', actions, which_cache, cachable_keycodes,
-                // cachable_keycodes[which_cache], actions.includes(cachable_keycodes[which_cache]));
+    //         // console.log('hihi', actions, which_cache, cachable_keycodes,
+    //             // cachable_keycodes[which_cache], actions.includes(cachable_keycodes[which_cache]));
 
-            if (!actions.includes(cachable_keycodes[which_cache]))
-            {
-                library[which_cache] = _.cloneDeep(actions);
-                actions = [cachable_keycodes[which_cache]];
+    //         if (!actions.includes(cachable_keycodes[which_cache]))
+    //         {
+    //             library[which_cache] = _.cloneDeep(actions);
+    //             actions = [cachable_keycodes[which_cache]];
 
-                UpdateCacheVis(which_cache);
-                UpdateStringVis();
-                results.library_history.push(_.cloneDeep(library));
-                results.library_update_at.push(results.action_history.length);
-            } else {
-                alert('Cannot cache a sequence that contains itself!')
-            }
-        });
+    //             UpdateCacheVis(which_cache);
+    //             UpdateStringVis();
+    //             results.library_history.push(_.cloneDeep(library));
+    //             results.library_update_at.push(results.action_history.length);
+    //         } else {
+    //             alert('Cannot cache a sequence that contains itself!')
+    //         }
+    //     });
 
-        for (let i=0; i<library.length; i++)
-        {
-            UpdateCacheVis(i);
-        }
-    }
+    //     for (let i=0; i<library.length; i++)
+    //     {
+    //         UpdateCacheVis(i);
+    //     }
+    // }
 
     //key listener
     window.removeEventListener("keydown", hexKeyListener);
@@ -296,8 +303,8 @@ function Action(keycode, this_state=state, real=true, midcache = false)
         //console.log('got here');
         actions.push(keycode);
         
-        results.action_history.push(keycode);
-        results.state_history.push(_.cloneDeep(this_state));
+        action_history.push(keycode);
+        state_history.push(_.cloneDeep(this_state));
 
         //Update the visual (player's) state
         Update();
@@ -728,9 +735,11 @@ function Lock(this_state, real)
         inputLocked = true;
         attemptCount++;
 
+        if (match) {completed=true;}
+
         if (tutorial_phase)
         {
-            var tmp = tutCounter;
+            var tmp = tutCounter-1;
         } else 
         {
             var tmp = trialNumber;
@@ -747,81 +756,94 @@ function Lock(this_state, real)
 
         const feedback = document.createElement("p");
         //feedback.textContent = match ? "Puzzle solved. You have earned £0.10!" : "Puzzle not solved, please try again.";
+        
         const currentTrial = jsPsych.getCurrentTrial();
-        const isTutorial = currentTrial.type === jsPsychHtmlKeyboardResponse && currentTrial.stimulus.includes("Tutorial");
+        //const isTutorial = currentTrial.type === jsPsychHtmlKeyboardResponse && currentTrial.stimulus.includes("Tutorial");
 
-        if (match) {
-            feedback.textContent = isTutorial
+        if (completed) {
+            feedback.textContent = tutorial_phase
                 ? "Tutorial step complete."
                 : "Puzzle solved. You have earned £0.20!";
         } else {
-            feedback.textContent = isTutorial
+            feedback.textContent = tutorial_phase
                 ? "Tutorial step not complete. Please try again."
                 : "Puzzle not solved, please try again.";
         }
+
+        key_between_times.push({key: key_times[0].key, interval: key_times[0].time});   //for the first key pressed it just includes the key code and the output of performance.now
+
+        for (let i = 1; i < key_times.length; i++) {    //for the other ones it calculates the differences in milliseconds
+            key_between_times.push({
+                key: key_times[i].key,
+                interval: key_times[i].time - key_times[i - 1].time
+            });
+        }
+
+        trial_result = {trial: tmp, attempt: attemptCount, actions:_.cloneDeep(action_history), keys:_.cloneDeep(key_between_times), result:false};
+        
         btnContainer.appendChild(feedback);
 
         const tryAgainBtn = document.createElement("button");
+        const moveOnBtn = document.createElement("button");
         tryAgainBtn.textContent = "Try Again";
-        tryAgainBtn.onclick = function () {
+
+        tryAgainBtn.onclick = function ()
+        {
             inputLocked = false;
-            //recording the data even if the try was incorrect
-
-            trial_result = [{tutorial: tutorial_phase, trial: tmp, attempt: attemptCount, result: false, challenge: pattern, actions:actions, state:state} ];
-            key_between_times.push({key: key_times[0].key, interval: key_times[0].time});   //for the first key pressed it just includes the key code and the output of performance.now
-
-            for (let i = 1; i < key_times.length; i++) {    //for the other ones it calculates the differences in milliseconds
-                key_between_times.push({
-                    key: key_times[i].key,
-                    interval: key_times[i].time - key_times[i - 1].time
-                });
-            }
-
-            results.performance.push({steps:actions.length, errors:spillage}); 
-            results.timestamps.push(key_between_times); 
-            results.trial.push(trial_result);
+            trial_result.result = false;
             ResetBoard();
         };
         btnContainer.appendChild(tryAgainBtn);
 
-        if (match || attemptCount >= 5) {
-        const moveOnBtn = document.createElement("button");
-        moveOnBtn.textContent = "Move On";
-        moveOnBtn.style.marginLeft = "1em";
-        moveOnBtn.onclick = function () {
-            //attemptCount = 0;
+
+        if (completed || (attemptCount >= 5 && !tutorial_phase)) {
             if (match) {
-                trial_result = [{tutorial: tutorial_phase, trial: tmp, attempt: attemptCount, result: true, challenge: pattern, actions:actions, state:state} ];
-                if (!isTutorial){
+                trial_result.result = true;
+
+                // if (!tutorial_phase){
+                //     number_correct = number_correct +1;
+                // }
+            } else{
+                trial_result.result = false;
+            }
+            btnContainer.appendChild(moveOnBtn);
+        }
+
+            
+            moveOnBtn.textContent = "Move On";
+            moveOnBtn.style.marginLeft = "1em";
+        
+            moveOnBtn.onclick = function ()
+            {
+                jsPsych.finishTrial();
+                attemptCount = 0;
+
+                if (!tutorial_phase && completed){
                     number_correct = number_correct +1;
                 }
-            }
-            else{
-                trial_result = [{tutorial: tutorial_phase, trial: tmp, attempt: attemptCount, result: false, challenge: pattern, actions:actions, state:state} ];
-            }
-                key_between_times.push({key: key_times[0].key, interval: key_times[0].time});   //for the first key pressed it just includes the key code and the output of performance.now
 
-                for (let i = 1; i < key_times.length; i++) {    //for the other ones it calculates the differences in milliseconds
-                    key_between_times.push({
-                        key: key_times[i].key,
-                        interval: key_times[i].time - key_times[i - 1].time
-                    });
-                }
+                completed = false;
+                ResetBoard();
+            };
 
-                results.performance.push({steps:actions.length, errors:spillage}); 
-                results.timestamps.push(key_between_times);     
-                results.trial.push(trial_result);
-            
-            // if(trialNumber==1){ //don't forget to change to 7
-            //     save_data();
-            // }
-            jsPsych.finishTrial();
-        };
-        btnContainer.appendChild(moveOnBtn);
-    }
-    document.body.prepend(btnContainer);
-    }
-}
+
+
+        document.body.prepend(btnContainer);
+        
+        if (tutorial_phase)
+        {
+          results.tutorials[tmp].push(_.cloneDeep(trial_result));
+          results.state_history_tutorials[tmp].push(_.cloneDeep(state_history));
+        } else {
+          results.targets[tmp].push(_.cloneDeep(target));//Store the target pattern
+          results.trials[tmp].push(_.cloneDeep(trial_result));
+          results.state_history_tests[tmp].push(_.cloneDeep(state_history));
+        }
+
+        console.log('pushed trial results');
+
+    }//Real
+}//Lock
 
 function ResetBoard() {
     state = _.cloneDeep(empty_state);
@@ -830,15 +852,14 @@ function ResetBoard() {
     actions = [];
     spillage = 0;
     display_array = [];
-    results.action_history = [];
-    results.state_history = [];
+    action_history = [];
+    state_history = [];
     key_times = [];
     key_between_times = [];
 
     Update();  
     //document.getElementById("main_focus").innerHTML = "";
   
-
     const container = document.getElementById("progressContainer");
 
     container.innerHTML = "";
@@ -849,8 +870,6 @@ function ResetBoard() {
         container.appendChild(segment);
     }
     currentIndex = 0;
-
-
     
     const controls = document.getElementById("control-buttons");
     if (controls) controls.remove();
@@ -1033,12 +1052,13 @@ function save_data()    // TODO: highlighting this too
     var now = new Date();
     results_str = JSON.stringify(results);
 
-    //console.log('full results: ', results);
+    //jspsych_results_str = JSON.stringify(jsPsych.data.get());
+    // console.log('full results: ', results);
 
     jQuery.ajax({
         url: './static/php/save_data.php', //breaking this thing for now to test
         type:'POST',
-        data:{results:results_str},   
+        data:{results:results_str},   //, jsPsychResults:jspsych_results_str
         success:function(data)
         {
             console.log('Sent data to database');
@@ -1058,7 +1078,7 @@ function save_data()    // TODO: highlighting this too
 function save_data_fallback() {
 
     var fallback_data = JSON.stringify(results);
-    var fallback_filename = upiexp + "_FALLBACK.csv";  
+    var fallback_filename = prolific_id + "_FALLBACK.csv";  
 
     jQuery.ajax({
         url: './static/php/save_data_to_csv.php',
@@ -1092,11 +1112,18 @@ function hexKeyListener(e) {
         return;
         }
 
+
         //Workaround to avoid spacebar scrolling to bottom of page
         if (e.keyCode == 32 | e.keyCode == 13) {
             e.preventDefault();
         }
         var code = e.keyCode || e.which;
+
+        if (action_history.length==0 && code==13)
+        {
+            alert('You must take some actions first!');
+            return;
+        }
 
         if (code>=97 && code<=122)
         {
@@ -1121,8 +1148,9 @@ function hexKeyListener(e) {
         //console.log(ch);
         // console.log("Key char is: " + ch + " Code is: " + code);
 
-        if(actions.length == 29){
-        Lock(state, true);
+        if(action_history.length == 29){
+            //Lock(state, true);
+            code=13;
         }
 
         Action(code);
@@ -1134,40 +1162,41 @@ function hexKeyListener(e) {
 function tutorialText(step) {
     switch(step){
         case 1:
-            var tutText = '<p style="font-size: 1em;">\n\nFirst, put a single piece in the middle of the Board by pressing <b>A</b> on your keyboard.</p>' + 
-            '<p style="font-size: 1em;">\nThen press <b>Enter</b> to lock it in and move on.\n\n</p>';
+            var tutText = '<p style="font-size: 1em; text-align: left; margin-bottom: 20px;">First, put a single piece in the middle of the Board by pressing <b>A</b> on your keyboard.</p>' + 
+            '<p style="font-size: 1em;  text-align: left;">Then, press <b>Enter</b> to lock it in and move on.</p>';
             break;
         case 2:
-            var tutText = '<p style="font-size: 1em;">Pressing <b>W</b> moves all pieces on the Board one space to the <b>West</b>.</p>' +
-            '<p style="font-size: 1em;">Pressing <b>E</b> moves all pieces on the Board one space to the <b>North-East</b>.' +
-            '</p><p style="font-size: 1em;">Pressing <b>S</b> moves all pieces on the Board one space to the <b>South-East</b>.' +
-            '</p><p style="font-size: 1em;">Press <b>A</b> then <b>W,E,S</b> to move it one space to the <b>South-West</b></p>';
+            var tutText = '<p style="font-size: 1em; text-align: left; margin-bottom: 20px;">Pressing <b>W</b> moves all pieces on the Board one space to the <b>West</b>.</p>' +
+            '<p style="font-size: 1em; text-align: left; margin-bottom: 20px;">Pressing <b>E</b> moves all pieces on the Board one space to the <b>North-East</b>.' +
+            '</p><p style="font-size: 1em; text-align: left; margin-bottom: 20px;">Pressing <b>S</b> moves all pieces on the Board one space to the <b>South-East</b>.' +
+            '</p><p style="font-size: 1em; text-align: left; margin-bottom: 20px;">Press <b>A</b> then <b>W,E,S</b> to positino a tile one space to the <b>South-West</b> of the centre.</p>';
             break;
         case 3:
-            var tutText = '<p style="font-size: 1em;">Pressing <b>Z</b> puts a <b>Corner shape</b> in the middle of the Board. Place it and lock it in to move on.</p>';
+            var tutText = '<p style="font-size: 1em; text-align: left;">Pressing <b>Z</b> puts a <b>Corner shape</b> in the middle of the Board. Place it and lock it in to move on.</p>';
             break;
         case 4:
-            var tutText = '<p style="font-size: 1em;">Pressing <b>X</b> puts a <b>diagonal bar</b> in the middle of the Board. Place it and lock it in to move on.</p>';
+            var tutText = '<p style="font-size: 1em; text-align: left;">Pressing <b>X</b> puts a <b>diagonal bar</b> in the middle of the Board. Place it and lock it in to move on.</p>';
             break;
         case 5:
-            var tutText = '<p style="font-size: 1em;">The placed pieces can overlap with each other.</p><p style="font-size: 1em;">Put both a <b>Corner</b> and a <b>Bar</b> to combine them.</p>';
+            var tutText = '<p style="font-size: 1em; text-align: left; margin-bottom: 20px;">The placed pieces can overlap with each other.</p>' +
+            '<p style="font-size: 1em;text-align: left; ">Put both a <b>Corner</b> and a <b>Bar</b> to combine them.</p>';
             break;
         case 6:
-            var tutText = '<p style="font-size: 1em;">Tiles can be <b>deleted</b> from the middle of the board by pressing <b>D</b>.</p>' +
-            '<p style="font-size: 1em;">Place a <b>Bar</b> and <b>delete</b> its middle tile to move on.';
+            var tutText = '<p style="font-size: 1em; text-align: left; margin-bottom: 20px;">Tiles can be <b>deleted</b> from the middle of the board by pressing <b>D</b>.</p>' +
+            '<p style="font-size: 1em; text-align: left;">Place a <b>Bar</b> and <b>delete</b> its middle tile to move on.';
             break;
         case 7:
-            var tutText = '<p style="font-size: 1em;">Pressing <b>Space</b> <b>rotates</b> all the pieces clockwise.</p>' +
-            '<p style="font-size: 1em;">Place a <b>Corner</b> and <b>Rotate</b> it until it matches the target shape.</p>';
+            var tutText = '<p style="font-size: 1em; text-align: left; margin-bottom: 20px;">Pressing <b>Space</b> <b>rotates</b> all the pieces clockwise.</p>' +
+            '<p style="font-size: 1em; text-align: left;">Place a <b>Corner</b> and <b>Rotate</b> it until it matches the target shape.</p>';
             break;
         case 8:
-            var tutText = '<p style="font-size: 1em;">Pressing <b>F</b> makes the board <b>Flip</b> from West to East (and vice-versa).</p>' +
-            '<p style="font-size: 1em;">Place a <b>Corner</b> and <b>Flip</b> it to match the target shape.</p>';
+            var tutText = '<p style="font-size: 1em; text-align: left; margin-bottom: 20px;">Pressing <b>F</b> makes the board <b>Flip</b> from West to East (and vice-versa).</p>' +
+            '<p style="font-size: 1em; text-align: left;">Place a <b>Corner</b> and <b>Flip</b> it to match the target shape.</p>';
             break;
         case 9:
-            var tutText = '<p style="font-size: 1em;">Pressing <b>R</b> serves a similar function to <b>Flip</b>, ' +
+            var tutText = '<p style="font-size: 1em; text-align: left; margin-bottom: 20px;">Pressing <b>R</b> serves a similar function to <b>Flip</b>, ' +
             'but instead the board <b>Reflects</b>, so the original pieces are copied on the other side of the board.</p>' +
-            '<p style="font-size: 1em;">Place a <b>Piece</b> and <b>Move</b> it to match one of the target locations, then <b>Reflect</b> the board.</p>';
+            '<p style="font-size: 1em; text-align: left;">Place a <b>Piece</b> and <b>Move</b> it to match one of the target locations, then <b>Reflect</b> the board.</p>';
             break;
     }
     document.getElementById("tutText").innerHTML = tutText;

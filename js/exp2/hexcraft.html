@@ -8,8 +8,8 @@
     <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.0.0"></script>
     <script src="https://unpkg.com/@jspsych/plugin-survey-multi-choice@1.1.3"></script>
     <script src="https://unpkg.com/@jspsych/plugin-survey-text@1.1.3"></script>
-
- <!-- Libraries -->
+    <script src="https://unpkg.com/@jspsych/plugin-html-button-response@1.2.0"></script>
+    <!-- Libraries -->
     <script src="static/lib/jquery.min.js"></script>
     <script src="static/lib/d3.min.js"></script>
     <script src="static/lib/underscore-min.js"></script>
@@ -32,171 +32,21 @@
 <body></body>
 
 <script>
+    var tutCounter = 0;
+    let currentIndex = 0;
+    var trialNumber = 0;
+    var tutorial_phase = true;
 
-
-
-    var jsPsych = initJsPsych({
-    on_finish: function() {
-        //jsPsych.data.displayData('csv');
-    }
-    }); 
-
-
-var instructions = {
-    type: jsPsychInstructions,
-    pages: [
-        `<img src="static/img/uni_logo.png">
-        <div id="landing" class="base">
-      <h1>The University of Edinburgh, Psychology</h1>
-        <div class="frame" id="consent-div">
-          <h2>Information for participants</h2>
-          <div style='padding: 50px 300px; text-align: left;'>
-            <p style='margin-bottom: 20px;'>
-              <b>Nature of the study.</b>
-              You are about to participate in a study which involves completing a series of computer-based shape puzzles.  Once you finish, we may have some questions about you (e.g., age, gender). Your response will be recorded. Your session should last about 30 minutes. You will be given full instructions shortly. 
-            </p>
-            <p style='margin-bottom: 20px;'>
-              <b>Compensation.</b>
-              You will be paid £3.00 and an up to £1.40 bonus for your participation in this study.
-            </p>
-            <p style='margin-bottom: 20px;'>
-              <b>Risks and benefits.</b>
-              There are no known risks to participation in this study.
-              Other than the payment mentioned, there no tangible benefits to you,
-              however you will be contributing to our knowledge about human reasoning.
-            </p>
-            <p style='margin-bottom: 20px;'>
-              <b>Confidentiality and use of data.</b>
-              All the information we collect during the course of the research will be processed in accordance with Data Protection Law. In order to safeguard your privacy, we will never share personal information (like names or dates of birth) with anyone outside the research team. Your data will be referred to by a unique participant number rather than by name. Please note that we will temporarily collect your worker ID to allow payment and prevent
-            repeat participation, however we will never share this information with anyone outside the research team. We will store any personal data (e.g., audio/video recordings, signed forms) using the University of Edinburgh’s secure encrypted storage service or in a locked filing cabinet at the University of Edinburgh. The anonymised data collected during this study will be used for research purposes. 
-            </p>
-            <p style='margin-bottom: 20px;'>
-              <b>What are my data protection rights?</b>
-              The University of Edinburgh is a Data Controller for the information you provide.  You have the right to access information held about you. Your right of access can be exercised in accordance Data Protection Law. You also have other rights including rights of correction, erasure and objection.  For more details, including the right to lodge a complaint with the Information Commissioner’s Office, please visit www.ico.org.uk.  Questions, comments and requests about your personal data can also be sent to the University Data Protection Officer at dpo@ed.ac.uk.
-            </p>
-            <p style='margin-bottom: 20px;'>
-              <b>Voluntary participation and right to withdraw.</b>
-              Your participation is voluntary, and you may withdraw from the study at any time and for any reason. If you withdraw from the study during or after data gathering, we will delete your data and there is no penalty or loss of benefits to which you are otherwise entitled.
-            </p>
-            <p style='margin-bottom: 20px;'>
-              If you have any questions about what you’ve just read, please feel free to ask, or contact us later. You can contact us by email at neil.bramley@ed.ac.uk. This project has been approved by PPLS Ethics committee. If you have questions or comments regarding your own rights as a participant, please contact the School Research Ethics Convenor at ppls.rec@ed.ac.uk.</p>
-            <p style='margin-bottom: 20px;'>By accepting this HIT, you consent to the following:</p>
-            <ol>
-                <li><b>I agree to participate in this study.</b></li>
-                <li>I confirm that I have read and understood <b>how my data will be stored and used</b>.</li>
-                <li>I understand that I have the right to <b>terminate this session</b> at any point. </li>
-            </ol>
-          </div>
-        </div>
-      </div>`,
-
-        `<p style = 'font-size: 2em'>Task instructions</p>
-        <div style='padding: 100px 300px; text-align: left;'>
-        <p style='margin-bottom: 20px;'>- In this experiment, you will try to solve a series of shape-making puzzles.</p>
-        <p style='margin-bottom: 20px;'>- For each puzzle, your goal will be to recreate a target shape.</p>
-        <p style='margin-bottom: 20px;'>- There will be seven puzzles in total.</p>
-        <p style='margin-bottom: 20px;'>- Below are some examples of what the puzzles look like:</p>
-        <div style='padding: 20px 20px; text-align: centre;'>
-            <img src="static/img/example_puzzles.png" style="width:600px">
-        </div>
-        </div>`,
-
-        `<p style = 'font-size: 2em'>Task instructions</p>
-        <div style='padding: 100px 300px; text-align: left;'>
-        <p style='margin-bottom: 20px;'>- In each puzzle the goal is to add tiles to the board to match the green target shape.</p>
-        <p style='margin-bottom: 20px;'>- You do this by performing a series of actions by pressing keyboard keys.</p>
-        <p style='margin-bottom: 20px;'>- All the actions add, remove or move (transparant) grey tiles on the board.</p>
-        <p style='margin-bottom: 20px;'>- If you can make these grey tiles cover up the light green pattern exactly, then you have successfully solved the puzzle.</p>
-        <p style='margin-bottom: 20px;'>- The actions are shown below:</p>
-
-        <div style='padding: 50px 50px; text-align: centre;'>
-            <img src="static/img/keys_square.png" style='height:350px;'>
-        </div>
-        <p style='margin-bottom: 20px;'>- Don't worry, you do not need to memorise these now. Before facing the 7 test puzzles, you will complete a series of guided tutorial puzzles. These will familiarise you with how the interface works, and introduce each of these actions, one at a time.</p>
-        </div>`,
-
-        `<p style = 'font-size: 2em'>Task instructions</p>
-        <div style='padding: 100px 300px; text-align: left;'>
-        <p style='margin-bottom: 20px;'>- When you think you have solved a puzzle, or want to give up on your attempt you press ENTER to lock in your solution.</p>
-        <p style='margin-bottom: 20px;'>- The picture below shows what you will see if you lock in an incorrect solution:</p>
-        <div style='padding: 50px 50px; text-align: centre;'>
-            <img src="static/img/example_solution.png" style="width:600px">
-        </div>
-        <p style='margin-bottom: 20px;'>- If you make a mistake you can press "U" to go back a step. However, both actions stll count toward your total steps.
-        <p style='margin-bottom: 20px;'>- You can only Undo the most recent action.</p>
-        </div>`,
-
-        `<p style = 'font-size: 2em'>Task instructions</p>
-        <div style='padding: 100px 300px; text-align: left;'>
-        <p style='margin-bottom: 20px;'>- If you solved the puzzle successfully, all the squares will appear in dark green, and you will be able to move onto the next puzzle. If you did not solve the puzzle correctly, you will be able to try again.</p>
-        <p style='margin-bottom: 20px;'>- You are free to attempt each puzzle as many times as you want. However, after 5 unsuccessful attempts you will have the option to move to the next puzzle.</p>
-        <p style='margin-bottom: 20px;'>- On each attempt you can perform a maximum of 30 actions, after which your attempt will be locked in automatically and you will be able to try again or move on (if you have already had five attempts).</p>
-        </div>`,
-
-        `<p style = 'font-size: 2em'>Task instructions</p>
-        <div style='padding: 100px 300px; text-align: left;'>
-        <p style='margin-bottom: 20px;'>- Whenever you solve a puzzle solve successfully, you will win a bonus of £0.20. This does not depend on how many attempts it took you.</p>
-        <p style='margin-bottom: 20px;'>- Whenever you get stuck or want to try a puzzle again, just lock in your current answer and you will be able to start again.
-        <p style='margin-bottom: 20px;'><b>- Important: Do not refresh the page, as this will restart the experiment and make you ineligible to complete it.</b></p> 
-        <p style='margin-bottom: 20px;'>- Lastly, do not worry if you are not able to solve all or even most of the puzzles. They are designed to be difficult, you will still be able to get to the end of the experiment, and we are interested in the actions you try as well as the results you get. Just do your best. Good luck!</p>
-        </div>`
-    ],
-    button_label_next: "Continue",
-    button_label_previous: "Back",
-    show_clickable_nav: true
-}
-
-
-
-var tutEnd = {
-    type: jsPsychInstructions,
-    pages: [
-        'Thank you for completing the tutorial! The actual puzzles will begin now. TODO ADD COMP CHECK.'
-    ],
-    on_load: function() {
-        const oldButtons = document.getElementById("control-buttons");
-        if (oldButtons) oldButtons.remove();
-      },
-    button_label_next: "Continue",
-    button_label_previous: "Back",
-    show_clickable_nav: true
-}
-
-var tutCounter = 0;
-// var patternCounter = 0;
-let currentIndex = 0;
-var trialNumber = 0;
-var tutorial_phase = true;
-
-// testing trials: 
-// var dabone = ['XKX','ZXKXW','XKXWWXKXSSR'];   //'[XKX]','Z[XKX]W','[XKX]WW[XKX]SSR'
-// var hazard = ['ZSA', 'ZSARK', 'ZSAKZSARKX'];      //'[ZSA]', '[ZSA]RK', '[ZSA]K[ZSA]RKX' 
-// var dinopaw = ['ZXD', 'ZXDWR', 'ZXDESZXDSR'];     // '[ZXD]', '[ZXD]WR', '[ZXD]ES[ZXD]SR'
-
-//var triangle = ['ASAEA', 'ASAEAEASAEAK', 'ASAEASASAEAEASAEA'];     //the cache is a bit too long 
-
-var training_tasks1 = ['AWWRKRKR','AWAWWRKRKR','AWAWAWWRKRKR']
-var training_tasks2 = ['ZXDR','ZXDRWWE','ZXDRWWF'];
-var test_tasks = ['ZKKWWRKRKR','ZKKDWWRKRKR','ZXDRWR','ZXDREESRKR','ZXDRWWRKRKR']
-//
-var tutorial = ['A', 'ASW', 'Z', 'X', 'ZX', 'XD', 'ZKKK', 'ZF', 'ASSR'];
-
-// var all_tasks = training_tasks1.concat(training_tasks2, test_tasks); //For what?
-
-//var expTrials = [dabone[1], dabone[2], hazard[1], hazard[2], dinopaw[1], dinopaw[2]];
-
-// var medTrials = [dabone[1], hazard[1], dinopaw[1]];
-// shuffle(medTrials);
-
-// var hardTrials = [dabone[2], hazard[2], dinopaw[2]];
-// shuffle(hardTrials);
-
-// var expTrials = medTrials.concat(hardTrials);
-
-
-var condition = Math.floor(Math.random() * 2);
-
-switch(condition){
+    var training_tasks1 = ['AWWRKRKR','AWAWWRKRKR','AWAWAWWRKRKR']
+    var training_tasks2 = ['ZXDR','ZXDRWWE','ZXDRWWF'];
+    var test_tasks = ['ZKKWWRKRKR','ZKKDWWRKRKR','ZXDRWR','ZXDREESRKR','ZXDRWWRKRKR']
+    var tutorial = ['A', 'ASW', 'Z', 'X', 'ZX', 'XD', 'ZKKK', 'ZF', 'ASSR'];
+    var timings = {start:[], tutorial:[], test:[], debrief:[], end:[]};
+    var condition = Math.floor(Math.random() * 2);
+    
+    var prolific_id = '';
+    var comprehension = '';
+    switch(condition){
     case 0:
         var expTrials = training_tasks1.concat(test_tasks);
         // expTrials.unshift(dabone[0]);
@@ -205,72 +55,207 @@ switch(condition){
         var expTrials = training_tasks2.concat(test_tasks);
         // expTrials.unshift(hazard[0]);
         break;
-}
+    }
 
-// progress bar styles
-const validKeys = ['a','d','z','x','w','e','s','f','r','A','D','Z','X','W','E','S','F','R', ' ','Enter'];
-const NUM_SEGMENTS = 30;
-const FILL_COLOR = 'green';
-const SEGMENT_STYLE = {
-    width: '20px',
-    height: '20px',
-    backgroundColor: 'white',
-    border: '1px solid black',
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '12px',
-    fontWeight: 'bold',
-    fontFamily: 'sans-serif',
-    marginRight: '2px'
-};
+    // progress bar styles
+    const validKeys = ['a','d','z','x','w','e','s','f','r','u','A','D','Z','X','W','E','S','F','R',' ','Enter'];
+    const NUM_SEGMENTS = 30;
+    const FILL_COLOR = 'green';
+    const SEGMENT_STYLE = {
+        width: '20px',
+        height: '20px',
+        backgroundColor: 'white',
+        border: '1px solid black',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '12px',
+        fontWeight: 'bold',
+        fontFamily: 'sans-serif',
+        marginRight: '2px'
+    };
 
-var hexTutorial = {
-    type: jsPsychHtmlKeyboardResponse,
-    stimulus: `<div id="board-and-cache">
-    <!-- Board will go
-     } here --> 
+    var jsPsych = initJsPsych({
+        on_finish: function() {
+            
+            }
+        }); 
 
-    <div id="caches">
-        <p style="font-size: 1em;"><b>Tutorial</b></p>
-        <div id="tutTextContainer">
-            <div id="tutText"></div>
-        </div>
-        <p style="font-size: 1em;"><b>Try to match the green pattern!</b></p>
-    </div>
-</div>
 
-<p id="response_area">
-    Your action sequence appears below:
-</p>
-<!-- <div id="main_focus"></div> -->
-<div id="progressContainer"></div>
-<img src="static/img/keys.png" style="width:600px; padding:5px">
-`,
-    on_load: function() {
+
+    var surveyID = {
+      type: jsPsychSurveyText,
+      questions: [
+            {prompt: 'Please enter your Prolific ID.',
+                name: 'prolific_id',
+                required: true
+            }
+        ],
+        on_load: function() {
+            const input = document.querySelector('input[type="text"]');
+
+            timings.start = performance.now();  //this should record timestamp at which the key was pressed 
+            
+            input.addEventListener('input', function(e) {
+              this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');
+          });
+        },
+        on_finish: function(data) {
+            const cleaned_id = data.response.prolific_id.replace(/[^a-zA-Z0-9]/g, '');
+            jsPsych.data.addProperties({prolific_id: cleaned_id});
+        }
+    }
+
+    var instructions = {
+        type: jsPsychInstructions,
+        pages: [
+                `<img src="static/img/uni_logo.png">
+                <div id="landing" class="base">
+                <h1>The University of Edinburgh, Psychology</h1>
+                <div class="frame" id="consent-div">
+                  <h2>Information for participants</h2>
+                  <div style='padding: 50px 300px; text-align: left;'>
+                    <p style='margin-bottom: 20px;'>
+                      <b>Nature of the study.</b>
+                      You are about to participate in a study which involves completing a series of computer-based shape puzzles.  Once you finish, we may have some questions about you (e.g., age, gender). Your response will be recorded. Your session should last about 30 minutes. You will be given full instructions shortly. 
+                    </p>
+                    <p style='margin-bottom: 20px;'>
+                      <b>Compensation.</b>
+                      You will be paid £3.00 and an up to £1.60 bonus for your participation in this study.
+                    </p>
+                    <p style='margin-bottom: 20px;'>
+                      <b>Risks and benefits.</b>
+                      There are no known risks to participation in this study.
+                      Other than the payment mentioned, there no tangible benefits to you,
+                      however you will be contributing to our knowledge about human reasoning.
+                    </p>
+                    <p style='margin-bottom: 20px;'>
+                      <b>Confidentiality and use of data.</b>
+                      All the information we collect during the course of the research will be processed in accordance with Data Protection Law. In order to safeguard your privacy, we will never share personal information (like names or dates of birth) with anyone outside the research team. Your data will be referred to by a unique participant number rather than by name. Please note that we will temporarily collect your worker ID to allow payment and prevent
+                    repeat participation, however we will never share this information with anyone outside the research team. We will store any personal data (e.g., audio/video recordings, signed forms) using the University of Edinburgh’s secure encrypted storage service or in a locked filing cabinet at the University of Edinburgh. The anonymised data collected during this study will be used for research purposes. 
+                    </p>
+                    <p style='margin-bottom: 20px;'>
+                      <b>What are my data protection rights?</b>
+                      The University of Edinburgh is a Data Controller for the information you provide.  You have the right to access information held about you. Your right of access can be exercised in accordance Data Protection Law. You also have other rights including rights of correction, erasure and objection.  For more details, including the right to lodge a complaint with the Information Commissioner’s Office, please visit www.ico.org.uk.  Questions, comments and requests about your personal data can also be sent to the University Data Protection Officer at dpo@ed.ac.uk.
+                    </p>
+                    <p style='margin-bottom: 20px;'>
+                      <b>Voluntary participation and right to withdraw.</b>
+                      Your participation is voluntary, and you may withdraw from the study at any time and for any reason. If you withdraw from the study during or after data gathering, we will delete your data and there is no penalty or loss of benefits to which you are otherwise entitled.
+                    </p>
+                    <p style='margin-bottom: 20px;'>
+                      If you have any questions about what you’ve just read, please feel free to ask, or contact us later. You can contact us by email at neil.bramley@ed.ac.uk. This project has been approved by PPLS Ethics committee. If you have questions or comments regarding your own rights as a participant, please contact the School Research Ethics Convenor at ppls.rec@ed.ac.uk.</p>
+                    <p style='margin-bottom: 20px;'>By accepting this HIT, you consent to the following:</p>
+                    <ol>
+                        <li><b>I agree to participate in this study.</b></li>
+                        <li>I confirm that I have read and understood <b>how my data will be stored and used</b>.</li>
+                        <li>I understand that I have the right to <b>terminate this session</b> at any point. </li>
+                    </ol>
+                  </div>
+                </div>
+                    </div>`,
+
+                    `<p style = 'font-size: 2em'>Task instructions</p>
+                    <div style='padding: 100px 300px; text-align: left;'>
+                    <p style='margin-bottom: 20px;'>- In this experiment, you will try to solve a series of shape-making puzzles.</p>
+                    <p style='margin-bottom: 20px;'>- For each puzzle, your goal will be to recreate a target shape.</p>
+                    <p style='margin-bottom: 20px;'>- There will be eight test puzzles in total.</p>
+                    <p style='margin-bottom: 20px;'>- Below are some examples of what the puzzles look like:</p>
+                    <div style='padding: 20px 20px; text-align: centre;'>
+                        <img src="static/img/example_puzzles.png" style="width:600px">
+                    </div>
+                        </div>`,
+
+                    `<p style = 'font-size: 2em'>Task instructions</p>
+                    <div style='padding: 100px 300px; text-align: left;'>
+                    <p style='margin-bottom: 20px;'>- In each puzzle the goal is to add tiles to the board to match the green target shape.</p>
+                    <p style='margin-bottom: 20px;'>- You do this by performing a series of actions by pressing keyboard keys.</p>
+                    <p style='margin-bottom: 20px;'>- All the actions add, remove or move grey tiles on the board.</p>
+                    <p style='margin-bottom: 20px;'>- If you can make these grey tiles cover up the light green pattern exactly, then you have successfully solved the puzzle.</p>
+                    <p style='margin-bottom: 20px;'>- The actions are shown below:</p>
+
+                    <div style='padding: 50px 50px; text-align: centre;'>
+                        <img src="static/img/keys_square.png" style='height:350px;'>
+                    </div>
+                    <p style='margin-bottom: 20px;'>- Don't worry, you do not need to memorise these now. Before facing the eight test puzzles, you will complete a series of guided tutorial puzzles. These will familiarise you with how the interface works, and introduce each of these actions, one at a time.</p>
+                        </div>`,
+
+                    `<p style = 'font-size: 2em'>Task instructions</p>
+                    <div style='padding: 100px 300px; text-align: left;'>
+                    <p style='margin-bottom: 20px;'>- When you think you have solved a puzzle, or want to give up on your attempt you press ENTER to lock in your solution.</p>
+                    <p style='margin-bottom: 20px;'>- The picture below shows what you will see if you lock in an incorrect solution:</p>
+                    <div style='padding: 50px 50px; text-align: centre;'>
+                        <img src="static/img/example_solution.png" style="width:600px">
+                    </div>
+                        </div>`,
+
+                    `<p style = 'font-size: 2em'>Task instructions</p>
+                    <div style='padding: 100px 300px; text-align: left;'>
+                    <p style='margin-bottom: 20px;'>- If you solved the puzzle successfully, all the squares will appear in dark green, and you will be able to move onto the next puzzle. If you did not solve the puzzle correctly, you will be able to try again.</p>
+                    <p style='margin-bottom: 20px;'>- You are free to attempt each puzzle as many times as you want. You have to solve all the tutorial puzzles. However, after 5 unsuccessful attempts on the main test puzzles you will have the option to move to the next puzzle.</p>
+                    <p style='margin-bottom: 20px;'>- On each attempt you can perform a maximum of 30 actions, after which your attempt will be locked in automatically and you will be able to try again or move on (if you have already had five attempts).</p>
+                    <p style='margin-bottom: 20px;'>- If your actions move grey tiles off the edge of the board then they "fall off" and would have to be added again.</p>
+                        </div>`,
+
+                    `<p style = 'font-size: 2em'>Task instructions</p>
+                    <div style='padding: 100px 300px; text-align: left;'>
+                    <p style='margin-bottom: 20px;'>- Whenever you solve a puzzle solve successfully, you will win a bonus of £0.20. This does not depend on how many attempts it took you.</p>
+                    <p style='margin-bottom: 20px;'>- Whenever you get stuck or want to try a puzzle again, just lock in your current answer and you will be able to start again.
+                    <p style='margin-bottom: 20px;'><b>- Important: Do not refresh the page, as this will restart the experiment and make you ineligible to complete it.</b></p> 
+                    <p style='margin-bottom: 20px;'>- Lastly, do not worry if you are not able to solve all or even most of the puzzles. They are designed to be difficult, you will still be able to get to the end of the experiment, and we are interested in the actions you try as well as the results you get. Just do your best. Good luck!</p>
+                        </div>`
+        ],
+        button_label_next: "Continue",
+        button_label_previous: "Back",
+        show_clickable_nav: true
+    }
+
+    var hexTutorial = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `<div id="board-and-cache">
+                    <!-- Board will go
+                     } here --> 
+
+                    <div id="caches" style="padding: 20px 20px;">
+                        <h2>Tutorial</h2>
+                        <div id="tutTextContainer">
+                            <div id="tutText"></div>
+                        </div>
+                        <p style="font-size: 1em;"><b>Try to match the green pattern!</b></p>
+                    </div>
+                </div>
+
+                <p id="response_area">
+                    Your action sequence appears below:
+                </p>
+                <!-- <div id="main_focus"></div> -->
+                <div id="progressContainer"></div>
+                <img src="static/img/keys.png" style="width:600px; padding:5px">
+        `,
+        on_load: function() {
         //trial counter
-        var oldCounter = document.getElementById("trial-counter");
-        if (oldCounter) oldCounter.remove();
+            var oldCounter = document.getElementById("trial-counter");
+            if (oldCounter) oldCounter.remove();
+            timings.tutorial = performance.now();  //this should record timestamp at which the key was pressed 
+            
+            tutorial_phase = true;
 
-        tutorial_phase = true;
-        
-        var trialCounter = document.createElement("div");
-        trialCounter.id = "trial-counter";
-        trialCounter.textContent = "Tutorial " + (tutCounter+1) + " / " + tutorial.length;
-        Object.assign(trialCounter.style, {
-            position: "absolute",
-            top: "10px",
-            right: "20px",
-            fontSize: "18px",
-            color: "#333",
-            zIndex: 1000
-        });
-        document.body.appendChild(trialCounter);
+            var trialCounter = document.createElement("div");
+            trialCounter.id = "trial-counter";
+            trialCounter.textContent = "Tutorial " + (tutCounter+1) + " / " + tutorial.length;
+            Object.assign(trialCounter.style, {
+                position: "absolute",
+                top: "10px",
+                right: "20px",
+                fontSize: "18px",
+                color: "#333",
+                zIndex: 1000
+            });
+            document.body.appendChild(trialCounter);
 
-        
-        const oldButtons = document.getElementById("control-buttons");
-        if (oldButtons) oldButtons.remove();
-        inputLocked = false;
+
+            const oldButtons = document.getElementById("control-buttons");
+            if (oldButtons) oldButtons.remove();
+            inputLocked = false;
         //attemptCount = 0;
         Start(tutorial[tutCounter]);   //change allTrials to the specific cache-array if needed
         tutCounter = tutCounter + 1;
@@ -310,71 +295,201 @@ var hexTutorial = {
         document.addEventListener('keydown', keyHandler);
 
         jsPsych.getCurrentTrial()._keyHandler = keyHandler; // store for removal later
+        },
 
-
-    },
-    on_finish: function() {
-        if (jsPsych.getCurrentTrial()._keyHandler) {
-            document.removeEventListener('keydown', jsPsych.getCurrentTrial()._keyHandler);
-        }
-        if (jsPsych.getCurrentTrial()._keyHandler) {
-        document.removeEventListener('keydown', jsPsych.getCurrentTrial()._keyHandler);
+        on_finish: function() {
+            if (jsPsych.getCurrentTrial()._keyHandler) {
+                document.removeEventListener('keydown', jsPsych.getCurrentTrial()._keyHandler);
+            }
+            if (jsPsych.getCurrentTrial()._keyHandler) {
+                document.removeEventListener('keydown', jsPsych.getCurrentTrial()._keyHandler);
+            }
+        //tutCounter++;
+        },
+        choices: "NO_KEYS",
+        trial_duration: null
     }
-    //tutCounter++;
-    },
-    choices: "NO_KEYS",
-    trial_duration: null
-}
 
 
 
+    var tutEnd = {
+        type: jsPsychInstructions,
+        pages: [
+            'Thank you for completing the tutorial! Next, let\'s do a quick comprehension check.'
+        ],
+        on_load: function() {
+            const oldButtons = document.getElementById("control-buttons");
+            if (oldButtons) oldButtons.remove();
+        },
+        button_label_next: "Continue",
+        button_label_previous: "Back",
+        show_clickable_nav: true
+    }
 
-//actual trials:
-var hexTrial = {
-    type: jsPsychHtmlKeyboardResponse,
-    stimulus: `<div id="board-and-cache">
-    <!-- Board will go here -->
-    <div id="caches">
-        <p style="font-size: 0.9em;"><b>Instructions:</b> Your goal is to match the green pattern. There are 10 actions you can use to achieve this. Take actions by pressing keys on the keyboard:</p>
-        <p style="font-size: 0.9em;">You complete the puzzle by covering all the green hexes with locked in pieces. Remember, if you are stuck you can try again by <b>Locking in</b> your answer and then pressing <b>Try Again</b>. <b>Any pieces that go beyond the board will be deleted.</b></p>
-        <p style="font-size: 1em;"><b>Try to match the green pattern!</b></p>
-    </div>
-</div>
 
-<p id="response_area">
-    Your action sequence appears below:
-</p>
-<!-- <div id="main_focus"></div> -->
-<div id="progressContainer"></div>
-<img src="static/img/keys.png" style="width:800px">
-`,
-    on_load: function() {
-        //trial counter
-        const oldCounter = document.getElementById("trial-counter");
-        if (oldCounter) oldCounter.remove();
+    var compCheck = {
+      type: jsPsychSurveyMultiChoice,
+      questions: [
+            {prompt: '1. Your goal is to move the green tiles to match the grey tiles',
+                name: 'check_q1',
+                options:['True', 'False'],
+                required: true
+            },
+            {prompt: '2. Pressing ENTER locks in locks in and tests your solution',
+                name: 'check_q2',
+                options:['True', 'False'],
+                required: true
+            },
+            {prompt: '3. You get a £0.20 bonus only if you solve a puzzle first try',
+                name: 'check_q3',
+                options:['True', 'False'],
+                required: true
+            },            
+            {prompt: '4. You can move on when you complete a puzzle or if have attempted it five or more times.',
+                name: 'check_q4',
+                options:['True', 'False'],
+                required: true
+            },
+            {prompt: '5. When you add new tiles, they cannot overlap with any tiles you already added.',
+                name: 'check_q5',
+                options:['True', 'False'],
+                required: true
+            }]
+    }
 
-        tutorial_phase = false;
+    // var compFeedback = {
+    //      type: jsPsychHtmlButtonResponse,
+    //       stimulus: '<p style="font-size:48px; color:red;">GREEN</p>',
+    //       choices: ['Red', 'Green', 'Blue'],
+    //       button_html:[`<button class="jspsych-btn">%choice%</button>`,`<button class="jspsych-btn">%choice%</button>`,`<button class="jspsych-btn">%choice%</button>`],
+    //       prompt: "<p>What color is the ink?</p>"
+    // };
+    var compFeedback = {
+      type: jsPsychHtmlButtonResponse,
+      stimulus: function(){
+        var responses_correct = [jsPsych.data.getLastTrialData().values()[0].response.check_q1=='False',
+            jsPsych.data.getLastTrialData().values()[0].response.check_q2=='True',
+            jsPsych.data.getLastTrialData().values()[0].response.check_q3=='False',
+            jsPsych.data.getLastTrialData().values()[0].response.check_q4=='True',
+            jsPsych.data.getLastTrialData().values()[0].response.check_q5=='False'];
 
-        const trialCounter = document.createElement("div");
-        trialCounter.id = "trial-counter";
-        trialCounter.textContent = "Trial " + (trialNumber+1) + " / " + expTrials.length;
-        Object.assign(trialCounter.style, {
-            position: "absolute",
-            top: "10px",
-            right: "20px",
-            fontSize: "18px",
-            color: "#333",
-            zIndex: 1000
-        });
+        comprehension = _.cloneDeep(responses_correct);
+
+        var  html_display= "<div style='padding: 100px 300px; text-align: left;'><p style='margin-bottom: 20px;'>1. Your goal is to move the green tiles to match the grey tiles:</p><p style='margin-bottom: 20px;'>";
+        if (responses_correct[0]==true)
+        {
+            html_display+="You said 'False'. This is <span style='color:green'><b>CORRECT!</b></span><br><i>Your actions add remove or shift around the <b>grey</b> not the green tiles. The green tiles do not move. Your goal is to move the grey tiles to match the green tiles.</i></p>";
+        } else 
+        {
+            html_display+="You said 'True'. This is <span style='color: red'><b>INCORRECT!</b></span><br><i>Your actions add remove or shift around the <b>grey</b> not the green tiles. The green tiles do not move. Your goal is to move the grey tiles to match the green tiles.</i></p>";
+        }
+        html_display += "<p style='margin-bottom: 20px;'>2. Pressing ENTER locks in and tests your solution:</p><p style='margin-bottom: 20px;'>";
+        if (responses_correct[1]==true)
+        {
+            html_display+="You said 'True'. This is <span style='color:green'><b>CORRECT!</b></span><br><i>Pressing ENTER does lock in your solution, allowing you to try again (if you are stuck) or move on (if you have matched the pattern).</i></p>";
+        } else 
+        {
+            html_display+="You said 'False'. This is <span style='color: red'><b>INCORRECT!</b></span><br><i>Pressing ENTER does lock in your solution, allowing you to try again (if you are stuck) or move on (if you have matched the pattern).</i></p>";
+        }
+        html_display += "<p style='margin-bottom: 20px;'>3. You get a £0.20 bonus only if you solve a puzzle first try:</p><p style='margin-bottom: 20px;'>";
+        if (responses_correct[2]==true)
+        {
+            html_display+="You said 'False'. This is <span style='color:green'><b>CORRECT!</b></span><br><i>You get the bonuses for every puzzle you solve, not just if you solve them first try.</i></p>";
+        } else 
+        {
+            html_display+="You said 'True'. This is <span style='color: red'><b>INCORRECT!</b></span><br><i>You get the bonuses for every puzzle you solve, not just if you solve them first try.</i></p>";
+        }
+        html_display += "<p style='margin-bottom: 20px;'>4. You can move on when you complete a puzzle or if have attempted it five or more times:</p><p style='margin-bottom: 20px;'>";
+        if (responses_correct[3]==true)
+        {
+            html_display+="You said 'True'. This is <span style='color:green'><b>CORRECT!</b></span></p>";
+        } else 
+        {
+            html_display+="You said 'False'. This is <span style='color: red'><b>INCORRECT!</b></span><br><i>It is true.</i></p>";
+        }
+        html_display += "<p style='margin-bottom: 20px;'>5. When you add new tiles, they cannot overlap with any tiles you already added:</p><p style='margin-bottom: 20px;'>";
+        if (responses_correct[4]==true)
+        {
+            html_display+="You said 'False'. This is <span style='color:green'><b>CORRECT!</b></span><br><i>All the actions are always available. If you place tiles that overlap with existing grey tiles this will leave the board unchanged.</i></p>";
+        } else 
+        {
+           html_display+="You said 'True'. This is <span style='color:red'><b>INCORRECT!</b></span><br><i>All the actions are always available. If you place tiles that overlap with existing grey tiles this will leave the board unchanged.</i></p>";
+
+        }
+
+        return html_display;
+        },
+      choices: ['Next'],
+      button_html:[`<button class="jspsych-btn">%choice%</button>`]
+    };
+
+    var readyStart = {
+        type: jsPsychInstructions,
+        pages: [
+            'You have now completed the instruction phase. The actual puzzles will begin now. Good luck!'
+        ],
+        on_load: function() {
+            const oldButtons = document.getElementById("control-buttons");
+            if (oldButtons) oldButtons.remove();
+            timings.test = performance.now();  //this should record timestamp at which the key was pressed 
+                 
+        },
+        button_label_next: "Continue",
+        button_label_previous: "Back",
+        show_clickable_nav: true
+    }
+
+    //actual trials:
+    var hexTrial = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `<div id="board-and-cache">
+        <!-- Board will go here -->
+        <div id="caches" style="padding: 20px 20px;">
+        <h2>Main task</h2>
+            <p style="font-size: 1em; text-align: left; margin-bottom: 20px;"><b>Recap Instructions:</b></p>
+            <p style="font-size: 0.9em; text-align: left; margin-bottom: 5px;">- Your goal is to match the green pattern.</p>
+            <p style="font-size: 0.9em; text-align: left; margin-bottom: 5px;">- There are 10 actions you can use to achieve this.</p>
+            <p style="font-size: 0.9em; text-align: left; margin-bottom: 5px;">- Take actions by pressing keys on the keyboard.</p>
+            <p style="font-size: 0.9em; text-align: left; margin-bottom: 5px;">- You complete the puzzle by covering all the green hexes with the grey pieces and pressing ENTER to lock in your solution.</p>
+            <p style="font-size: 0.9em; text-align: left; margin-bottom: 5px;">- If you are stuck you can try again by pressing ENTER and then clicking <b>Try Again</b>.</p>
+            <p style="font-size: 0.9em; text-align: left; margin-bottom: 5px;">- You can move on after solving a puzzle, or making 5 attempts.</p>
+            <p style="font-size: 0.9em; text-align: left; margin-bottom: 5px;">- Each attempt will auto-lock at 30 actions.</p>
+        </div>
+        </div>
+
+        <p id="response_area">
+            Your action sequence appears below:
+        </p>
+        <!-- <div id="main_focus"></div> -->
+        <div id="progressContainer"></div>
+        <img src="static/img/keys.png" style="width:800px">
+            `,
+        on_load: function() {
+            //trial counter
+            const oldCounter = document.getElementById("trial-counter");
+            if (oldCounter) oldCounter.remove();
+
+            tutorial_phase = false;
+
+            const trialCounter = document.createElement("div");
+            trialCounter.id = "trial-counter";
+            trialCounter.textContent = "Trial " + (trialNumber+1) + " / " + expTrials.length;
+            Object.assign(trialCounter.style, {
+                position: "absolute",
+                top: "10px",
+                right: "20px",
+                fontSize: "18px",
+                color: "#333",
+                zIndex: 1000
+            });
         document.body.appendChild(trialCounter);
         
 
-
         const oldButtons = document.getElementById("control-buttons");
         if (oldButtons) oldButtons.remove();
+        
         inputLocked = false;
         //attemptCount = 0;
-        
         //hexKeyListener(expTrials[patternCounter]);   //UNSURE WHY THIS WAS CALLED INSTEAD OF START?
 
         Start(expTrials[trialNumber]);   //change allTrials to the specific cache-array if needed
@@ -393,8 +508,6 @@ var hexTrial = {
         const keyHandler = (e) => {
             if (currentIndex >= NUM_SEGMENTS) return;
             if (!inputLocked && (validKeys.includes(e.key) || e.key === ' '))  {
-                
-
                 const segments = document.querySelectorAll('#progressContainer .segment');
                 segments[currentIndex].style.backgroundColor = FILL_COLOR;
                 segments[currentIndex].style.color = 'white';
@@ -419,125 +532,111 @@ var hexTrial = {
             document.removeEventListener('keydown', jsPsych.getCurrentTrial()._keyHandler);
         }
         if (jsPsych.getCurrentTrial()._keyHandler) {
-        document.removeEventListener('keydown', jsPsych.getCurrentTrial()._keyHandler);
-    }
-    trialNumber++;
+            document.removeEventListener('keydown', jsPsych.getCurrentTrial()._keyHandler);
+        }
+        trialNumber++;
     },
     choices: "NO_KEYS",
     trial_duration: null
 }
 
-// var debrief = {
-//       type: jsPsychInstructions,
-//       stimulus: function() {
-
-//         return `<p>Thank you for completing the experiment.</p> 
-//                 <p>Your score is ${number_correct} out of 7, which means you have earned £2.${number_correct}0!</p>
-//                 <p>You will be eligible for full payment once you answer the following questions.</p>`;
-
-//       },
-//       on_load: function() {
-//         const oldButtons = document.getElementById("control-buttons");
-//         if (oldButtons) oldButtons.remove();
-//       }
-
-// };
 
 var debrief = {
     type: jsPsychInstructions,
     pages: function() {
         return [
-        `<p>Thank you for completing the experiment.</p> 
-        <p>Your score is ${number_correct} out of 7, which means you have earned £${2.5 + number_correct*2/10}0!</p>
-        <p>You will be eligible for full payment once you answer the following questions.</p>`
+            `<p>Thank you for completing the experiment.</p> 
+            <p>Your score is ${number_correct} out of 8, which means you have earned £${3 + number_correct*0.2}!</p>
+            <p>You will be eligible for full payment once you answer the following questions.</p>`
         ];
     },
     on_load: function() {
-         const oldButtons = document.getElementById("control-buttons");
-         if (oldButtons) oldButtons.remove();
-       },
-    button_label_next: "Continue",
-    allow_backward: false,
-    show_clickable_nav: true
+        timings.debrief = performance.now();  //this should record timestamp at which the key was pressed 
+            
+            
+       const oldButtons = document.getElementById("control-buttons");
+       if (oldButtons) oldButtons.remove();
+   },
+   button_label_next: "Continue",
+   allow_backward: false,
+   show_clickable_nav: true
 }
 
-var survey_ID = {
-  type: jsPsychSurveyText,
-  questions: [
-    {prompt: 'Please enter your Prolific ID.',
-    name: 'prolific_id',
-    required: true
-    }
-  ],
-  on_load: function() {
-    const input = document.querySelector('input[type="text"]');
-    
-    input.addEventListener('input', function(e) {
-      this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');
-    });
-  },
-  on_finish: function(data) {
-    const cleaned_id = data.response.prolific_id.replace(/[^a-zA-Z0-9]/g, '');
-    jsPsych.data.addProperties({prolific_id: cleaned_id});
-  }
-}
-
-var survey_gender = {
+var surveyGender = {
     type: jsPsychSurveyMultiChoice,
     questions: [
         {
-        prompt: "What is your gender?", 
-        name: 'gender', 
-        options: ['Male', 'Female', 'Other', 'Prefer not to say'], 
-        required: true
+            prompt: "What is your gender?", 
+            name: 'gender', 
+            options: ['Male', 'Female', 'Other', 'Prefer not to say'], 
+            required: true
         }
     ]
 };
 
-var survey_age = {
+var surveyAge = {
   type: jsPsychSurveyText,
   questions: [
-    {prompt: 'How old are you?',
-    name: 'age',
-    required: true
+        {
+            prompt: 'How old are you?',
+            name: 'age',
+            required: true
+        }
+    ],
+    on_load: function() {
+        const input = document.querySelector('input[type="text"]');
+        
+        input.addEventListener('input', function(e) {
+          this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');
+      });
+    },
+    on_finish: function(data) {
+        const cleaned_age = data.response.age.replace(/[^a-zA-Z0-9]/g, '');
+        jsPsych.data.addProperties({age: cleaned_age});
     }
-  ],
-  on_load: function() {
-    const input = document.querySelector('input[type="text"]');
-    
-    input.addEventListener('input', function(e) {
-      this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');
-    });
-  },
-  on_finish: function(data) {
-    const cleaned_age = data.response.age.replace(/[^a-zA-Z0-9]/g, '');
-    jsPsych.data.addProperties({age: cleaned_age});
+}
 
-    const idData = jsPsych.data.get().filter({trial_type: 'survey-text'}).values();
+var surveyGeneral = {
+  type: jsPsychSurveyText,
+  questions: [
+    {prompt: 'Do you have any general comments about the task?<br><i>e.g., Did you enjoy it? Did you find it difficult? Did you have a discover any useful approach or strategy?</i>',
+        name: 'general_comments',
+        columns: 80,
+        rows: 5,
+        required: true
+    }
+    ],
+    on_finish: function(data) {
 
-      var prolific_id = "";
-      var age = "";
+        timings.end = performance.now();  //this should record timestamp at which the key was pressed 
+        const cleaned_general = data.response.general_comments.replace(/[^a-zA-Z0-9 ]/g, '');
+        jsPsych.data.addProperties({general_comments: cleaned_general});
 
-      if (idData.length > 0 && idData[0].response && idData[0].response.prolific_id) {
-        prolific_id = idData[0].response.prolific_id;
-      }
-      if (idData.length > 1 && idData[1].response && idData[1].response.age) {
-        age = idData[1].response.age;
-      }
+        const idData = jsPsych.data.get().filter({trial_type: 'survey-text'}).values();
 
-      const Mdata = jsPsych.data.get().filter({trial_type: 'survey-multi-choice'}).values();
-      var gender = "";
 
-      if (Mdata.length > 0 && Mdata[0].response && Mdata[0].response.gender) {
-        gender = Mdata[0].response.gender;
-      }
+        var age = "";
 
-      results.demographics.push([prolific_id, gender, age]);
-      upiexp = prolific_id;
-      console.log(results);
-      save_data();
-  }
-  
+        if (idData.length > 0 && idData[0].response && idData[0].response.prolific_id) {
+            prolific_id = idData[0].response.prolific_id;
+        }
+        if (idData.length > 1 && idData[1].response && idData[1].response.age) {
+            age = idData[1].response.age;
+        }
+
+        const Mdata = jsPsych.data.get().filter({trial_type: 'survey-multi-choice'}).values();
+        var gender = "";
+
+        if (Mdata.length > 0 && Mdata[0].response && Mdata[0].response.gender) {
+            gender = Mdata[0].response.gender;
+        }
+
+        results.subjectwise={prolific_id:prolific_id, condition:condition, gender:gender, age:age, comments:cleaned_general, timings:_.cloneDeep(timings), comprehension:_.cloneDeep(comprehension)};
+
+        console.log(results);
+
+        save_data();
+    }
 }
 
 var theEnd = {
@@ -550,8 +649,8 @@ var theEnd = {
         <button style="padding:10px 20px; font-size:16px; margin-top:20px;">Finish</button>
       </a>
     </div>
-    `,
-    choices: "NO_KEYS", 
+        `,
+        choices: "NO_KEYS", 
     // on_start: function() {
 
     //     const idData = jsPsych.data.get().filter({trial_type: 'survey-text'}).values();
@@ -565,22 +664,28 @@ var theEnd = {
     //   results.demographics.push([prolific_id, gender, age]);
     //   save_data();
     // }
-}
+    }
+
+
+    //Determine the sequence of pages to show
+    var timeline = [
+        surveyID,
+        instructions,
+        hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial,
+        tutEnd, 
+        compCheck, 
+        compFeedback,
+        readyStart,
+        hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, 
+        debrief, surveyGender, surveyAge, surveyGeneral, theEnd];
+    // var timeline = [compCheck, readyStart,
+    //     hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, 
+    //     debrief, survey_gender, survey_age, theEnd];
+
+
+        jsPsych.run(timeline);
+    </script>
 
 
 
-var timeline = [
-    survey_ID, instructions,
-    hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial,
-    tutEnd,
-    hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, 
-    debrief, survey_gender, survey_age, theEnd];
-
-//hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, hexTutorial, tutEnd, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial, hexTrial,
-
-jsPsych.run(timeline);
-</script>
-
-
-
-</html>
+    </html>
