@@ -3,13 +3,15 @@
 ### Contents
 
 - python
-    - mcmc.py: this is the file for the Metropolis-Hastings model for the general sequence learning process.
-    - generate.py: some trial code that I used to generate some sequences from a given library.
+    - mcmc.py: the file for the Metropolis-Hastings model for the general sequence learning process.
+    - generate_probabilistic.py: the code for generating sequences from a given PCFG.
     - square_game.py: the code for manipulating a square board. A Python replica of a previous master's project.
-    - hex_game_1.py: the first version of a hex game.
-    - hex_game_2.py: the second version of a hex game, with objective shape as goal and can judge whether the objective is reached.
-    - hex_game_3.py: the third (and the current) version of a hex game, with the same design choices as in Ana's experiment.
+    - hex_game_1.py: the first version of the hex game.
+    - hex_game_2.py: the second version of the hex game, with objective shape as goal and can judge whether the objective is reached.
+    - hex_game_3.py: the third version of the hex game, with the same design choices as in Ana's experiment.
+    - hex_game_4.py: the fourth version (and the current version) of the hex game, with minor tweaks on flipping and reflecting.
     - solver.py: a script for searching all the possible action chains that could solve a problem within a certain chain length. Possible to use shapes or action sequences as input.
+    - q_learning.py: a Q-learning-based RL algorithm to train a model to solve the hex game. Used as a baseline in our project.
 - js
     - exp1: code in development for first experiment
         - demo and demo_nocache are original demo sites created by Neil 
