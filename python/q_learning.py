@@ -4,10 +4,15 @@ from tqdm import tqdm
 
 BOARD_SIZE = 9
 
+def to_hashable(obj):
+    if isinstance(obj, list):
+        return tuple(to_hashable(item) for item in obj)
+    return obj
+
 # First we declare some IO functions about Q
 # We initialize the Q value of every movement to be 0 
 def get_Q(Q, state, action):
-    return Q.get((state, action), 0.0)
+    return Q.get((to_hashable(state), action), 0.0)
 
 def load_Q(filename):
     with open(filename, 'r') as f:
@@ -211,7 +216,7 @@ def q_learning(filename, goal_states, alpha=0.1, gamma=0.9, epsilon=0.2, episode
     for ep in tqdm(range(episodes)):
         state = [[]]
         goal_state = goal_states[ep]
-        for _ in tqdm(range(max_steps)):
+        for _ in range(max_steps):
             action = choose_action(Q, state, actions, epsilon)
 
             func = ACTIONS[action]
@@ -223,7 +228,7 @@ def q_learning(filename, goal_states, alpha=0.1, gamma=0.9, epsilon=0.2, episode
 
             old_q = get_Q(Q, state, action)
             new_q = old_q + alpha * (reward + gamma * max_next_q - old_q)
-            Q[(state, action)] = new_q
+            Q[(to_hashable(state), action)] = new_q
 
             state = next_state
 
@@ -240,7 +245,7 @@ def q_inference(filename, goal_state, max_steps=10):
     actions_list = []
     actions = list(ACTIONS.keys())
 
-    for _ in tqdm(range(max_steps)):
+    for _ in range(max_steps):
         action = get_best_action(Q, state, actions)
 
         func = ACTIONS[action]
@@ -254,7 +259,7 @@ def q_inference(filename, goal_state, max_steps=10):
 
 def main():
     # We use <episodes> training shapes with a length of <train_sequence_length> to train the model 
-    episodes = 10
+    episodes = 100000
     train_sequence_length = 5
     train_actions = generate_simple(list(ACTIONS.keys()), train_sequence_length, episodes)
     train_goal_shapes = [get_shape_from_sequence(actions) for actions in train_actions]
