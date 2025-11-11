@@ -1,23 +1,19 @@
 import random
 import json
 from tqdm import tqdm
+import ast
 
 BOARD_SIZE = 9
-
-def to_hashable(obj):
-    if isinstance(obj, list):
-        return tuple(to_hashable(item) for item in obj)
-    return obj
 
 # First we declare some IO functions about Q
 # We initialize the Q value of every movement to be 0 
 def get_Q(Q, state, action):
-    return Q.get((to_hashable(state), action), 0.0)
+    return Q.get((tuple(state), action), 0.0)
 
 def load_Q(filename):
     with open(filename, 'r') as f:
         Q_serializable = json.load(f)
-    Q = {eval(k): v for k, v in Q_serializable.items()}
+    Q = {ast.literal_eval(k): v for k, v in Q_serializable.items()}
     return Q
 
 def save_Q(Q, filename):
@@ -45,7 +41,7 @@ def get_best_action(Q, state, actions):
 
 # Here are the functions related to the hexcraft game
 def check_goal(shapes, goal_shape):
-    return set(shapes[0]) == set(goal_shape)
+    return set(shapes) == set(goal_shape)
 
 def convert_string(s):
     # convert action sequences to usable input to our program
@@ -57,56 +53,52 @@ def convert_string(s):
             result.append(char.lower())
     return result
 
-def create_center(shapes):
+def create_center(shape):
     cx, cy = BOARD_SIZE // 2, BOARD_SIZE // 2
-    shapes[0].append((cx, cy))
+    shape.append((cx, cy))
 
-    return shapes
+    return shape
 
-def add_bar(shapes):
+def add_bar(shape):
     cx, cy = BOARD_SIZE // 2, BOARD_SIZE // 2
     bar = [(cx - 1, cy - 1), (cx, cy), (cx + 1, cy)]
-    shapes[0].extend(bar)
-    return shapes
+    shape.extend(bar)
+    return shape
 
-def add_corner(shapes):
+def add_corner(shape):
     cx, cy = BOARD_SIZE // 2, BOARD_SIZE // 2
     corner = [(cx + 1, cy - 1), (cx, cy), (cx, cy + 1)]
-    shapes[0].extend(corner)
-    return shapes
+    shape.extend(corner)
+    return shape
 
-def delete_center(shapes):
+def delete_center(shape):
     cx, cy = BOARD_SIZE // 2, BOARD_SIZE // 2
-    for shape in shapes:
-        while (cx, cy) in shape:
-            shape.remove((cx, cy))
-    return shapes
+    while (cx, cy) in shape:
+        shape.remove((cx, cy))
+    return shape
 
-def move_west(shapes):
-    for shape in shapes:
-        for i in range(len(shape)):
-            x, y = shape[i]
-            shape[i] = (x, y - 1)
-    return shapes
+def move_west(shape):
+    for i in range(len(shape)):
+        x, y = shape[i]
+        shape[i] = (x, y - 1)
+    return shape
 
-def move_northeast(shapes):
-    for shape in shapes:
-        for i in range(len(shape)):
-            x, y = shape[i]
-            q, r = offset_to_axial(x, y)
-            q += 1
-            r -= 1
-            shape[i] = axial_to_offset(q, r)
-    return shapes
+def move_northeast(shape):
+    for i in range(len(shape)):
+        x, y = shape[i]
+        q, r = offset_to_axial(x, y)
+        q += 1
+        r -= 1
+        shape[i] = axial_to_offset(q, r)
+    return shape
 
-def move_southeast(shapes):
-    for shape in shapes:
-        for i in range(len(shape)):
-            x, y = shape[i]
-            q, r = offset_to_axial(x, y)
-            r += 1
-            shape[i] = axial_to_offset(q, r)
-    return shapes
+def move_southeast(shape):
+    for i in range(len(shape)):
+        x, y = shape[i]
+        q, r = offset_to_axial(x, y)
+        r += 1
+        shape[i] = axial_to_offset(q, r)
+    return shape
 
 def offset_to_axial(x, y):
     if x <= BOARD_SIZE // 2:
@@ -155,28 +147,23 @@ def flip_w_to_e(a, b):
     # s = -q - r
     return axial_to_offset(-q - r, r)
 
-def rotate(shapes):
-    for shape in shapes:
-        for i in range(len(shape)):
-            x, y = shape[i]
-            shape[i] = rotate60(x, y)
-    return shapes
+def rotate(shape):
+    for i in range(len(shape)):
+        x, y = shape[i]
+        shape[i] = rotate60(x, y)
+    return shape
 
-def flip(shapes):
-    for shape in shapes:
-        for i in range(len(shape)):
-            x, y = shape[i]
-            shape[i] = flip_w_to_e(x, y)
-    return shapes
+def flip(shape):
+    for i in range(len(shape)):
+        x, y = shape[i]
+        shape[i] = flip_w_to_e(x, y)
+    return shape
 
-def reflect(shapes):
-    reflected_shapes = []
-    for shape in shapes:
-        original = shape[:]
-        flipped = [flip_w_to_e(x, y) for (x, y) in shape]
-        combined = list(set(original + flipped))
-        reflected_shapes.append(combined)
-    return reflected_shapes
+def reflect(shape):
+    original = shape[:]
+    flipped = [flip_w_to_e(x, y) for (x, y) in shape]
+    combined = list(set(original + flipped))
+    return combined
 
 ACTIONS = {
     'a': create_center,
@@ -192,15 +179,47 @@ ACTIONS = {
 }
 
 def get_shape_from_sequence(sequence):
-    shapes = [[]]
+    shape = []
     for cmd in sequence:
         func = ACTIONS[cmd]
-        shapes = func(shapes)
-    return shapes[0]
+        shape = func(shape)
+    return shape
 
-# We can change the reward function as we need
-def get_reward(state, goal_state):
-    return 1.0 if check_goal(state, goal_state) else 0.0
+def hex_distance(a1, b1, a2, b2):
+    q1, r1 = offset_to_axial(a1, b1)
+    q2, r2 = offset_to_axial(a2, b2)
+    x1, y1, z1 = axial_to_cube(q1, r1)
+    x2, y2, z2 = axial_to_cube(q2, r2)
+
+    return (abs(x1 - x2) + abs(y1 - y2) + abs(z1 - z2)) / 2
+
+def chamfer_distance_hex(shape1, shape2):
+    empty1 = (len(shape1) == 0)
+    empty2 = (len(shape2) == 0)
+
+    if empty1 and empty2:
+        return 0.0
+
+    elif empty1 or empty2:
+        return 10.0
+    
+    dist_a_to_b = []
+    for a in shape1:
+        min_d = min(hex_distance(*a, *b) for b in shape2)
+        dist_a_to_b.append(min_d)
+
+    dist_b_to_a = []
+    for b in shape2:
+        min_d = min(hex_distance(*a, *b) for a in shape1)
+        dist_b_to_a.append(min_d)
+
+    return (sum(dist_a_to_b) / len(shape1)) + (sum(dist_b_to_a) / len(shape2))
+
+# def get_reward(state, goal_state):
+#     return 1.0 if check_goal(state, goal_state) else 0.0
+
+def get_reward(prev_state, curr_state, goal_state):
+    return chamfer_distance_hex(prev_state, goal_state) - chamfer_distance_hex(curr_state, goal_state)
 
 # A simple generation from the ACTIONS, not the probabilistic generation
 def generate_simple(char_list, length, number):
@@ -214,7 +233,7 @@ def q_learning(filename, goal_states, alpha=0.1, gamma=0.9, epsilon=0.2, episode
     assert len(goal_states) == episodes
 
     for ep in tqdm(range(episodes)):
-        state = [[]]
+        state = []
         goal_state = goal_states[ep]
         for _ in range(max_steps):
             action = choose_action(Q, state, actions, epsilon)
@@ -222,13 +241,13 @@ def q_learning(filename, goal_states, alpha=0.1, gamma=0.9, epsilon=0.2, episode
             func = ACTIONS[action]
             next_state = func(state)
 
-            reward = get_reward(state, goal_state)
+            reward = get_reward(state, next_state, goal_state)
 
             max_next_q = max([get_Q(Q, next_state, a) for a in actions], default=0.0)
 
             old_q = get_Q(Q, state, action)
             new_q = old_q + alpha * (reward + gamma * max_next_q - old_q)
-            Q[(to_hashable(state), action)] = new_q
+            Q[(tuple(state), action)] = new_q
 
             state = next_state
 
@@ -241,7 +260,7 @@ def q_learning(filename, goal_states, alpha=0.1, gamma=0.9, epsilon=0.2, episode
 # no MCMC-like caches
 def q_inference(filename, goal_state, max_steps=10):
     Q = load_Q(filename)
-    state = [[]]
+    state = []
     actions_list = []
     actions = list(ACTIONS.keys())
 
@@ -265,7 +284,7 @@ def main():
     train_goal_shapes = [get_shape_from_sequence(actions) for actions in train_actions]
     q_learning("q.json", train_goal_shapes, episodes=episodes)
 
-    inference_goal_shape = get_shape_from_sequence(convert_string('ZXDRWWRKRKR'))
+    inference_goal_shape = get_shape_from_sequence(convert_string('ZXDR'))
     print(q_inference("q.json", inference_goal_shape))
     
 
