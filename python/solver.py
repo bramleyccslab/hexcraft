@@ -2,66 +2,62 @@ import itertools
 
 BOARD_SIZE = 9
 
-def check_goal(shapes, goal_shape):
-    return set(shapes[0]) == set(goal_shape)
+def check_goal(shape, goal_shape):
+    return set(shape) == set(goal_shape)
 
 def get_shape_from_sequence(sequence):
-    shapes = [[]]
+    shape = []
     for cmd in sequence:
         func = ACTIONS[cmd]
-        shapes = func(shapes)
-    return shapes[0]
+        shape = func(shape)
+    return shape
 
-def create_center(shapes):
+def create_center(shape):
     cx, cy = BOARD_SIZE // 2, BOARD_SIZE // 2
-    shapes[0].append((cx, cy))
+    shape.append((cx, cy))
 
-    return shapes
+    return shape
 
-def add_bar(shapes):
+def add_bar(shape):
     cx, cy = BOARD_SIZE // 2, BOARD_SIZE // 2
     bar = [(cx - 1, cy - 1), (cx, cy), (cx + 1, cy)]
-    shapes[0].extend(bar)
-    return shapes
+    shape.extend(bar)
+    return shape
 
-def add_corner(shapes):
+def add_corner(shape):
     cx, cy = BOARD_SIZE // 2, BOARD_SIZE // 2
     corner = [(cx + 1, cy - 1), (cx, cy), (cx, cy + 1)]
-    shapes[0].extend(corner)
-    return shapes
+    shape.extend(corner)
+    return shape
 
-def delete_center(shapes):
+def delete_center(shape):
     cx, cy = BOARD_SIZE // 2, BOARD_SIZE // 2
-    for shape in shapes:
-        while (cx, cy) in shape:
-            shape.remove((cx, cy))
-    return shapes
+    while (cx, cy) in shape:
+        shape.remove((cx, cy))
+    return shape
 
-def move_west(shapes):
-    for shape in shapes:
-        for i in range(len(shape)):
-            x, y = shape[i]
-            shape[i] = (x, y - 1)
-    return shapes
+def move_west(shape):
+    for i in range(len(shape)):
+        x, y = shape[i]
+        shape[i] = (x, y - 1)
+    return shape
 
-def move_northeast(shapes):
-    for shape in shapes:
-        for i in range(len(shape)):
-            x, y = shape[i]
-            q, r = offset_to_axial(x, y)
-            q += 1
-            r -= 1
-            shape[i] = axial_to_offset(q, r)
-    return shapes
+def move_northeast(shape):
+    for i in range(len(shape)):
+        x, y = shape[i]
+        q, r = offset_to_axial(x, y)
+        q += 1
+        r -= 1
+        shape[i] = axial_to_offset(q, r)
+    return shape
 
-def move_southeast(shapes):
-    for shape in shapes:
-        for i in range(len(shape)):
-            x, y = shape[i]
-            q, r = offset_to_axial(x, y)
-            r += 1
-            shape[i] = axial_to_offset(q, r)
-    return shapes
+def move_southeast(shape):
+    for i in range(len(shape)):
+        x, y = shape[i]
+        q, r = offset_to_axial(x, y)
+        r += 1
+        shape[i] = axial_to_offset(q, r)
+    return shape
 
 def offset_to_axial(x, y):
     if x <= BOARD_SIZE // 2:
@@ -110,28 +106,23 @@ def flip_w_to_e(a, b):
     # s = -q - r
     return axial_to_offset(-q - r, r)
 
-def rotate(shapes):
-    for shape in shapes:
-        for i in range(len(shape)):
-            x, y = shape[i]
-            shape[i] = rotate60(x, y)
-    return shapes
+def rotate(shape):
+    for i in range(len(shape)):
+        x, y = shape[i]
+        shape[i] = rotate60(x, y)
+    return shape
 
-def flip(shapes):
-    for shape in shapes:
-        for i in range(len(shape)):
-            x, y = shape[i]
-            shape[i] = flip_w_to_e(x, y)
-    return shapes
+def flip(shape):
+    for i in range(len(shape)):
+        x, y = shape[i]
+        shape[i] = flip_w_to_e(x, y)
+    return shape
 
-def reflect(shapes):
-    reflected_shapes = []
-    for shape in shapes:
-        original = shape[:]
-        flipped = [flip_w_to_e(x, y) for (x, y) in shape]
-        combined = list(set(original + flipped))
-        reflected_shapes.append(combined)
-    return reflected_shapes
+def reflect(shape):
+    original = shape[:]
+    flipped = [flip_w_to_e(x, y) for (x, y) in shape]
+    combined = list(set(original + flipped))
+    return combined
 
 ACTIONS = {
     'a': create_center,
@@ -145,7 +136,8 @@ ACTIONS = {
     'r': reflect,
     ' ': rotate,
 
-    # 'xzd': lambda shapes: delete_center(add_corner(add_bar(shapes)))
+    'wwr r r': lambda shape: reflect(rotate(reflect(rotate(reflect(move_west(move_west(shape))))))),
+    'zxdr': lambda shape: reflect(delete_center(add_bar(add_corner(shape)))),
 }
 
 def goal_solver(goal_shape, max_depth=7):
@@ -154,7 +146,7 @@ def goal_solver(goal_shape, max_depth=7):
 
     for length in range(1, max_depth + 1):
         for cmd_seq in itertools.product(action_keys, repeat=length):
-            shapes = [[]]
+            shapes = []
             for cmd in cmd_seq:
                 func = ACTIONS[cmd]
                 shapes = func(shapes)
@@ -174,10 +166,10 @@ def convert_string(s):
     return result
 
 def main():
-    GOAL_SHAPE = get_shape_from_sequence(convert_string('XRKRDSSW'))
+    GOAL_SHAPE = get_shape_from_sequence(convert_string('AWAWAWWRKRKR'))
 
     print("Searching for solutions...")
-    sols = goal_solver(GOAL_SHAPE, max_depth=7)
+    sols = goal_solver(GOAL_SHAPE, max_depth=5)
     for i, sol in enumerate(sols):
         print(f"Solution {i+1}: {' -> '.join(sol)}")
     print(f"Total solutions found: {len(sols)}")
