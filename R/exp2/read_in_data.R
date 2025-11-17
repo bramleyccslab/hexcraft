@@ -23,18 +23,22 @@ df.raw<-df.raw[-c(1:3),] #Remove test data points from Neil and Haozhe
 
 # df.raw<-df.raw[2,]
 vec<-rep(NA, nrow(df.raw))
+vecF<-rep(F, nrow(df.raw))
+vec0<-rep(0, nrow(df.raw))
 df.sw<-data.frame(p_ix=vec,
                   prolific_id=vec,
                   condition=vec,
                   gender=vec,
                   age=vec,
                   ins_time=vec,tut_time=vec,trial_time=vec,total_time=vec,
-                  comprehension_score=vec, tutorial_attempts=vec, tutorial_keys = vec,
-                  t1_solved=vec,t2_solved=vec,t3_solved=vec,t4_solved=vec,
-                  t5_solved=vec,t6_solved=vec,t7_solved=vec,t8_solved=vec,
-                  t1_attempts=vec,t2_attempts=vec,t3_attempts=vec,t4_attempts=vec,
-                  t5_attempts=vec,t6_attempts=vec,t7_attempts=vec,t8_attempts=vec,
-                  total_solved=vec,
+                  comprehension_score=vec, tutorial_tries=vec, tutorial_keys = vec,
+                  c1t1=vecF,c1t2=vecF,c1t3=vecF,
+                  c2t1=vecF,c2t2=vecF,c2t3=vecF,
+                  test1=vec,test2=vec,test3=vec,test4=vec,test5=vec,
+                  c1t1_tries=vec0,c1t2_tries=vec0,c1t3_tries=vec0,
+                  c2t1_tries=vec0,c2t2_tries=vec0,c2t3_tries=vec0,
+                  test1_tries=vec, test2_tries=vec,test3_tries=vec,test4_tries=vec,test5_tries=vec,
+                  total=vec,
                   m_steps=vec,m_steps_successes=vec, m_steps_failures=vec,
                   n_add=vec,n_delete=vec,n_corner=vec,n_bar=vec,n_move=vec,n_rotate=vec,n_flip=vec,n_reflect=vec,
                   comments=vec)
@@ -67,8 +71,15 @@ for (ppt in 1:nrow(df.raw))
   
   for (trial in 1:8)
   {
-    df.sw[[paste0('t',trial,'_solved',sep='')]][ppt]<-any(sapply(ls.p$trials[[trial]], '[[', 'result'))
-    df.sw[[paste0('t',trial,'_attempts',sep='')]][ppt]<-length(ls.p$trials[[trial]])
+    if (trial<4)
+    {
+      df.sw[[paste0('c', ls.p$subjectwise$condition+1, 't',trial ,sep='')]][ppt]<-any(sapply(ls.p$trials[[trial]], '[[', 'result'))
+      df.sw[[paste0('c', ls.p$subjectwise$condition+1, 't',trial,'_tries',sep='')]][ppt]<-length(ls.p$trials[[trial]])
+    } else {
+      df.sw[[paste0('test',trial-3 ,sep='')]][ppt]<-any(sapply(ls.p$trials[[trial]], '[[', 'result'))
+      df.sw[[paste0('test',trial-3,'_tries',sep='')]][ppt]<-length(ls.p$trials[[trial]])
+    }
+
     
     for (attempt in 1:length(ls.p$trials[[trial]]))
     {
@@ -88,27 +99,27 @@ for (ppt in 1:nrow(df.raw))
                               keycodes=paste0(sapply(ls.p$trials[[trial]][[attempt]]$keys, '[[', 'key'), collapse=''),
                               success=success))
     }
-
+    
   }
   df.sw$comments[ppt]<-ls.p$subjectwise$comments
- df.sw$n_add[ppt]<-str_count(paste0(df.tw$keycodes[df.tw$p_ix==df.sw$p_ix[ppt]], collapse=''),'A')
- df.sw$n_delete[ppt]<-str_count(paste0(df.tw$keycodes[df.tw$p_ix==df.sw$p_ix[ppt]], collapse=''),'D')
- df.sw$n_corner[ppt]<-str_count(paste0(df.tw$keycodes[df.tw$p_ix==df.sw$p_ix[ppt]], collapse=''),'Z')
- df.sw$n_bar[ppt]<-str_count(paste0(df.tw$keycodes[df.tw$p_ix==df.sw$p_ix[ppt]], collapse=''),'X')
- df.sw$n_move[ppt]<-str_count(paste0(df.tw$keycodes[df.tw$p_ix==df.sw$p_ix[ppt]], collapse=''),'W')+
-                       str_count(paste0(df.tw$keycodes[df.tw$p_ix==df.sw$p_ix[ppt]], collapse=''),'E')+
-                       str_count(paste0(df.tw$keycodes[df.tw$p_ix==df.sw$p_ix[ppt]], collapse=''),'S')
- df.sw$n_rotate[ppt]<-str_count(paste0(df.tw$keycodes[df.tw$p_ix==df.sw$p_ix[ppt]], collapse=''),'R')
- df.sw$n_flip[ppt]<-str_count(paste0(df.tw$keycodes[df.tw$p_ix==df.sw$p_ix[ppt]], collapse=''),'F')
- df.sw$n_reflect[ppt]<-str_count(paste0(df.tw$keycodes[df.tw$p_ix==df.sw$p_ix[ppt]], collapse=''),'K')
- df.sw$m_steps[ppt]<-mean(nchar(paste0(df.tw$keycodes[df.tw$p_ix==df.sw$p_ix[ppt]])))
- 
- df.sw$m_steps_successes[ppt]<-mean(nchar(paste0(df.tw$keycodes[df.tw$p_ix==df.sw$p_ix[ppt]]))[df.tw$success[df.tw$p_ix==df.sw$p_ix[ppt]]])
- df.sw$m_steps_failures[ppt]<-mean(nchar(paste0(df.tw$keycodes[df.tw$p_ix==df.sw$p_ix[ppt]]))[!df.tw$success[df.tw$p_ix==df.sw$p_ix[ppt]]])
- 
- 
- # And let's extract the larger and less important items:
- ls.states[[ppt]]<-list()
+  df.sw$n_add[ppt]<-str_count(paste0(df.tw$keycodes[df.tw$p_ix==df.sw$p_ix[ppt]], collapse=''),'A')
+  df.sw$n_delete[ppt]<-str_count(paste0(df.tw$keycodes[df.tw$p_ix==df.sw$p_ix[ppt]], collapse=''),'D')
+  df.sw$n_corner[ppt]<-str_count(paste0(df.tw$keycodes[df.tw$p_ix==df.sw$p_ix[ppt]], collapse=''),'Z')
+  df.sw$n_bar[ppt]<-str_count(paste0(df.tw$keycodes[df.tw$p_ix==df.sw$p_ix[ppt]], collapse=''),'X')
+  df.sw$n_move[ppt]<-str_count(paste0(df.tw$keycodes[df.tw$p_ix==df.sw$p_ix[ppt]], collapse=''),'W')+
+    str_count(paste0(df.tw$keycodes[df.tw$p_ix==df.sw$p_ix[ppt]], collapse=''),'E')+
+    str_count(paste0(df.tw$keycodes[df.tw$p_ix==df.sw$p_ix[ppt]], collapse=''),'S')
+  df.sw$n_rotate[ppt]<-str_count(paste0(df.tw$keycodes[df.tw$p_ix==df.sw$p_ix[ppt]], collapse=''),'R')
+  df.sw$n_flip[ppt]<-str_count(paste0(df.tw$keycodes[df.tw$p_ix==df.sw$p_ix[ppt]], collapse=''),'F')
+  df.sw$n_reflect[ppt]<-str_count(paste0(df.tw$keycodes[df.tw$p_ix==df.sw$p_ix[ppt]], collapse=''),'K')
+  df.sw$m_steps[ppt]<-mean(nchar(paste0(df.tw$keycodes[df.tw$p_ix==df.sw$p_ix[ppt]])))
+  
+  df.sw$m_steps_successes[ppt]<-mean(nchar(paste0(df.tw$keycodes[df.tw$p_ix==df.sw$p_ix[ppt]]))[df.tw$success[df.tw$p_ix==df.sw$p_ix[ppt]]])
+  df.sw$m_steps_failures[ppt]<-mean(nchar(paste0(df.tw$keycodes[df.tw$p_ix==df.sw$p_ix[ppt]]))[!df.tw$success[df.tw$p_ix==df.sw$p_ix[ppt]]])
+  
+  
+  # And let's extract the larger and less important items:
+  ls.states[[ppt]]<-list()
   for (trial in 1:length(ls.p$state_history_tests))
   {
     ls.states[[ppt]][[trial]]<-list()
@@ -121,23 +132,56 @@ for (ppt in 1:nrow(df.raw))
       }
     }
   }
- 
- this_ppt_tutorial_attempts<-this_ppt_tutorial_keys<-rep(NA, length(ls.p$tutorials))
- for (tutorial in 1:length(ls.p$tutorials))
- {
-    this_ppt_tutorial_attempts[tutorial]<-length(ls.p$tutorials[[tutorial]])
+  
+  this_ppt_tutorial_tries<-this_ppt_tutorial_keys<-rep(NA, length(ls.p$tutorials))
+  for (tutorial in 1:length(ls.p$tutorials))
+  {
+    this_ppt_tutorial_tries[tutorial]<-length(ls.p$tutorials[[tutorial]])
     this_ppt_tutorial_keys[tutorial]<-''
     for (attempt in 1:length(ls.p$tutorials[[tutorial]]))
     {
       this_ppt_tutorial_keys[tutorial]<-paste0(this_ppt_tutorial_keys[tutorial], paste0(sapply(ls.p$tutorials[[tutorial]][[attempt]]$keys, '[[', 'key'), collapse=''))
     }
- }
- df.sw$tutorial_attempts[ppt]<-paste0(this_ppt_tutorial_attempts, collapse=',')
- df.sw$tutorial_keys[ppt]<-paste0(nchar(this_ppt_tutorial_keys), collapse=',')
+  }
+  df.sw$tutorial_tries[ppt]<-paste0(this_ppt_tutorial_tries, collapse=',')
+  df.sw$tutorial_keys[ppt]<-paste0(nchar(this_ppt_tutorial_keys), collapse=',')
 }
 
-df.sw<- df.sw %>% mutate(total_solved = t1_solved+t2_solved+t3_solved+t4_solved+t5_solved+t6_solved+t7_solved+t8_solved,
-                         bonus = total_solved*0.2)
+
+df.sw<- df.sw %>% mutate(total = c1t1+c1t2+c1t3+c2t1+c2t2+c2t3+test1+test2+test3+test4+test5,
+                         bonus = total*0.2,
+                         condition = factor(condition, levels = 0:1, labels = c('train_reflect','train_flower')))
+# training group 1:
+#   A WWR∠R∠R
+# AWA WWR∠R∠R
+# AWAWA WWR∠R∠R
+# training group 2:
+#   XR∠RD
+# XR∠RD SSW
+# XR∠R∠D ESES
+# tests:
+#   Z∠∠ WWR∠R∠R
+# Z∠∠D WWR∠R∠R
+# XR∠RD WR
+# XR∠RD EES R∠R
+# XR∠RD WWR∠R∠R
+
+df.tw<-df.tw %>% mutate(condition = factor(condition, levels = 0:1, labels = c('train1_reflect','train2_flower')))
+
+df.tw<-df.tw %>% mutate(trial_type = case_match(trial, 1~'train_rr1',2~'train_rr2',3~'train_rr3',
+                                         4~'test1',5~'test2',6~'test3',7~'test4',8~'test5'),
+                 trial_solution = case_match(trial, 1~'AWWRKRKR',2~'AWAWWRKRKR',3~'AWAWAWWRKRKR',
+                                     4~'ZKKWWRKRKR',5~'ZKKDWWRKRKR',6~'ZXDRWR',7~'ZXDREESRKR',8~'ZXDRWWRKRKR'),
+                 train_test = factor(trial<4, levels = c(T,F), labels = c('train','test')))
+
+df.tw$trial_solution[df.tw$condition=='train2_flower' & df.tw$trial==1]<-'ZXDR'
+df.tw$trial_solution[df.tw$condition=='train2_flower' & df.tw$trial==2]<-'ZXDRWWE'
+df.tw$trial_solution[df.tw$condition=='train2_flower' & df.tw$trial==3]<-'ZXDRWWF'
+
+df.tw$trial_type[df.tw$condition=='train2_flower' & df.tw$trial==1]<-'ZXDR'
+df.tw$trial_type[df.tw$condition=='train2_flower' & df.tw$trial==2]<-'ZXDRWWE'
+df.tw$trial_type[df.tw$condition=='train2_flower' & df.tw$trial==3]<-'ZXDRWWF'
+
 
 df.sw
 df.tw
@@ -145,8 +189,18 @@ df.tw
 
 save(file='../dat/exp2.rdata', df.sw, df.tw)
 
+df.sw %>% group_by(condition) %>% summarise(mean(total))
 
-for (ppt in 1:nrow(df.raw))
-{
-ls.p[[ppt]]
-}
+df.l <- df.sw %>% gather(test, correct, test1:test5)
+
+df.l<-df.sw %>% group_by(condition) %>% summarise(t1=sum(test1),
+                                                  t2=sum(test3),
+                                                  t3=sum(test3),
+                                                  t4=sum(test4),
+                                                  t5=sum(test5), n=n()) %>%
+  mutate(t1=t1/n, t2=t2/n, t3=t3/n, t4=t4/n,t5=t5/n) %>%
+  gather(test, accuracy, t1:t5)
+
+ggplot(df.l, aes(y=accuracy, x=test, fill=condition)) +
+  geom_bar(stat='identity', position = position_dodge())
+
