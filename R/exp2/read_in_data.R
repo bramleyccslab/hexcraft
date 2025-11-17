@@ -19,9 +19,8 @@ mydb = dbConnect(RMySQL::MySQL(),
 dbListTables(mydb)
 df.raw<-dbReadTable(mydb,"hexcraft_exp2")
 
-df.raw<-df.raw[-c(1:3),] #Remove test data points from Neil and Haozhe
+df.raw<-df.raw[c(12:21),]
 
-# df.raw<-df.raw[2,]
 vec<-rep(NA, nrow(df.raw))
 vecF<-rep(F, nrow(df.raw))
 vec0<-rep(0, nrow(df.raw))
@@ -168,8 +167,21 @@ df.sw<- df.sw %>% mutate(total = c1t1+c1t2+c1t3+c2t1+c2t2+c2t3+test1+test2+test3
 
 df.tw<-df.tw %>% mutate(condition = factor(condition, levels = 0:1, labels = c('train1_reflect','train2_flower')))
 
+df.tw$trial
+
+# A clunky way to get the trial type in the right order for condition 2
+df.tw$trial_type<-df.tw$trial
+ix4<-which(df.tw$condition=='train2_flower' & df.tw$trial==4)
+ix5<-which(df.tw$condition=='train2_flower' & df.tw$trial==5)
+ix6<-which(df.tw$condition=='train2_flower' & df.tw$trial==6)
+ix7<-which(df.tw$condition=='train2_flower' & df.tw$trial==7)
+df.tw$trial_type[ix4]<-6
+df.tw$trial_type[ix5]<-7
+df.tw$trial_type[ix6]<-4
+df.tw$trial_type[ix7]<-5
+
 df.tw<-df.tw %>% mutate(trial_type = case_match(trial, 1~'train_rr1',2~'train_rr2',3~'train_rr3',
-                                         4~'test1',5~'test2',6~'test3',7~'test4',8~'test5'),
+                                         4~'test_rr1',5~'test_rr2',6~'test_f1',7~'test_f2',8~'test_both'),
                  trial_solution = case_match(trial, 1~'AWWRKRKR',2~'AWAWWRKRKR',3~'AWAWAWWRKRKR',
                                      4~'ZKKWWRKRKR',5~'ZKKDWWRKRKR',6~'ZXDRWR',7~'ZXDREESRKR',8~'ZXDRWWRKRKR'),
                  train_test = factor(trial<4, levels = c(T,F), labels = c('train','test')))
@@ -194,7 +206,7 @@ df.sw %>% group_by(condition) %>% summarise(mean(total))
 df.l <- df.sw %>% gather(test, correct, test1:test5)
 
 df.l<-df.sw %>% group_by(condition) %>% summarise(t1=sum(test1),
-                                                  t2=sum(test3),
+                                                  t2=sum(test2),
                                                   t3=sum(test3),
                                                   t4=sum(test4),
                                                   t5=sum(test5), n=n()) %>%
