@@ -274,7 +274,7 @@ def dqn_learning(filename, goal_states, episodes, alpha=0.001, gamma=0.99, epsil
         state = []
         goal_state = goal_states[ep]
         
-        current_state_tensor = state_to_tensor(state).to(device)
+        current_state_tensor = state_to_tensor(state)
         
         for step in range(max_steps):
             global_step = ep * max_steps + step
@@ -298,7 +298,7 @@ def dqn_learning(filename, goal_states, episodes, alpha=0.001, gamma=0.99, epsil
             if done:
                 reward += 10.0 
             
-            next_state_tensor = state_to_tensor(next_state).to(device)
+            next_state_tensor = state_to_tensor(next_state)
             
             action_idx = ACTION_TO_IDX[action]
             replay_buffer.push(current_state_tensor.cpu().numpy(), action_idx, 
