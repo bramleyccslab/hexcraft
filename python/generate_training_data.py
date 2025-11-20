@@ -6,7 +6,7 @@ BOARD_SIZE = 9
 OUTPUT_FILE = "train_shapes_10000.json"
 TARGET_COUNT = 10000
 SEQ_LEN = 10
-MAX_DEPTH = 5
+MIN_STEPS = 5
 
 def create_center(shape):
     cx, cy = BOARD_SIZE // 2, BOARD_SIZE // 2
@@ -171,7 +171,7 @@ while len(train_shapes) < TARGET_COUNT:
     if serial in seen_shapes:
         continue
 
-    sols = goal_solver(shape, max_depth=MAX_DEPTH)
+    sols = goal_solver(shape, max_depth=MIN_STEPS-1)
 
     if not sols:
         train_shapes.append(shape_to_serializable(shape))
