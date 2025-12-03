@@ -40,3 +40,8 @@ ggplot(df.l, aes(y=accuracy, x=test_type, fill=condition)) +
 ggsave('accuracy_by_test_type.pdf', width = 5, height = 5)
 
 df.sw$comments
+
+
+# tmp<-df.sw %>% group_by(condition) %>% summarise(rr1=sum(test_rr1),rr2=sum(test_rr2),f1=sum(test_f1),f2=sum(test_f2),bot=sum(test_both))
+# counts<-matrix(unlist(tmp), nrow=2)[,2:6]
+# chisq.test(counts)
