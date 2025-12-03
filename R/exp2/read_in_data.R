@@ -19,7 +19,7 @@ mydb = dbConnect(RMySQL::MySQL(),
 dbListTables(mydb)
 df.raw<-dbReadTable(mydb,"hexcraft_exp2")
 
-df.raw<-df.raw[c(12:21),]
+df.raw<-df.raw[-c(1:10),]#Remove the pilots from before data was finalised
 
 vec<-rep(NA, nrow(df.raw))
 vecF<-rep(F, nrow(df.raw))
@@ -190,9 +190,20 @@ df.tw$trial_solution[df.tw$condition=='train2_flower' & df.tw$trial==1]<-'ZXDR'
 df.tw$trial_solution[df.tw$condition=='train2_flower' & df.tw$trial==2]<-'ZXDRWWE'
 df.tw$trial_solution[df.tw$condition=='train2_flower' & df.tw$trial==3]<-'ZXDRWWF'
 
-df.tw$trial_type[df.tw$condition=='train2_flower' & df.tw$trial==1]<-'ZXDR'
-df.tw$trial_type[df.tw$condition=='train2_flower' & df.tw$trial==2]<-'ZXDRWWE'
-df.tw$trial_type[df.tw$condition=='train2_flower' & df.tw$trial==3]<-'ZXDRWWF'
+df.tw$trial_type[df.tw$condition=='train2_flower' & df.tw$trial==1]<-'train_f1'
+df.tw$trial_type[df.tw$condition=='train2_flower' & df.tw$trial==2]<-'train_f2'
+df.tw$trial_type[df.tw$condition=='train2_flower' & df.tw$trial==3]<-'train_f3'
+
+# A clunky way to get the trial type accuracy right for condition 2
+df.sw$test_rr1<-df.sw$test1
+df.sw$test_rr2<-df.sw$test2
+df.sw$test_f1<-df.sw$test3
+df.sw$test_f2<-df.sw$test4
+df.sw$test_both<-df.sw$test5
+df.sw$test_rr1[df.sw$condition=='train_flower']<-df.sw$test3[df.sw$condition=='train_flower']
+df.sw$test_rr2[df.sw$condition=='train_flower']<-df.sw$test4[df.sw$condition=='train_flower']
+df.sw$test_f1[df.sw$condition=='train_flower']<-df.sw$test1[df.sw$condition=='train_flower']
+df.sw$test_f2[df.sw$condition=='train_flower']<-df.sw$test2[df.sw$condition=='train_flower']
 
 
 df.sw
