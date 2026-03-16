@@ -4,7 +4,7 @@ library(tidyverse)
 
 rm(list=ls())
 
-#ssh -L 1111:127.0.0.1:3306 nbramley@eco.ppls.ed.ac.uk
+#x
 # Password:your_eco_password
 
 mydb = dbConnect(RMySQL::MySQL(),
@@ -180,10 +180,10 @@ df.tw$trial_type[ix5]<-7
 df.tw$trial_type[ix6]<-4
 df.tw$trial_type[ix7]<-5
 
-df.tw<-df.tw %>% mutate(trial_type = case_match(trial, 1~'train_rr1',2~'train_rr2',3~'train_rr3',
-                                         4~'test_rr1',5~'test_rr2',6~'test_f1',7~'test_f2',8~'test_both'),
-                 trial_solution = case_match(trial, 1~'AWWRKRKR',2~'AWAWWRKRKR',3~'AWAWAWWRKRKR',
+df.tw<-df.tw %>% mutate(trial_solution = case_match(trial_type, 1~'AWWRKRKR',2~'AWAWWRKRKR',3~'AWAWAWWRKRKR',
                                      4~'ZKKWWRKRKR',5~'ZKKDWWRKRKR',6~'ZXDRWR',7~'ZXDREESRKR',8~'ZXDRWWRKRKR'),
+                 trial_type = case_match(trial_type, 1~'train_rr1',2~'train_rr2',3~'train_rr3',
+                                         4~'test_rr1',5~'test_rr2',6~'test_f1',7~'test_f2',8~'test_both'),
                  train_test = factor(trial<4, levels = c(T,F), labels = c('train','test')))
 
 df.tw$trial_solution[df.tw$condition=='train2_flower' & df.tw$trial==1]<-'ZXDR'
@@ -227,3 +227,15 @@ df.l<-df.sw %>% group_by(condition) %>% summarise(t1=sum(test1),
 ggplot(df.l, aes(y=accuracy, x=test, fill=condition)) +
   geom_bar(stat='identity', position = position_dodge())
 
+
+df.l<-df.sw %>% group_by(condition) %>% summarise(r1=sum(test_rr1),
+                                            r2=sum(test_rr2),
+                                            f1=sum(test_f1),
+                                            f2=sum(test_f2),
+                                            both=sum(test_both), n=n()) %>%
+  mutate(r1=r1/n, r2=r2/n, f1=f1/n, f2=f2/n, both=both/n) %>%
+  gather(test, accuracy, r1:both) %>%
+  mutate(test.f = factor(test, levels = c('r1','r2','f1','f2','both')))
+
+ggplot(df.l, aes(y=accuracy, x=test.f, fill=condition)) +
+  geom_bar(stat='identity', position = position_dodge())

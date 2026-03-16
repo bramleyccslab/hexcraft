@@ -17,13 +17,15 @@ ccache = TRUE
 
 set.seed(678654) #changed for random generation
 
-depth<-3
-N<-100
-basic_targets_d3<-matrix(NA, nrow=61, ncol=N)
-basic_targets_d3_solutions<-list()
+depth<-20
+N<-25
+basic_targets_d20<-matrix(NA, nrow=61, ncol=N)
+basic_targets_d20_solutions<-list()
 
+f<-f[c(1,5,6,10)]
+f
 
-for (i in 1:100)
+for (i in 1:N)
 {
   # Basic functionality is to chain these together, calculating a loss and keeping a history
   state<-empty_state %>% select(-x_pos, -y_pos) %>% mutate(target = 0, active=0)
@@ -70,41 +72,41 @@ for (i in 1:100)
     }
   }
   
-  basic_targets_d3[,i]<-state$active
-  basic_targets_d3_solutions[[i]]<-actions
+  basic_targets_d20[,i]<-state$active
+  basic_targets_d20_solutions[[i]]<-actions
 }
 
-save(file='./dat/basic_targets_d3.rdata', basic_targets_d3, basic_targets_d3_solutions)
+save(file='./dat/basic_targets_d20_f4.rdata', basic_targets_d20, basic_targets_d20_solutions)
 
 # Mega-plot time
 p<-fb<-list()
 for (i in 1:N)
 {
   fb[[i]]<-board_polygons
-  fb[[i]]$state<-factor(rep(basic_targets_d3[,i], each = 6))
+  fb[[i]]$state<-factor(rep(basic_targets_d20[,i], each = 6))
   p[[i]]<-ggplot(fb[[i]], aes(x_pos, y_pos)) + 
     geom_polygon(aes(group = id, fill=state), colour = 'black') +
-    scale_fill_manual(values = c('white','yellow')) +
-    ggtitle(paste0(basic_targets_d3_solutions[[i]], collapse=' '))
+    scale_fill_manual(values = c('white','black')) +
+    ggtitle(paste0(basic_targets_d20_solutions[[i]], collapse=' '))
   
 }
 
 p_save<-grid.arrange(grobs = p, nrow = round(sqrt(N)))
-ggsave(p_save, filename='./plot/targets_d3.pdf', width = 50, height = 40, limitsize = F)
+ggsave(p_save, filename='./plot/targets_d20_f4.pdf', width = 50, height = 40, limitsize = F)
 
 
 # Now for some recursive targets
 set.seed(1988)
-depth<-3
+depth<-5
 N<-9
-recursive_targets_d3<-list()
-recursive_targets_d3_solutions<-list()
+recursive_targets_d20<-list()
+recursive_targets_d20_solutions<-list()
 
 
 for (cache in 1:N)
 {
-  recursive_targets_d3[[cache]]<-matrix(NA, nrow=61, ncol=10)
-  recursive_targets_d3_solutions[[cache]]<-list()
+  recursive_targets_d20[[cache]]<-matrix(NA, nrow=61, ncol=10)
+  recursive_targets_d20_solutions[[cache]]<-list()
   
   for (example in 1:N)
   {
@@ -126,7 +128,8 @@ for (cache in 1:N)
         cat('cache', cache, ' example', example, 'primitive\n')
       } 
       else {
-        tmp_state <- apply_cache(state, basic_targets_d3_solutions[[cache]])
+        action<-'UseCache'
+        tmp_state <- apply_cache(state, basic_targets_d20_solutions[[cache]])
         
         cat('cache', cache, ' example', example, 'library\n')
       }
@@ -165,8 +168,8 @@ for (cache in 1:N)
         d<-d+1
       }
     }
-    recursive_targets_d3[[cache]][,example]<-state$active
-    recursive_targets_d3_solutions[[cache]][[example]]<-actions
+    recursive_targets_d20[[cache]][,example]<-state$active
+    recursive_targets_d20_solutions[[cache]][[example]]<-actions
   }
   
 }
@@ -179,7 +182,7 @@ for (cache in 1:N)
   p<-fb<-list()
   
   tmp<-board_polygons
-  tmp$state<- factor(rep(basic_targets_d3[,cache], each = 6))
+  tmp$state<- factor(rep(basic_targets_d20[,cache], each = 6))
   p[[1]]<-ggplot(tmp, aes(x_pos, y_pos)) + 
     geom_polygon(aes(group = id, fill=state), colour = 'black') +
     scale_fill_manual(values = c('white','blue')) +
@@ -188,20 +191,20 @@ for (cache in 1:N)
   for (example in 1:N)
   {
     fb[[example]]<-board_polygons
-    fb[[example]]$state<-factor(rep(recursive_targets_d3[[cache]][,example], each = 6))
+    fb[[example]]$state<-factor(rep(recursive_targets_d20[[cache]][,example], each = 6))
     p[[example+1]]<-ggplot(fb[[example]], aes(x_pos, y_pos)) + 
       geom_polygon(aes(group = id, fill=state), colour = 'black') +
-      scale_fill_manual(values = c('white','yellow')) +
-      ggtitle(paste0(recursive_targets_d3_solutions[[cache]][[example]], collapse=' '))
+      scale_fill_manual(values = c('white','black')) +
+      ggtitle(paste0(recursive_targets_d20_solutions[[cache]][[example]], collapse=' '))
   }
   str(p)
   p_save<-grid.arrange(grobs = p, nrow = 2,
-                       top = paste0('Cache sequence: ', paste0(basic_targets_d3_solutions[[cache]], collapse = ' ')))
+                       top = paste0('Cache sequence: ', paste0(basic_targets_d20_solutions[[cache]], collapse = ' ')))
   ggsave(p_save, filename=paste0('./plot/recursive_targets', cache, '.pdf'), width = 30, height = 10, limitsize = F)
 }
 
 
-save(file='./dat/recursive_targets_d3.rdata', basic_targets_d3, basic_targets_d3_solutions)
+save(file='./dat/recursive_targets_d20.rdata', basic_targets_d20, basic_targets_d20_solutions, recursive_targets_d20, recursive_targets_d20_solutions)
 
 
 # Very deep recursion

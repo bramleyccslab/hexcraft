@@ -37,21 +37,21 @@ make_hex_lattice = function(N, dist=1) {
   offset<-c(0, rep(c(0.5,0), N))
   
   loc <- data.frame(x_pos = sort(c(rep(seq(from=0, by=dist, length.out=nx),each=ceiling(ny/2)),
-                                            rep(seq(from=dist/2, by=dist, length.out=nx),
-                                                each=floor(ny/2)))) + origin[1],
-                          y_pos = rep(c(seq(from=0, by = dist*sqrt(3), length.out=ceiling(ny/2)),
-                                           seq(from=dist*sqrt(3)/2, by=dist*sqrt(3),
-                                               length.out=floor(ny/2))) + origin[2], times=nx))
+                                   rep(seq(from=dist/2, by=dist, length.out=nx),
+                                       each=floor(ny/2)))) + origin[1],
+                    y_pos = rep(c(seq(from=0, by = dist*sqrt(3), length.out=ceiling(ny/2)),
+                                  seq(from=dist*sqrt(3)/2, by=dist*sqrt(3),
+                                      length.out=floor(ny/2))) + origin[2], times=nx))
   
   loc<-loc %>% mutate(x = rep(-N:N, each=ny),
-                                  y = rep(c(seq(-N,N, by=2),seq((-N+1),N, by=2)), nx))
+                      y = rep(c(seq(-N,N, by=2),seq((-N+1),N, by=2)), nx))
   
   loc <- cbind(loc, oddr_to_cube(loc$x, loc$y))
   
   loc<-loc %>% arrange(desc(y), x) %>%   #this was changed to desc because it was flipped upside-down
     filter(abs(q)<5 & abs(r)<5 & abs(s)<5) %>% mutate(id = 1:n()) %>%
-  select(id, x, y, q,r,s, x_pos, y_pos)
-
+    select(id, x, y, q,r,s, x_pos, y_pos)
+  
   return(loc)
 }
 
@@ -67,9 +67,9 @@ make_hex_coords  = function(loc) {
   #Get your coordinates in long format with an id
   hexdat <- hex_x %>% gather(vertice, x_pos, X1:X6) %>% arrange(id, vertice)
   hexdat_y <-  hex_y %>% gather(vertice, y_pos, X1:X6) %>% arrange(id, vertice)
-    #Merge them into the same dataframe
+  #Merge them into the same dataframe
   hexdat$y_pos <- hexdat_y$y_pos
-
+  
   return(hexdat)
 }
 
@@ -88,16 +88,22 @@ for (dir in 1:6)
   amort$vectors[[dir]]<-data.frame(from=1:nrow(empty_state), to = rep(NA, nrow(empty_state)))
   for (i in 1:nrow(empty_state))
   {
-    tmp<-which(empty_state$q==empty_state$q[i]+direction_vectors[[dir]][1] &
-         empty_state$r==empty_state$r[i]+direction_vectors[[dir]][2] &
-         empty_state$s==empty_state$s[i]+direction_vectors[[dir]][3])
-    if (any(tmp))
+    tmp<-c(empty_state$q[i]+direction_vectors[[dir]][1],
+           empty_state$r[i]+direction_vectors[[dir]][2],
+           empty_state$s[i]+direction_vectors[[dir]][3])
+    # tmp[tmp>max(empty_state$x)]<-max(empty_state$x)
+    # tmp[tmp<min(empty_state$x)]<-min(empty_state$x)
+    
+    tmp2<-which(empty_state$q==tmp[1] &
+                 empty_state$r==tmp[2] &
+                 empty_state$s==tmp[3])
+    if (any(tmp2))
     {
-      amort$vectors[[dir]]$to[i]<-tmp
+      amort$vectors[[dir]]$to[i]<-tmp2
     }
-
+    
   }
-  amort$vectors[[dir]]<-amort$vectors[[dir]][!is.na(amort$vectors[[dir]]$to),] #Remove the indices that go off the board
+  # amort$vectors[[dir]]<-amort$vectors[[dir]][!is.na(amort$vectors[[dir]]$to),] #Remove the indices that go off the board
 }
 
 amort$rotations[[1]]<-data.frame(from=1:nrow(empty_state), to = rep(NA, nrow(empty_state)))
@@ -221,7 +227,10 @@ f$ShiftNE<-function(ts, dir = 1)
 {
   os<-ts
   ts$active<-0
-  ts$active[amort$vectors[[dir]]$to]<-os$active[amort$vectors[[dir]]$from]
+  # ts$active[amort$vectors[[dir]]$to]<-os$active[amort$vectors[[dir]]$from]
+  ts$active[amort$vectors[[dir]]$to[!is.na(amort$vectors[[dir]]$to)]]<-os$active[amort$vectors[[dir]]$from[!is.na(amort$vectors[[dir]]$to)]]
+  # A hack to make things not fall off the edge
+  ts$active[is.na(amort$vectors[[dir]]$to)]<-as.numeric(ts$active[is.na(amort$vectors[[dir]]$to)] | os$active[is.na(amort$vectors[[dir]]$to)])
   ts
 }
 
@@ -230,7 +239,10 @@ f$ShiftSE<-function(ts, dir = 3) #changed this to SE
 {
   os<-ts 
   ts$active<-0
-  ts$active[amort$vectors[[dir]]$to]<-os$active[amort$vectors[[dir]]$from] 
+  # ts$active[amort$vectors[[dir]]$to]<-os$active[amort$vectors[[dir]]$from] 
+  ts$active[amort$vectors[[dir]]$to[!is.na(amort$vectors[[dir]]$to)]]<-os$active[amort$vectors[[dir]]$from[!is.na(amort$vectors[[dir]]$to)]]
+  # A hack to make things not fall off the edge
+  ts$active[is.na(amort$vectors[[dir]]$to)]<-as.numeric(ts$active[is.na(amort$vectors[[dir]]$to)] | os$active[is.na(amort$vectors[[dir]]$to)])
   ts
 }
 
@@ -239,7 +251,9 @@ f$ShiftW<-function(ts, dir = 5)
 {
   os<-ts
   ts$active<-0
-  ts$active[amort$vectors[[dir]]$to]<-os$active[amort$vectors[[dir]]$from]
+  ts$active[amort$vectors[[dir]]$to[!is.na(amort$vectors[[dir]]$to)]]<-os$active[amort$vectors[[dir]]$from[!is.na(amort$vectors[[dir]]$to)]]
+  # A hack to make things not fall off the edge
+  ts$active[is.na(amort$vectors[[dir]]$to)]<-as.numeric(ts$active[is.na(amort$vectors[[dir]]$to)] | os$active[is.na(amort$vectors[[dir]]$to)])
   ts
 }
 
@@ -347,4 +361,4 @@ direction_vectors
 #     # UpdateStringVis()
 #   }
 # }  
-  
+
