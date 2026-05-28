@@ -24,56 +24,57 @@
 
 <body onload="Start();">
 
-
-
-<h1>Demo task interface with cachable actions</h1>
-
+<h3>Demo "Hexcraft" task interface with fixed actions</h3>
+<h2 id="player-header">Ready Player 1</h2>
 <div id="board-and-cache">
+    <p>&nbsp;&nbsp;&nbsp;</p>
     <!-- Board will go here -->
+
     <div id="caches">
-        <p>Optionally, cache sequences of actions here, then use them by pressing the corresponding key:</p>
-        <div class = "cache-container"><div id="test" class = "cache-label"> &nbsp"E"&larr;</div><div id="cache0" class = "cache"></div><button type="button" id = "cache-btn0" class="cache-btn">Cache</button></div>
-        <div class = "cache-container"><div class = "cache-label"> &nbsp"S"&larr;</div><div id="cache1" class = "cache"></div><button type="button" id = "cache-btn1" class="cache-btn" >Cache</button></div>
-        <div class = "cache-container"><div class = "cache-label"> &nbsp"Z"&larr;</div><div id="cache2" class = "cache"></div><button type="button" id = "cache-btn2" class="cache-btn">Cache</button></div>
-        <div class = "cache-container"><div class = "cache-label"> &nbsp"X"&larr;</div><div id="cache3" class = "cache"></div><button type="button" id = "cache-btn3" class="cache-btn">Cache</button></div>
-        <div class = "cache-container"><div class = "cache-label"> &nbsp"C"&larr;</div><div id="cache4" class = "cache"></div><button type="button" id = "cache-btn4" class="cache-btn">Cache</button></div>
-        <div class = "cache-container"><div class = "cache-label"> &nbsp"V"&larr;</div><div id="cache5" class = "cache"></div><button type="button" id = "cache-btn5" class="cache-btn">Cache</button></div>
-        <p style="font-size: 1em;" onclick="Hint1()" id="hintbtn1">Hint 1 (click to reveal)</p>
-        <p style="font-size: 1em; display:none;" id="hint1">For this demo, the default caches for <b>E,S,Z</b> & <b>X</b> above recreate how these keys worked <a href="https://eco.ppls.ed.ac.uk/~nbramley/hexcraft/demo_nocache.html?pattern=ZXDESZXDSR">here</a> (reminders at bottom of page).</p>
-        <p style="font-size: 1em;" onclick="Hint2()" id="hintbtn2">Hint 2 (click to reveal)</p>
-        <p style="font-size: 1em; display:none;" id="hint2">Try caching a sequence that creates a circle (e.g. <b>ZXD</b>) as <b>C</b>. Does this make it easier to solve <a href="https://eco.ppls.ed.ac.uk/~nbramley/hexcraft/demo.html?pattern=ZXDWZXD">this</a> example puzzle?</p>
+        <img id="keys"src="static/img/keys_small.png" style="width: 400px">
+        <p>Create your own action sequence shortcuts:</p>
+        <div class = "cache-container"><div class = "cache-label"> <img id="b-key" src="static/img/b.png" style="width: 50px"> &larr;</div><div id="cache0" class = "cache"></div><button type="button" id = "cache-btn0" class="cache-btn">Save</button></div>
+        <div class = "cache-container"><div class = "cache-label"> <img id="c-key" src="static/img/c.png" style="width: 50px"> &larr;</div><div id="cache1" class = "cache"></div><button type="button" id = "cache-btn1" class="cache-btn" >Save</button></div>
+        <div class = "cache-container"><div class = "cache-label"> <img id="e-key" src="static/img/e.png" style="width: 50px"> &larr;</div><div id="cache2" class = "cache"></div><button type="button" id = "cache-btn2" class="cache-btn">Save</button></div>
+        <div class = "cache-container"><div class = "cache-label"> <img id="s-key" src="static/img/s.png" style="width: 50px"> &larr;</div><div id="cache3" class = "cache"></div><button type="button" id = "cache-btn3" class="cache-btn">Save</button></div>
     </div>
 </div>
+<br>
+<!-- <p id="response-prompt">
+    Your action sequence appears below:
+</p> -->
+<div id="action-boxes"><div id="locked-in-actions"></div><div id="current-actions"></div></div>
+<br>
+<div id="user-buttons">
+<button type="button" id = "restart-task" class="action-btn" onclick="ResetBoard()">Vote Restart</button>
+<button type="button" id = "pass-action" class="action-btn" onclick="Submit()">Pass</button>
+<button type="button" id = "restart-action" class="action-btn" onclick="Clear()">Reset</button>
+<button type="button" id = "submit-action" class="action-btn" onclick="Submit()">Act</button>
+</div>
+<br>
 
-<p id="response_area">
-    Try to match the green pattern using the actions. Your action sequence appears below:
-</p>
-<div id="main_focus"></div>
-<img src="static/img/keys_cache.png" style="width:800px">
-
-<p>These actions are hard coded:</p>
-<ul>
-    <li><b>A</b> adds a single piece in the center of the board
-    <li><b>D</b> removes any piece in the center of the board
-    <li><b>ENTER ("↵")</b> <i>locks</i> in the positions of the pieces you have added (you can do this multiple times)
-    <li><b>SPACE ("∠")</b> rotates all (unlocked) pieces clockwise
-    <li><b>F</b> flips all (unlocked) pieces horizontally
-    <li><b>W</b> shift all (unlocked) pieces one space to the West. Any pieces that fall off the edge of the board are deleted
-    <li><b>R</b> reflects all tiles horizontally, duplicating them
-    <li>By holding SHIFT, you can try a move out without commiting to it. WHen you release Shift, the move will "Undo".
-</ul>
-<p>The default cache for these actions are:</p>
+<p onclick="Instructions1()" id="insbtn1"><b>Click to view instructions</b></p>
+<div style="display:none;" id="instructions">
+<p><b>Instructions:</b></p>
+    <p>You are a one of a team of scientists working on synthetic protein folding.</p>
+    <p>Your collective goal is to find a procedure to replicate the target protein (shown here as a green pattern).</p>
+    <p>There are 5 basic actions you can use to achieve this:</p>
     <ul>
-        <li><b>Z</b> adds three pieces in a triangular arrangement
-        <li><b>X</b> adds three pieces in a straight line
-        <li><b>E,R</b>,and <b>S</b> shift all (unlocked) pieces one space to the East, North-West, and South-West respectively.
-    </ul> 
+        <li><b>a</b> adds a single piece in the center of the board
+        <li><b>d</b> removes any piece in the center of the board
+        <li><b>o</b> rotates all (unlocked) pieces clockwise
+        <li><b>w</b> shift all (unlocked) pieces one space to the West. <!--Any pieces that fall off the edge of the board are deleted -->
+        <li><b>r</b> reflects all tiles horizontally, duplicating them
+    </ul>
+    <p>You succeed by covering the green pattern exactly. Your additions (shown in gray) can overlap existing tiles. Your transformation actions (moving, and rotating and reflecting) affect everything on the board. The red dot indicates how the board is orientated.</p>
+    <p>Press keys on the keyboad totransform the protein</p>
+    <p>Press Act if you are ready to contribute to the solution or Reset if you make a mistake. If you do not want to add anything, press Pass. If you want to start over, press Vote Restart.</p>
     <p>Your additions can overlap existing pieces. You complete the puzzle by covering all the green hexes with locked in pieces. You lose a point for each white hex you cover in your final pattern.</p>
     <p><b>Demo options</b></p>
-<ol>
-    <li>Try procedurally generated target patterns (click <a href=https://eco.ppls.ed.ac.uk/~nbramley/hexcraft/demo.html>here</a> & refresh for new patterns)
-    <li>Set the depth of the procedural generation by adding a url "depth" parameter <a href="https://eco.ppls.ed.ac.uk/~nbramley/hexcraft/demo.html?depth=100">like this</a>
-    <li>Include a "pattern" parameter to load your own challenge problem like <a href=https://eco.ppls.ed.ac.uk/~nbramley/hexcraft/demo.html?pattern=ZXDESZXDSR>this</a><br>(note, these use K instead of SPACE)
-    <li>Navigate to the demo with <a href = "https://eco.ppls.ed.ac.uk/~nbramley/hexcraft/demo_nocache.html">fixed actions</a>
-</ol>     
+    <ol>
+        <li>Try procedurally generated target patterns (click <a href=https://eco.ppls.ed.ac.uk/~nbramley/hexcraft/demo.html>here</a> & refresh for new patterns)
+        <li>Set the depth of the procedural generation by adding a url "depth" parameter <a href="https://eco.ppls.ed.ac.uk/~nbramley/hexcraft/demo.html?depth=100">like this</a>
+        <li>Include a "pattern" parameter to load your own challenge problem like <a href=https://eco.ppls.ed.ac.uk/~nbramley/hexcraft/demo.html?pattern=ZXDESZXDSR>this</a><br>(note, these use K instead of SPACE)
+        <li>Navigate to the demo with <a href = "https://eco.ppls.ed.ac.uk/~nbramley/hexcraft/demo_nocache.html">fixed actions</a>
+    </ol>     
 </body>

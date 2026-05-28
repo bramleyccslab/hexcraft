@@ -88,9 +88,16 @@ for (dir in 1:6)
   amort$vectors[[dir]]<-data.frame(from=1:nrow(empty_state), to = rep(NA, nrow(empty_state)))
   for (i in 1:nrow(empty_state))
   {
-    tmp<-c(empty_state$q[i]+direction_vectors[[dir]][1],
-           empty_state$r[i]+direction_vectors[[dir]][2],
-           empty_state$s[i]+direction_vectors[[dir]][3])
+    pre<-c(empty_state$q[i], empty_state$r[i], empty_state$s[i])
+    dv<-direction_vectors[[dir]]
+    tmp<-pre+dv
+    if (any(abs(tmp)>N))
+    {
+      tmp <- pre
+      tmp[dv!=0]<- -pre[dv!=0]
+      
+    }
+    
     # tmp[tmp>max(empty_state$x)]<-max(empty_state$x)
     # tmp[tmp<min(empty_state$x)]<-min(empty_state$x)
     

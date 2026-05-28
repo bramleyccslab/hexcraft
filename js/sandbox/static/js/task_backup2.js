@@ -12,69 +12,85 @@ for (var i=0; i<empty_state.length; i++)
 }
 var state = _.cloneDeep(empty_state);//Tracks the current active board state of the user
 var old_state = _.cloneDeep(empty_state);//Tracks the active board state of the user at t-1
-var locked_state = _.cloneDeep(empty_state);//Stores the locked-in board state of the user (end of trial)
-var prelocked_state = _.cloneDeep(empty_state);//Stores the locked-in board state of the user (end of trial)
-
+var locked_state = _.cloneDeep(empty_state);//Tracks the locked-in board state of the user
 var target = _.cloneDeep(empty_state);//Contains the target state
-//var target_lock_tmp = _.cloneDeep(empty_state);//For procedurally generating the target state if it involves locking steps
+var target_lock_tmp = _.cloneDeep(empty_state);//For procedurally generating the target state if it involves locking steps
 var spillage = 0;//tracks false positives in solutions
-var board_orientation = [2,-4,2];
+
 var d //The canvas identifier
-var player = 1;//
-var players = 3;//
-var player_colours = Array.from({length: players}, (_, i) =>
-    `hsl(${Math.round(15 + i * 360 / players) % 360}, 70%, 60%)`
-);
 
 var cdv = {NE:[+1, -1, 0], E:[+1, 0, -1], SE:[0, +1, -1], 
     SW:[-1, +1, 0], W:[-1, 0, +1], NW:[0, -1, +1]}//Cube-coordinate directional vectors
 
 var actions = []; //Store the sequence of actions the user performs
-var spec_actions = []; //Store the sequence of actions the user performs before they commit to them
-var library = [[111,111], //Bar97, 114, 97, 83, 69, 83, 69, 97, 114
-               [97,119,97,119,115,97], //Corner97, 119, 97, 69, 114, 69, 97, 83
-               [97,119,97,119],//
-               [98,119, 98,98]//
-]; //Store the action sequences they cache
+var library = [[32,32,32,32,87,32,32], //NE
+               [32,32,87,32,32,32,32], //SW
+               [65,87,69,65,83,83,,65,87,69],//Corner65, 87, 65, 69, 82, 69, 65, 83
+               [65,87,65,69,83,69,,65,87,83],//Bar65, 82, 65, 83, 69, 83, 69, 65, 82
+               [],
+               []]; //Store the action sequences they cache
 
-var results = {target:[], performance:[], action_history:[], state_history:[], player_history:[], complete_action_history:[], complete_state_history:[], library_history:[], library_update_at:[0]};
-
+var results = {target:[], performance:[], action_history:[], state_history:[], library_history:[], library_update_at:[0]};
+//TMP BOB FOR DEMO
+// library = [[32, 32, 87, 32, 32, 32,32], //SE
+//                [32,32,32,32,87,32,32], //NW
+//                [32,87,32,32,32,32,32],//SW
+//                [65, 87, 65, 87, 65, 69, 65, 69, 65, 82, 65],//Corner65, 87, 65, 69, 82, 65, 83]
+//                [90, 68, 87, 68, 82, 68],//Bar65, 87, 82, 65, 83, 83, 69, 69, 65, 87, 82
+//                []];
+//TMP FOR CIRCLES LIBRARY
+// var library = [[32, 32, 32, 87, 32, 32, 32], //East
+//                [32,32,32,32,32,87,32], //NE
+//                [32,87,32,32,32,32,32],//SW
+//                [88,32,88,32,88,68,13],//Corner65, 87, 65, 69, 82, 65, 83]
+//                [65, 82, 65, 83, 69, 83, 69, 65, 82],//Bar65, 87, 82, 65, 83, 83, 69, 69, 65, 87, 82
+//                [88,32,88,32,88,68]]; //Store the action sequences they cache
 var attemptCount = 0;
 var pattern = [];
 var mode = '';
 //For procedural generation etc ORIGINAL: ['s','a','d','w','e','j','i','k','m','n','h','u']; "^[sadwejikmnhuq]*$"
 var action_keys = [];
 var action_keycodes = [];
-// var primitive_keycodes = [];
+var primitive_keycodes = [];
 var display_array = [];
 var cachable_keycodes = [];
 var mid_cache = false;
-var action_displays = ['a', 'd', 'o', 'r', 'w', 'b', 'c', 'e', 's'];//What order?
-
-var keysPressed = {};
-
+var action_displays = ['W','A','D','F','R', '&#8736;',
+                       'E','S','Z','X','C','V'];
+var action_keys =     ['W','A','D','F','R','K', //so L = Enter and K = space 
+                       'E','S','Z','X','C','V'];
 if (cache)
 {
-    // 87=W  119=w
-    // 65=A 97=a
-    // 68=D 100=d
-    // 70=F 102=f
+    // 87=W
+    // 65=A
+    // 68=D
+    // 70=F
     // 13=ENTER
-    // 32=SPACE -> 111-o
-    // 69=E 101=e
-    // 82=R 114=r
-    // 83=S 115=s
-    // 90=Z 122=z
-    // 88=X 120=x
-    // 67=C 99=ca
-    // 86=V 118=v
+    // 32=SPACE
+    // 69=E
+    // 82=R
+    // 83=S
+    // 90=Z
+    // 88=X
+    // 67=C
+    // 86=V
+    primitive_keycodes = [87, 65, 68, 70,82, 32]; //,13Hard coded actions
+    cachable_keycodes = [69,83,90, 88, 67,86]; //Keys that can be mapped
 
-    action_keycodes = [97, 100, 111, 114, 119]; //Hard coded actions  
-    cachable_keycodes = [98 ,99,101, 115]; //Keys that can be mapped to the library. Currently b,c,e,s. Could be extended if desired.
+    // action_keys =     ['W','A','D','F','R','K'];'L',
+    action_keycodes = [ 87, 65, 68, 70, 82,  32];//, 1376, 75
+
+
     //console.log(cachable_keycodes);
 
 } else {
-    action_keycodes = [97, 100, 111, 114, 119, 98 ,99,101, 115];
+    primitive_keycodes = [87, 65, 68, 70, 82, 32, //13,
+                       69,83,90, 88];
+
+    action_keycodes = [87, 65, 68, 70, 82, 32, //13, 
+                       69,83,90, 88];//76, 75
+
+
 }
 
 const regex = new RegExp("^[WERASDFZXCLK]*$");//For preventing any other button being pressed in input field
@@ -92,15 +108,6 @@ for (var i=0; i<args.length; ++i) {
 
 function Start()
 {
-    //Name player 1 at the top
-    html_text = `Ready <b><span style="color: ${player_colours[player - 1]}">Player ${player}</span></b>`;
-    $('#player-header').html(html_text);
-
-    $('#restart-task').prop('disabled', true);  // disable
-    $('#restart-action').prop('disabled', true);
-    $('#submit-action').prop('disabled', true);
-
-
     //Create the canvas
     d = new ROT.Display({width:17, height:9, spacing:3, layout:"hex"});
     var tmp = document.getElementById("board-and-cache");
@@ -143,13 +150,11 @@ function Start()
         results.library_history.push(_.cloneDeep(library));
     }
 
-    board_orientation = [2,-4,2];
-
     //Plot the hexagons onto it
     for (var y = 0; y < (2*N+1); y++) {
         for (var x = y%2; x < 2*(2*N+1); x += 2) {
 
-        // console.log('xy', x, y, 'centered', oddr_to_cube(Math.floor((x-2*N)/2),y-N));
+        //console.log('xy', x, y, 'centered', prx[x], pry[y], oddr_to_cube(Math.floor(prx[x]/2),pry[y]));
         // Note the coordinates, every odd row is offset to the right doubling the number of x coordinates needed
 
             var these_cube_coords = oddr_to_cube(Math.floor((x-2*N)/2),y-N);
@@ -161,95 +166,35 @@ function Start()
                 // var raw_xy_string = x.toString()+','+y.toString();
                 // var xy_string = (x-2*N).toString()+','+(y-N).toString();
                 var qrs_string = these_cube_coords[0].toString()+','+these_cube_coords[1].toString();//+','+these_cube_coords[2].toString();
-                // If this is part of the target pattern, colour it light green, otherwise white.
                 if (target[these_cube_coords[0]+N][these_cube_coords[1]+N]==1)
                 {
                     d.draw(x, y, null, null, "#9e9");
-                    if (these_cube_coords[0]==0 & these_cube_coords[1]==0)
-                    {
-                       // Crosshair in centre (if no target there)
-                       d.draw(x, y, '+', 'black','#9e9');
-                    }
-
-                    if(these_cube_coords[0]==board_orientation[0] & 
-                    these_cube_coords[1]==board_orientation[1] & 
-                    these_cube_coords[2]==board_orientation[2])//these_cube_coords[0]==these_cube_coords[2])
-                    {
-                        console.log(these_cube_coords, these_cube_coords[1], -N, these_cube_coords[1]==-N);
-                       d.draw(x, y, '•', '#e55','#9e9'); 
-                    }
-
-
                 } else {
                     d.draw(x, y, null, null, "#fff");
-                    if (these_cube_coords[0]==0 & these_cube_coords[1]==0)
-                    {
-                       // Crosshair in centre (if no target there)
-                       d.draw(x, y, '+', 'black','#fff');
-                    }
-
-
-                    if(these_cube_coords[0]==board_orientation[0] & 
-                    these_cube_coords[1]==board_orientation[1] & 
-                    these_cube_coords[2]==board_orientation[2])
-                    {
-                       d.draw(x, y, '•', '#e55','#fff'); 
-                    }                   
                 }
                 // d.draw(x, y-0.2, raw_xy_string, "#f99");
                 // d.draw(x, y+0.2, qrs_string, "#9f9");
-
-   
             }
 
         }
     }
 
-
-
-    document.addEventListener('keydown', (event) => {
-       keysPressed[event.key] = true;
-    });
-
-
-    document.addEventListener('keyup', (event) => {
-        delete this.keysPressed[event.key];
-
-        // if (!keysPressed.Shift)
-        // {
-        Update();
-        // }
-
-     });
-
-
     //input.
     window.addEventListener("keypress", function(e) {
-
-
         //Workaround to avoid spacebar scrolling to bottom of page
         if (e.which == 32 | e.which == 13) {
             e.preventDefault();
         }
         var code = e.charCode;
 
-        if (code>=65 && code<=90)
+        if (code>=97 && code<=122)
         {
-            code = code+32;//Hack to convert upper case keycodes to lower case
+            code = code-32;//Hack to convert lower case keycodes to upper case
         }
         var ch = String.fromCharCode(code);
         console.log(ch);
         console.log("Key char is: " + ch + " Code is: " + code);
-
-        // if (keysPressed.Shift)
-        // {
-        //    // console.log('prevented action keysPressed', keysPressed, keysPressed.Shift);
-        //     speculative_state = _.cloneDeep(state);
-        //     Action(code, this_state=speculative_state, real=false, midcache=false, speculative=true);
-        // } else{
-           Action(code); 
-        // }
-
+        Action(code);
     });
     
     if (cache)
@@ -286,109 +231,58 @@ function Start()
 
 }
 
-function Submit()
-{
-    //Current player locks in their contribution and play moves on
-    actions = _.cloneDeep(actions.concat(spec_actions))
-    results.action_history.push(_.cloneDeep(spec_actions));
-    results.state_history.push(_.cloneDeep(state));
-    results.player_history.push(player);
-    prelocked_state = _.cloneDeep(state);
-    spec_actions = [];
 
-    player = player%players+1;//Toggle player 1-players
-    //document.getElementById("player-header").textContent = "Ready Player " + player;
-    html_text = `Ready <b><span style="color: ${player_colours[player - 1]}">Player ${player}</span></b>`;
-    $('#player-header').html(html_text);
-
-    console.log('actions', results.action_history, 'states', results.state_history, spec_actions, actions);
-    Update();
-
-    $('#restart-task').prop('disabled', true);
-    $('#restart-action').prop('disabled', true);
-    $('#submit-action').prop('disabled', true);
-    $('#pass-action').prop('disabled', false);
-}
-
-function Clear()
-{
-    //Current player clears their contribution and reverts to how it was when they recieved control
-    spec_actions = [];
-    state = _.cloneDeep(prelocked_state);
-    Update();
-
-    $('#restart-task').prop('disabled', true);
-    $('#restart-action').prop('disabled', true);
-    $('#submit-action').prop('disabled', true);
-    $('#pass-action').prop('disabled', false);
-}
-
-function Action(keycode, this_state=state, real=true, midcache = false, speculative = true)
+function Action(keycode, this_state=state, real=true, midcache = false)
 {
     // console.log('action triggered', keycode);
     //https://www.cs.cmu.edu/~pattis/15-1XX/common/handouts/ascii.html
 
     // ENTER=13     // l=108 L=76
-    // SPACE=32   // k=107 K=75A
+    // SPACE=32   // k=107 K=75
 
     //If 'real' is false then we are using this for procedurally generating 
     //a target rather than interactively generating a solution
     // if (keycode==81){Undo();}
 
 
-    // if (keycode==108 | keycode==13){Lock(this_state, real);} //L/ENTER LOCK
-    if (keycode==75 | keycode==111){RotateClockwise(this_state);} //K/SPACE rotate
+    if (keycode==76 | keycode==13){Lock(this_state, real);} //L/ENTER LOCK
+    if (keycode==75 | keycode==32){RotateClockwise(this_state, real);} //K/SPACE rotate
 
-    if (keycode==119){Shift('W', this_state);}//w
+    if (keycode==87){Shift('W', this_state, real);}//W
 
-    if (keycode==97){AddUnit(this_state);}//a
-    if (keycode==100){RemoveUnit(this_state);}//d
-    // if (keycode==70){Flip(axis=1, this_state);}//f
-    if (keycode==114){HexReflect(axis=1, this_state);}    //r
+    if (keycode==65){AddUnit(this_state, real);}//A
+    if (keycode==68){RemoveUnit(this_state, real);}//D
+    if (keycode==70){Flip(axis=1, this_state, real);}//F
+    if (keycode==82){HexReflect(axis=1, this_state, real);}    //R
 
     if (cache)// & real
     {
-        if (keycode==98){UseCache(0, this_state);}//b        
-        if (keycode==99){UseCache(1, this_state);}//c
-        if (keycode==101){UseCache(2, this_state);}//e
-        if (keycode==115){UseCache(3, this_state);}//s
-        // if (keycode==122){UseCache(2, this_state);}//z
-        // if (keycode==120){UseCache(3, this_state);}//z
-        //if (keycode==118){UseCache(5, this_state);}//v
+        if (keycode==69){UseCache(0, this_state, real);}//E
+        if (keycode==83){UseCache(1, this_state, real);}//S
+        if (keycode==90){UseCache(2, this_state, real);}//Z
+        if (keycode==88){UseCache(3, this_state, real);}//X
+        if (keycode==67){UseCache(4, this_state, real);}//C
+        if (keycode==86){UseCache(5, this_state, real);}//V
     } else {
-        if (keycode==101){Shift('NE', this_state);}    //e
-        if (keycode==115){Shift('SE', this_state);}    //s
-        if (keycode==98){AddBar(this_state);}//b
-        if (keycode==99){AddCorner(this_state);}//c
+        if (keycode==69){Shift('NE', this_state, real);}    //E
+        if (keycode==83){Shift('SE', this_state, real);}    //S
+        if (keycode==90){AddCorner(this_state, real);}
+        if (keycode==88){AddBar(this_state, real);}
         //if (keycode==67){Shift('SE', this_state, real);}  //unneeded
     }
 
-    // console.log('got here', keycode);
-    if (real & !midcache)// & (primitive_keycodes.indexOf(keycode)>-1 | [75,108].indexOf(keycode)>-1))
+    if (real & !midcache & (primitive_keycodes.indexOf(keycode)>-1 | [81,75,76].indexOf(keycode)>-1))
     {
-        $('#restart-task').prop('disabled', false);
-        $('#restart-action').prop('disabled', false);
-        $('#submit-action').prop('disabled', false);
-        $('#pass-action').prop('disabled', true);
-
-        // console.log('got here inside', keycode);
-        spec_actions.push(keycode);
+        console.log('got here');
+        actions.push(keycode);
         
-        results.complete_action_history.push(keycode);
-        results.complete_state_history.push(_.cloneDeep(this_state));
+        results.action_history.push(_.cloneDeep(actions));
+        results.state_history.push(_.cloneDeep(this_state));
 
         //Update the visual (player's) state
         Update();
     }
 
-    // if (speculative)
-    // {
-    //     // console.log('speculative behaviour');
-    //     SpeculativeUpdate(this_state);
-
-    //     results.complete_action_history.push(_.cloneDeep(actions));
-    //     results.complete_state_history.push(_.cloneDeep(this_state));
-    // }
 }
 
 
@@ -414,19 +308,9 @@ function Update()
                     if (target[these_cube_coords[0]+N][these_cube_coords[1]+N]==1)
                     {
                         d.draw(x, y, null, null, "#090"); //Strong Green
-                        if (these_cube_coords[0]==0 & these_cube_coords[1]==0)
-                        {
-                           // + in centre (if no target there)
-                           d.draw(x, y, '+', 'black','#090');
-                        }
                     } else {
                         //Otherwise
                         d.draw(x, y, null, null, "#900");//Red
-                        if (these_cube_coords[0]==0 & these_cube_coords[1]==0)
-                        {
-                           // + in centre (if no target there)
-                           d.draw(x, y, '+', 'black','#900');
-                        }
                     }
 
                 } else {
@@ -434,42 +318,11 @@ function Update()
                     if (target[these_cube_coords[0]+N][these_cube_coords[1]+N]==1)
                     {
                         d.draw(x, y, null, null, "#9e9"); //Light green
-
-                        if (these_cube_coords[0]==0 & these_cube_coords[1]==0)
-                        {
-                           // + in centre (if target there too)
-                           d.draw(x, y, '+', 'black',"#9e9");
-                        }
-
-                        if(these_cube_coords[0]==board_orientation[0] & 
-                            these_cube_coords[1]==board_orientation[1] & 
-                            these_cube_coords[2]==board_orientation[2])//these_cube_coords[0]==these_cube_coords[2])
-                        {
-                            console.log(these_cube_coords, these_cube_coords[1], -N, these_cube_coords[1]==-N);
-                           d.draw(x, y, '•', '#e55','#9e9'); 
-                        }
-
                     } else {
                         //Otherwise if unoccupied, non target and not locked in it is white
                        d.draw(x, y, null, null, "white");
-
-                        if (these_cube_coords[0]==0 & these_cube_coords[1]==0)
-                        {
-                           // + in centre (if no target there)
-                           d.draw(x, y, '+', 'black','white');
-                        }
-
-                        if(these_cube_coords[0]==board_orientation[0] & 
-                            these_cube_coords[1]==board_orientation[1] & 
-                            these_cube_coords[2]==board_orientation[2])//these_cube_coords[0]==these_cube_coords[2])
-                        {
-                            console.log(these_cube_coords, these_cube_coords[1], -N, these_cube_coords[1]==-N);
-                           d.draw(x, y, '•', '#e55','white'); 
-                        }
                     }
                 }
-                
-                
                 
                 // If the state is actively occupied
                 if (state[these_cube_coords[0]+N][these_cube_coords[1]+N]==1)
@@ -478,137 +331,36 @@ function Update()
                     if (target[these_cube_coords[0]+N][these_cube_coords[1]+N]==1)
                     {
 
-                        d.draw(x, y, ".", "black", "#595");//"#595"
-
-                        if (these_cube_coords[0]==0 & these_cube_coords[1]==0)
-                        {
-                           // + in centre (if target there too)
-                           d.draw(x, y, '+', 'black',"#595");
-                        }
-
-                        if(these_cube_coords[0]==board_orientation[0] & 
-                            these_cube_coords[1]==board_orientation[1] & 
-                            these_cube_coords[2]==board_orientation[2])//these_cube_coords[0]==these_cube_coords[2])
-                        {
-                            console.log(these_cube_coords, these_cube_coords[1], -N, these_cube_coords[1]==-N);
-                           d.draw(x, y, '•', '#e55','#595'); 
-                        }
-
+                        d.draw(x, y, "•", "black", "#595");//"#595"
                     } else {
-                        d.draw(x, y, ".", "black",  "#999");
-
-                        if (these_cube_coords[0]==0 & these_cube_coords[1]==0)
-                        {
-                           // + in centre (if target there too)
-                           d.draw(x, y, '+', 'black',"#999");
-                        }
-
-                        if(these_cube_coords[0]==board_orientation[0] & 
-                            these_cube_coords[1]==board_orientation[1] & 
-                            these_cube_coords[2]==board_orientation[2])//these_cube_coords[0]==these_cube_coords[2])
-                        {
-                            console.log(these_cube_coords, these_cube_coords[1], -N, these_cube_coords[1]==-N);
-                           d.draw(x, y, '•', '#e55','#999'); 
-                        }
+                        d.draw(x, y, "•", "black",  "#999");
                     }
                 } 
             }
-
-
         }
     }
 
     UpdateStringVis();
 }
 
-// function SpeculativeUpdate(speculative_state)
-// {
-//     // Loop over the raw xy locations
-//     for (var y = 0; y < 9; y++)
-//     {
-//         for (var x = y%2; x < 18; x += 2)
-//         {
-//             //Convert to cube coordinate
-//             var these_cube_coords = oddr_to_cube(Math.floor((x-2*N)/2),y-N);
-//             // oddr_to_cube(Math.floor(prx[x]/2),pry[y]);
-
-//             //If we're inside the hexagon
-//             if(Math.abs(these_cube_coords[0])<5 & Math.abs(these_cube_coords[1])<5 & Math.abs(these_cube_coords[2])<5)
-//             {
-                
-//                 //If state is part of the target
-//                 if (target[these_cube_coords[0]+N][these_cube_coords[1]+N]==1)
-//                 {
-//                     d.draw(x, y, null, null, "#9e9"); //Light green
-//                 } else {
-//                     //Otherwise if unoccupied, non target and not locked in it is white
-//                     d.draw(x, y, null, null, "white");
-//                 }
-                
-//                 // If the state is actively occupied
-//                 if (speculative_state[these_cube_coords[0]+N][these_cube_coords[1]+N]==1)
-//                 {
-//                     //And part of the pattern
-//                     if (target[these_cube_coords[0]+N][these_cube_coords[1]+N]==1)
-//                     {
-
-//                         d.draw(x, y, "•", "white", "#595");//"#595"
-//                     } else {
-//                         d.draw(x, y, "•", "white",  "#999");
-//                     }
-//                 } 
-//             }
-//         }
-//     }
-
-//     console.log('speculative state drawn');
-// }
-
 function UpdateStringVis()
 {
-    display_array = [`<span>`,];
+    display_array = [];
     // console.log(action_keycodes.concat(cachable_keycodes));
-    for (let i=0; i<results.action_history.length; i++)
-    {
-        display_array.push(`<span style="color: ${player_colours[results.player_history[i] - 1]}">`)
-        for (let j=0; j<results.action_history[i].length; j++)
-        {
-            for (let k=0; k<action_displays.length; k++)
-            {
-                if (results.action_history[i][j]==action_keycodes.concat(cachable_keycodes)[k])
-                {
-                    console.log('test', i, k, action_displays[k]);
-                    display_array.push(action_displays[k])
-                }
-            }
-        }
-        display_array.push(`</span>`)
-    }
-    display_array.push(`</span>`);
-    console.log('updatestringvis triggered', display_array.join(''));
-    $('#locked-in-actions').html(display_array.join(''));
-
-
-    spec_display_array = [`<span style="color: ${player_colours[player - 1]}">`];
-    // console.log(action_keycodes.concat(cachable_keycodes));
-    for (let i=0; i<spec_actions.length; i++)
+    for (let i=0; i<actions.length; i++)
     {
         for (let j=0; j<action_displays.length; j++)
         {
-            if (spec_actions[i]==action_keycodes.concat(cachable_keycodes)[j])
+            if (actions[i]==action_keycodes.concat(cachable_keycodes)[j])
             {
                 console.log('test', i, j, action_displays[j]);
-                spec_display_array.push(action_displays[j])
+                display_array.push(action_displays[j])
             }
         }
     }
-    
-    spec_display_array.push(`</span>`);
-    console.log('spec display array', spec_display_array.join(''));
-    $('#current-actions').html(spec_display_array.join(''));
+    console.log('updatestringvis triggered', display_array.join(''));
+    $('#main_focus').html(display_array.join(''));
 }
-
-
 
 function UpdateCacheVis(cache_n)
 {
@@ -644,7 +396,7 @@ function oddr_to_cube(x,y)
     return [q, r, s];
 }
 
-function AddUnit(this_state)
+function AddUnit(this_state, real)
 {
     //Clone the current state (for undo)
     old_state = _.cloneDeep(this_state);
@@ -653,7 +405,7 @@ function AddUnit(this_state)
     this_state[N][N] = 1;
 }
 
-function RemoveUnit(this_state)
+function RemoveUnit(this_state, real)
 {
     //Clone the current state (for undo)
     old_state = _.cloneDeep(this_state);
@@ -663,7 +415,7 @@ function RemoveUnit(this_state)
     this_state[N][N] = 0;
 }
 
-function AddBar(this_state)
+function AddBar(this_state, real)
 {
     //Clone the current state (for undo)
     old_state = _.cloneDeep(this_state);
@@ -674,7 +426,7 @@ function AddBar(this_state)
     this_state[N][N+1] = 1;
 }
 
-function AddCorner(this_state)
+function AddCorner(this_state, real)
 {
     //Clone the current state (for undo)
     old_state = _.cloneDeep(this_state);
@@ -686,7 +438,7 @@ function AddCorner(this_state)
 }
 
 
-function Shift(dir, this_state)
+function Shift(dir, this_state, real)
 {
     //Clone the current state
     old_state = _.cloneDeep(this_state);
@@ -735,13 +487,8 @@ function Shift(dir, this_state)
 
 
 
-function RotateClockwise(this_state)
+function RotateClockwise(this_state, real)
 {
-    old_bo = _.cloneDeep(board_orientation);
-    board_orientation[0]=-old_bo[1];
-    board_orientation[1]=-old_bo[2];
-    board_orientation[2]=-old_bo[0];
-
     old_state = _.cloneDeep(this_state);
     for (var q=-N; q<=N; q++)
     {
@@ -768,14 +515,8 @@ function RotateClockwise(this_state)
     }
 }
 
-function Flip(axis=1, this_state)
+function Flip(axis=1, this_state, real)
 {
-    
-    old_bo = _.cloneDeep(board_orientation);
-    board_orientation[0]=old_bo[0];
-    board_orientation[1]=old_bo[2];
-    board_orientation[2]=old_bo[1];
-
     old_state = _.cloneDeep(this_state);
     for (var q=-N; q<=N; q++)
     {
@@ -784,22 +525,20 @@ function Flip(axis=1, this_state)
             s=-q-r;
             if (axis==1)
             {
+                q_flip=q;
+                r_flip=s;
+                s_flip=r;
+                
+            } else if (axis==2)
+            {
                 q_flip=s;
                 r_flip=r;
                 s_flip=q;
-                
-            } else if (axis==2)
+            } else if (axis==3)
             {
                 q_flip=r;
                 r_flip=q;
                 s_flip=s;
-            } else if (axis==3)
-            {
-                q_flip=q;
-                r_flip=s;
-                s_flip=r;
-
-
             }
            
             if (Math.abs(q)<=N & Math.abs(r)<=N & Math.abs(s)<=N)
@@ -812,7 +551,7 @@ function Flip(axis=1, this_state)
     }
 }
 
-function HexReflect(axis=1, this_state)
+function HexReflect(axis=1, this_state, real)
 {
     old_state = _.cloneDeep(this_state);
     for (var q=-N; q<=N; q++)
@@ -822,23 +561,20 @@ function HexReflect(axis=1, this_state)
             s=-q-r;
             if (axis==1)
             {
-                q_flip=s;
-                r_flip=r;
-                s_flip=q;
-                
-            } else if (axis==2)
-            {
-
-                q_flip=r;
-                r_flip=q;
-                s_flip=s;
-                
-            } else if (axis==3)
-            {
                 q_flip=q;
                 r_flip=s;
                 s_flip=r;
-
+                
+            } else if (axis==2)
+            {
+                q_flip=s;
+                r_flip=r;
+                s_flip=q;
+            } else if (axis==3)
+            {
+                q_flip=r;
+                r_flip=q;
+                s_flip=s;
             }
            
             if (Math.abs(q)<=N & Math.abs(r)<=N & Math.abs(s)<=N)
@@ -996,7 +732,7 @@ function ResetBoard() {
     results.state_history = [];
 
     Update();  
-    //document.getElementById("current-actions").innerHTML = "";
+    //document.getElementById("main_focus").innerHTML = "";
   
 
     // const container = document.getElementById("progressContainer");
@@ -1098,9 +834,9 @@ function ChallengePattern(sequence)
     {
         var this_key = seq_arr.shift();
         var tmp = action_keys.indexOf(this_key);
-        console.log('keycode', this_key, tmp, action_keycodes.concat(cachable_keycodes));
+        console.log('keycode', this_key, tmp, primitive_keycodes.concat(cachable_keycodes));
 
-        Action(action_keycodes.concat(cachable_keycodes)[tmp], target_pattern, false);
+        Action(primitive_keycodes.concat(cachable_keycodes)[tmp], target_pattern, false);
     }
 
     for (var q=-N; q<=N; q++)
@@ -1122,33 +858,25 @@ function ProceduralPattern(depth)
 {
     var target_pattern = _.cloneDeep(state);
     var generation_procedure = [];
-    
-    var filter = [];
-    for (var i=0; i<library.length; i++)
-    {
-        filter[i] = library[i].length>1;
-    }
-    console.log('cache_exists', cachable_keycodes.filter((r, i) => filter[i]));
-
     for (var step =0; step<depth; step++)
     {
-        this_key = ROT.RNG.getItem(action_keycodes.concat(cachable_keycodes.filter((r, i) => filter[i])));//[cache_exists])
+        this_key = ROT.RNG.getItem(action_keycodes.concat(cachable_keycodes));
         //Remove the cachable keycode concatenation to use prior
         generation_procedure.push(this_key);
         Action(this_key, target_pattern, false);
     }
 
-    // for (var q=-N; q<=N; q++)
-    // {
-    //     for (var r=-N; r<=N; r++)
-    //     {
-    //         if (target_lock_tmp[q+N][r+N]==1)
-    //         {
-    //             target_pattern[q+N][r+N]=1;
-    //         } 
-    //     }
-    // }
-    console.log('gen proc', generation_procedure, action_keycodes.concat(cachable_keycodes));
+    for (var q=-N; q<=N; q++)
+    {
+        for (var r=-N; r<=N; r++)
+        {
+            if (target_lock_tmp[q+N][r+N]==1)
+            {
+                target_pattern[q+N][r+N]=1;
+            } 
+        }
+    }
+    console.log('gen proc', generation_procedure, action_keycodes.concat(primitive_keycodes));
     var tmp_key_array = [];
     for (var i=0; i<generation_procedure.length; i++)
     {
@@ -1167,15 +895,16 @@ function UseCache(n, this_state, this_real)
 {    
    //Read the cached pattern TODO KEEP THIS NOT IN THE STRING
    var cache_pattern = _.cloneDeep(library[n]);//Array.from($('#cache' + n).text());
-   //console.log('before expanding:', cache_pattern);
+   console.log('before expanding:', cache_pattern);
 
    //Get rid of any nesting before the display process begins
-   console.log('cache pattern is', cache_pattern, cachable_keycodes, library, n);
-
+   
    while (cache_pattern.includes(cachable_keycodes[0]) |
           cache_pattern.includes(cachable_keycodes[1]) | 
           cache_pattern.includes(cachable_keycodes[2]) | 
-          cache_pattern.includes(cachable_keycodes[3]))
+          cache_pattern.includes(cachable_keycodes[3]) | 
+          cache_pattern.includes(cachable_keycodes[4]) | 
+          cache_pattern.includes(cachable_keycodes[5]) )
    {
         for (var i=0; i<cache_pattern.length; i++)
         {
@@ -1194,7 +923,7 @@ function UseCache(n, this_state, this_real)
    var cpl = cache_pattern.length;
 
    //Feed the string to the Action function with short timeouts so you can see it play out
-   //console.log('after expanding:', cache_pattern);
+   console.log('after expanding:', cache_pattern);
 
 
    while (cache_pattern.length>0)
@@ -1226,7 +955,7 @@ function UseCache(n, this_state, this_real)
     //                 actions.splice(actions.length - cpl, cpl);
     //                 //actions.push(cachable_keycodes[n]);
     //                 UpdateStringVis();
-    //                 //$('#current-actions').text(actions.join(''));//
+    //                 //$('#main_focus').text(actions.join(''));//
 
     //                 console.log(n, 'original actions', actions, 'removed', tmp);
     //             }                     //  ..  setTimeout()
