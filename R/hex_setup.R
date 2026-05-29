@@ -91,12 +91,12 @@ for (dir in 1:6)
     pre<-c(empty_state$q[i], empty_state$r[i], empty_state$s[i])
     dv<-direction_vectors[[dir]]
     tmp<-pre+dv
-    if (any(abs(tmp)>N))
-    {
-      tmp <- pre
-      tmp[dv!=0]<- -pre[dv!=0]
-      
-    }
+    # if (any(abs(tmp)>N))
+    # {
+    #   tmp <- pre
+    #   tmp[dv!=0]<- -pre[dv!=0]
+    #   
+    # }
     
     # tmp[tmp>max(empty_state$x)]<-max(empty_state$x)
     # tmp[tmp<min(empty_state$x)]<-min(empty_state$x)
