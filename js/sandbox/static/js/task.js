@@ -31,11 +31,17 @@ var cdv = {NE:[+1, -1, 0], E:[+1, 0, -1], SE:[0, +1, -1],
 
 var actions = []; //Store the sequence of actions the user performs
 var spec_actions = []; //Store the sequence of actions the user performs before they commit to them
-var library = [[111,111], //Bar97, 114, 97, 83, 69, 83, 69, 97, 114
-               [97,119,97,119,115,97], //Corner97, 119, 97, 69, 114, 69, 97, 83
-               [97,119,97,119],//
-               [98,119, 98,98]//
-]; //Store the action sequences they cache
+var library = Array(players);
+for (var i = 0; i < players; i++) {
+    library[i] = _.cloneDeep([[111,111], 
+                                [97,119,97,119,115,97],
+                                [97,119,97,119],//
+                                [98,119, 98,98]]);
+    //Pre-populated libraries for testing. Each library is a list of action sequences,
+    // each action sequence is a list of keycodes.
+    // Currently 4 caches per player, with some example sequences in them.
+    }
+var lib_public = [false, false, true, true];
 
 var results = {target:[], performance:[], action_history:[], state_history:[], player_history:[], complete_action_history:[], complete_state_history:[], library_history:[], library_update_at:[0]};
 
@@ -108,7 +114,7 @@ function Start()
 
     if ($_GET['depth'] === undefined)
     {
-        var gen_depth = 20;
+        var gen_depth = 10;
     } else {
         var gen_depth = Number($_GET['depth']);//TODO UNSTRING?
     }
@@ -207,20 +213,20 @@ function Start()
 
 
 
-    document.addEventListener('keydown', (event) => {
-       keysPressed[event.key] = true;
-    });
+    // document.addEventListener('keydown', (event) => {
+    //    keysPressed[event.key] = true;
+    // });
 
 
-    document.addEventListener('keyup', (event) => {
-        delete this.keysPressed[event.key];
+    // document.addEventListener('keyup', (event) => {
+    //     delete this.keysPressed[event.key];
 
-        // if (!keysPressed.Shift)
-        // {
-        Update();
-        // }
+    //     // if (!keysPressed.Shift)
+    //     // {
+    //     Update();
+    //     // }
 
-     });
+    //  });
 
 
     //input.
@@ -240,6 +246,11 @@ function Start()
         var ch = String.fromCharCode(code);
         console.log(ch);
         console.log("Key char is: " + ch + " Code is: " + code);
+        
+        if (action_keycodes.includes(code) || cachable_keycodes.includes(code))
+        {
+            Action(code);
+        }
 
         // if (keysPressed.Shift)
         // {
@@ -247,7 +258,7 @@ function Start()
         //     speculative_state = _.cloneDeep(state);
         //     Action(code, this_state=speculative_state, real=false, midcache=false, speculative=true);
         // } else{
-           Action(code); 
+           
         // }
 
     });
@@ -260,15 +271,15 @@ function Start()
             console.log('clicked', this.id, tmp.charAt(tmp.length-1));
             var which_cache = Number(tmp.charAt(tmp.length-1));
 
-            // console.log('hihi', actions, which_cache, cachable_keycodes,
-                // cachable_keycodes[which_cache], actions.includes(cachable_keycodes[which_cache]));
+            console.log('hihi', actions, which_cache, cachable_keycodes,
+                cachable_keycodes[which_cache], actions.includes(cachable_keycodes[which_cache]));
 
             if (!actions.includes(cachable_keycodes[which_cache]))
             {
-                library[which_cache] = _.cloneDeep(actions);
-                actions = [cachable_keycodes[which_cache]];
+                library[player-1][which_cache] = _.cloneDeep(spec_actions);
+                spec_actions = [cachable_keycodes[which_cache]];//TEST immediately replaces the seq with the cache?
 
-                UpdateCacheVis(which_cache);
+                UpdateCacheVis(which_cache, player);
                 UpdateStringVis();
                 results.library_history.push(_.cloneDeep(library));
                 results.library_update_at.push(results.action_history.length);
@@ -277,9 +288,9 @@ function Start()
             }
         });
 
-        for (let i=0; i<library.length; i++)
+        for (let i=0; i<library[player-1].length; i++)
         {
-            UpdateCacheVis(i);
+            UpdateCacheVis(i, player);
         }
     }
 
@@ -304,10 +315,20 @@ function Submit()
     console.log('actions', results.action_history, 'states', results.state_history, spec_actions, actions);
     Update();
 
+    if (cache)
+    {
+        for (let i=0; i<library[player-1].length; i++)
+        {
+            UpdateCacheVis(i, player);
+        }
+    }
+
     $('#restart-task').prop('disabled', true);
     $('#restart-action').prop('disabled', true);
     $('#submit-action').prop('disabled', true);
     $('#pass-action').prop('disabled', false);
+
+    Check(state);
 }
 
 function Clear()
@@ -348,10 +369,10 @@ function Action(keycode, this_state=state, real=true, midcache = false, speculat
 
     if (cache)// & real
     {
-        if (keycode==98){UseCache(0, this_state);}//b        
-        if (keycode==99){UseCache(1, this_state);}//c
-        if (keycode==101){UseCache(2, this_state);}//e
-        if (keycode==115){UseCache(3, this_state);}//s
+        if (keycode==98){UseCache(0, this_state, real, player);}//b        
+        if (keycode==99){UseCache(1, this_state, real, player);}//c
+        if (keycode==101){UseCache(2, this_state, real, player);}//e
+        if (keycode==115){UseCache(3, this_state, real, player);}//s
         // if (keycode==122){UseCache(2, this_state);}//z
         // if (keycode==120){UseCache(3, this_state);}//z
         //if (keycode==118){UseCache(5, this_state);}//v
@@ -610,19 +631,29 @@ function UpdateStringVis()
 
 
 
-function UpdateCacheVis(cache_n)
+function UpdateCacheVis(cache_n, player)
 {
     var tmp = [];
-    for (let i=0; i<library[cache_n].length; i++)
+
+    if (!lib_public[cache_n])
+    {
+        tmp.push(`<span style="color: ${player_colours[player - 1]}">`);
+    }
+    for (let i=0; i<library[player-1][cache_n].length; i++)
     {
         for (let j=0; j<action_displays.length; j++)
         {
-            if (library[cache_n][i]==action_keycodes.concat(cachable_keycodes)[j])
+            if (library[player-1][cache_n][i]==action_keycodes.concat(cachable_keycodes)[j])
             {
                 // console.log(i, j, action_displays[j]);
                 tmp.push(action_displays[j])
             }
         }
+    }
+
+    if (!lib_public[cache_n])
+    {
+        tmp.push(`</span>`);
     }
     console.log('update cache vis triggered', tmp.join(''));
 
@@ -851,64 +882,19 @@ function HexReflect(axis=1, this_state)
     }
 }
 
-// function RotateAnticlockwise(this_state, real)
-// {
-//     old_state = _.cloneDeep(this_state);
-//     for (var q=-N; q<=N; q++)
-//     {
-//         for (var r=-N; r<=N; r++)
-//         {
-//             s=-q-r
-//             var q_rot= s;
-//             var r_rot = q;
-//             var s_rot = r;
-//             console.log(q,r,s,q_rot, r_rot, s_rot);
-//             if (Math.abs(q)<=N & Math.abs(r)<=N & Math.abs(s)<=N)
-//             {
-//                 this_state[q_rot+N][r_rot+N] = old_state[q+N][r+N]; 
-//             }
-
-//         }
-//     }
-// }
-
-// function Undo()
-// {
-//     console.log('undoing', state, old_state);
-//     state = _.cloneDeep(old_state);//Revert to previous state
-//     actions.pop();//And remove the latest letter from the list
-//     // (should only be called in interactive mode)
-// }
-
-function Lock(this_state, real) 
+function Check(this_state) 
 {
-    old_state = _.cloneDeep(this_state);
     var match = true;
-    spillage = 0;
-
     for (var q=-N; q<=N; q++)
     {
         for (var r=-N; r<=N; r++)
         {
             var s = -q-r;
-            if (this_state[q+N][r+N]==1)
-            {
-                if (real)
-                {
-                    locked_state[q+N][r+N]=1;
-                } else {
-                    target_lock_tmp[q+N][r+N]=1;
-                }
 
-                this_state[q+N][r+N]=0;
-            }
-
-            if (real & Math.abs(q)<=N & Math.abs(r)<=N & Math.abs(s)<=N)
+            if (Math.abs(q)<=N & Math.abs(r)<=N & Math.abs(s)<=N)
             {
-                if (locked_state[q+N][r+N] !== target[q+N][r+N])    
+                if (this_state[q+N][r+N] !== target[q+N][r+N])    
                 {
-                   //console.log('nonmatch', q,r);
-                   
                     match = false; 
                 }
 
@@ -920,101 +906,138 @@ function Lock(this_state, real)
         }
     }
 
-    // console.log("Match =", match);
-    // console.log("Locked state:");
-    // console.log(JSON.stringify(locked_state));
-    // console.log("Target:");
-    // console.log(JSON.stringify(target));
-
-
-    if (real)
+    if (match)
     {
-        inputLocked = true;
-        attemptCount++;
-
-        // const existingControls = document.getElementById("control-buttons");
-        // if (existingControls) existingControls.remove();
-
-        const btnContainer = document.createElement("div");
-        btnContainer.id = "control-buttons";
-        btnContainer.style.marginTop = "1em";
-        btnContainer.style.alignSelf = "center";
-        btnContainer.style.marginBottom = "1em";
-
-        const feedback = document.createElement("p");
-        feedback.textContent = match ? "Pattern complete" : "Pattern not complete -- try again.";
-        alert(match ? "Pattern complete" : "Pattern not complete -- try again!" + actions.length + " actions, with " + spillage + " mistakes!");
-        btnContainer.appendChild(feedback);
-
-        const tryAgainBtn = document.createElement("button");
-        tryAgainBtn.textContent = "Try Again";
-        tryAgainBtn.onclick = function () {
-            inputLocked = false;
-            //console.log('attempt count: ' + attemptCount);
-            // if(jsPsych.getCurrentTrial()==hexTutorial){
-            //     //timeline.splice(tutCounter+1, 0, hexTutorial);
-            //     //tutCounter = tutCounter-1;
-            //     R
-            // }
-            // else{
-            //     //timeline.splice(patternCounter+1, 0, hexTrial);
-            //     //patternCounter = patternCounter-1;
-            // }
-
-            //jsPsych.finishTrial();
-            ResetBoard();
-
-        };
-        btnContainer.appendChild(tryAgainBtn);
-
-        // if (match || attemptCount >= 3) {
-        //     const moveOnBtn = document.createElement("button");
-        //     moveOnBtn.textContent = "Move On";
-        //     moveOnBtn.style.marginLeft = "1em";
-        //     moveOnBtn.onclick = function () {
-        //         if (match) {
-        //             save_data(); 
-        //             attemptCount = 0;
-        //         }
-        //         jsPsych.finishTrial();
-        //     };
-        //     btnContainer.appendChild(moveOnBtn);
-        // }
-
-    document.body.prepend(btnContainer);
+        locked_state = _.cloneDeep(this_state);
+        Update();
+        save_data();
+        alert("Protein synthesised in " + actions.length + " actions");
     }
 }
 
+// function Lock(this_state, real) 
+// {
+//     old_state = _.cloneDeep(this_state);
+//     var match = true;
+//     spillage = 0;
+
+//     for (var q=-N; q<=N; q++)
+//     {
+//         for (var r=-N; r<=N; r++)
+//         {
+//             var s = -q-r;
+//             if (this_state[q+N][r+N]==1)
+//             {
+//                 if (real)
+//                 {
+//                     locked_state[q+N][r+N]=1;
+//                 } else {
+//                     target_lock_tmp[q+N][r+N]=1;
+//                 }
+
+//                 this_state[q+N][r+N]=0;
+//             }
+
+//             if (real & Math.abs(q)<=N & Math.abs(r)<=N & Math.abs(s)<=N)
+//             {
+//                 if (locked_state[q+N][r+N] !== target[q+N][r+N])    
+//                 {
+//                    //console.log('nonmatch', q,r);
+                   
+//                     match = false; 
+//                 }
+
+//                 if (locked_state[q+N][r+N]==1 & target[q+N][r+N]==0)
+//                 {
+//                     spillage++
+//                 }
+//             }
+//         }
+//     }
+
+//     // console.log("Match =", match);
+//     // console.log("Locked state:");
+//     // console.log(JSON.stringify(locked_state));
+//     // console.log("Target:");
+//     // console.log(JSON.stringify(target));
+
+
+//     if (real)
+//     {
+//         inputLocked = true;
+//         attemptCount++;
+
+//         // const existingControls = document.getElementById("control-buttons");
+//         // if (existingControls) existingControls.remove();
+
+//         const btnContainer = document.createElement("div");
+//         btnContainer.id = "control-buttons";
+//         btnContainer.style.marginTop = "1em";
+//         btnContainer.style.alignSelf = "center";
+//         btnContainer.style.marginBottom = "1em";
+
+//         const feedback = document.createElement("p");
+//         feedback.textContent = match ? "Pattern complete" : "Pattern not complete -- try again.";
+//         alert(match ? "Pattern complete" : "Pattern not complete -- try again!" + actions.length + " actions, with " + spillage + " mistakes!");
+//         btnContainer.appendChild(feedback);
+
+//         const tryAgainBtn = document.createElement("button");
+//         tryAgainBtn.textContent = "Try Again";
+//         tryAgainBtn.onclick = function () {
+//             inputLocked = false;
+//             //console.log('attempt count: ' + attemptCount);
+//             // if(jsPsych.getCurrentTrial()==hexTutorial){
+//             //     //timeline.splice(tutCounter+1, 0, hexTutorial);
+//             //     //tutCounter = tutCounter-1;
+//             //     R
+//             // }
+//             // else{
+//             //     //timeline.splice(patternCounter+1, 0, hexTrial);
+//             //     //patternCounter = patternCounter-1;
+//             // }
+
+//             //jsPsych.finishTrial();
+//             ResetBoard();
+
+//         };
+//         btnContainer.appendChild(tryAgainBtn);
+
+//         // if (match || attemptCount >= 3) {
+//         //     const moveOnBtn = document.createElement("button");
+//         //     moveOnBtn.textContent = "Move On";
+//         //     moveOnBtn.style.marginLeft = "1em";
+//         //     moveOnBtn.onclick = function () {
+//         //         if (match) {
+//         //             save_data(); 
+//         //             attemptCount = 0;
+//         //         }
+//         //         jsPsych.finishTrial();
+//         //     };
+//         //     btnContainer.appendChild(moveOnBtn);
+//         // }
+
+//     document.body.prepend(btnContainer);
+//     }
+// }
+
 function ResetBoard() {
+    save_data(); //Save the attempt
+
     state = _.cloneDeep(empty_state);
     old_state = _.cloneDeep(empty_state);
     locked_state = _.cloneDeep(empty_state);
     actions = [];
+    spec_actions = [];
     spillage = 0;
     display_array = [];
-    results.action_history = [];
-    results.state_history = [];
+    results = {target:[], performance:[], action_history:[],
+        state_history:[], player_history:[],
+        complete_action_history:[], complete_state_history:[],
+        library_history:[], library_update_at:[0]};
+
+
 
     Update();  
-    //document.getElementById("current-actions").innerHTML = "";
-  
-
-    // const container = document.getElementById("progressContainer");
-
-    // container.innerHTML = "";
-    // for (let i = 0; i < NUM_SEGMENTS; i++) {
-    //     const segment = document.createElement("div");
-    //     Object.assign(segment.style, SEGMENT_STYLE);
-    //     segment.classList.add("segment");
-    //     container.appendChild(segment);
-    // }
-    currentIndex = 0;
-
-
-    
-    const controls = document.getElementById("control-buttons");
-    if (controls) controls.remove();
-
 }
 
 // function Lock(this_state, real)
@@ -1124,9 +1147,9 @@ function ProceduralPattern(depth)
     var generation_procedure = [];
     
     var filter = [];
-    for (var i=0; i<library.length; i++)
+    for (var i=0; i<library[player-1].length; i++)
     {
-        filter[i] = library[i].length>1;
+        filter[i] = library[player-1][i].length>1;
     }
     console.log('cache_exists', cachable_keycodes.filter((r, i) => filter[i]));
 
@@ -1138,17 +1161,8 @@ function ProceduralPattern(depth)
         Action(this_key, target_pattern, false);
     }
 
-    // for (var q=-N; q<=N; q++)
-    // {
-    //     for (var r=-N; r<=N; r++)
-    //     {
-    //         if (target_lock_tmp[q+N][r+N]==1)
-    //         {
-    //             target_pattern[q+N][r+N]=1;
-    //         } 
-    //     }
-    // }
-    console.log('gen proc', generation_procedure, action_keycodes.concat(cachable_keycodes));
+    console.log('generative procedure:',
+        generation_procedure, action_keycodes.concat(cachable_keycodes));
     var tmp_key_array = [];
     for (var i=0; i<generation_procedure.length; i++)
     {
@@ -1158,19 +1172,22 @@ function ProceduralPattern(depth)
     }
     pattern = tmp_key_array.join('');
 
+    console.log('target_pattern', target_pattern);
     return target_pattern;
 }
 
 
 
-function UseCache(n, this_state, this_real)
+function UseCache(n, this_state, this_real, player)
 {    
    //Read the cached pattern TODO KEEP THIS NOT IN THE STRING
-   var cache_pattern = _.cloneDeep(library[n]);//Array.from($('#cache' + n).text());
+   console.log('using cache', n, library[player-1][n]);
+
+   var cache_pattern = _.cloneDeep(library[player-1][n]);//Array.from($('#cache' + n).text());
    //console.log('before expanding:', cache_pattern);
 
    //Get rid of any nesting before the display process begins
-   console.log('cache pattern is', cache_pattern, cachable_keycodes, library, n);
+   console.log('cache pattern is', cache_pattern, cachable_keycodes, player, library[player-1], n);
 
    while (cache_pattern.includes(cachable_keycodes[0]) |
           cache_pattern.includes(cachable_keycodes[1]) | 
@@ -1184,7 +1201,7 @@ function UseCache(n, this_state, this_real)
                 if (cache_pattern[i]==cachable_keycodes[j])
                 {
                     cache_pattern.splice(i, 1);
-                    insertArrayAt(cache_pattern, i, library[j]);
+                    insertArrayAt(cache_pattern, i, library[player-1][j]);
                     break;
                 };
             }
@@ -1270,6 +1287,11 @@ function save_data()
 function Instructions1() {
     $('#instructions').show();
     $('#insbtn1').hide();
+}
+
+function Instructions2() {
+    $('#instructions').hide();
+    $('#insbtn1').show();
 }
 
 function Hint1() {

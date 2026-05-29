@@ -25,6 +25,63 @@
 <body onload="Start();">
 
 <h3>Demo "Hexcraft" task interface with fixed actions</h3>
+<h3 onclick="Instructions1()" id="insbtn1"><b>Click to view instructions</b></h3>
+
+<div style="display:none;" id="instructions">
+    <h3 onclick="Instructions2()" id="insbtn2"><b>Instructions (Click to hide)</b></h3>
+    <p>You are a one of a team of scientists working on synthetic protein folding.</p>
+    <p>Your shared goal is to find a way to replicate target proteins
+        (shown below as green shapes).</p>
+    <img id="ins_img"src="static/img/example_puzzles.png" style="width:500px">
+    <p>There are 5 basic actions you can use to achieve this:</p>
+    <ul>
+        <li><b>a</b> adds a single piece in the center of the board
+        <li><b>d</b> removes any piece in the center of the board
+        <li><b>o</b> rotates all (unlocked) pieces clockwise
+        <li><b>w</b> shift all (unlocked) pieces one space to the West. <!--Any pieces that fall off the edge of the board are deleted -->
+        <li><b>r</b> reflects all tiles horizontally, duplicating them
+    </ul>
+    <!-- <li><b>f</b> flips all tiles horizontally -->   
+    <!-- <li><b>ENTER ("↵")</b> locks in your solution (and clears the board so you can try again) -->
+    <img id="ins_img"src="static/img/example_solution.png" style="width:350px">
+    <ol>
+    <li>Your additions can overlap existing additions.
+    <li>Your transformation actions (moving, and rotating and reflecting) affect <em>everything on the board</em>.
+    <li>Any pieces that fall off the edge of the board are lost. 
+    <li>You succeed by covering the green pattern exactly.
+    <li>Your the current state of your synthetic protein is shown in gray.
+    <li>Use the red dot to track how the board rotates.
+    </ol>
+    <p><b>Working together:</b></p>
+    <ol>
+    <li>Everyone in the team takes turns to contribute actions.
+    <li>To be eligible for bonus points, you must contribute at least one action per protein.</li>
+    <li>Click <b>Act</b> if you are ready to contribute one or more actions to the current attempt.
+    <li>Click <b>Reset</b> if you make a mistake and want to clear the actions you have typed.
+    <li>If you do not want to add anything, press <b>Pass</b>.
+    <li>If you want to start over, press <b>Vote Restart</b>. A new attempt will be started if everyone votes Restart.</li>
+    </ol>
+    <p><b>Create your own actions:</b></p>
+    <ol>
+    <li>You can create your own action sequence shortcuts by typing a sequence of actions into one of the "cache" boxes and clicking the "Save" button next to it.
+    <li>Once you have saved an action sequence to a cache, you can execute it at any time by pressing the corresponding key (e.g. "b" for the first cache, "c" for the second, etc.). 
+    <li>Use this feature to create your own custom actions that combine multiple basic actions.
+    <li>Some of these actions are shared between players, so you can create a useful action sequence and save it to a cache for your teammates to use as well!
+    <li>Beware: If you create a shared action that refers to a private action it may do something different for another player (if they don't have the same private actions!)</li>
+    </ol>
+    <!-- <p style="font-size: 1em;" onclick="Hint1()" id="hintbtn1">Hint 1 (click to reveal)</p>
+    <p style="font-size: 1em; display:none;" id="hint1"><b>ZXD</b> is one way to make a 'dinopaw' shape.</p> -->
+    <!--         <p style="font-size: 1em;" onclick="Hint2()" id="hintbtn2">Hint 2 (click to reveal)</p>
+    <p style="font-size: 1em; display:none;" id="hint2">Having made a circle, you can move it with <b>W,E,R,S</b> or,<b>C</b>, then lock it in position with ↵. E.g. Try typing <b>X∠X∠XD RRR↵</b></p> -->
+
+   <p><b>Demo options</b></p>
+    <ol>
+        <li>Try procedurally generated target patterns (click <a href=https://eco.ppls.ed.ac.uk/~nbramley/hexcraft/demo.html>here</a> & refresh for new patterns)
+        <li>Set the depth of the procedural generation by adding a url "depth" parameter <a href="https://eco.ppls.ed.ac.uk/~nbramley/hexcraft/demo.html?depth=100">like this</a>
+        <li>Include a "pattern" parameter to load your own challenge problem like <a href=https://eco.ppls.ed.ac.uk/~nbramley/hexcraft/demo.html?pattern=ZXDESZXDSR>this</a><br>(note, these use K instead of SPACE)
+        <li>Navigate to the demo with <a href = "https://eco.ppls.ed.ac.uk/~nbramley/hexcraft/demo_nocache.html">fixed actions</a>
+    </ol>  
+</div>
 <h2 id="player-header">Ready Player 1</h2>
 <div id="board-and-cache">
     <p>&nbsp;&nbsp;&nbsp;</p>
@@ -35,8 +92,8 @@
         <p>Create your own action sequence shortcuts:</p>
         <div class = "cache-container"><div class = "cache-label"> <img id="b-key" src="static/img/b.png" style="width: 50px"> &larr;</div><div id="cache0" class = "cache"></div><button type="button" id = "cache-btn0" class="cache-btn">Save</button></div>
         <div class = "cache-container"><div class = "cache-label"> <img id="c-key" src="static/img/c.png" style="width: 50px"> &larr;</div><div id="cache1" class = "cache"></div><button type="button" id = "cache-btn1" class="cache-btn" >Save</button></div>
-        <div class = "cache-container"><div class = "cache-label"> <img id="e-key" src="static/img/e.png" style="width: 50px"> &larr;</div><div id="cache2" class = "cache"></div><button type="button" id = "cache-btn2" class="cache-btn">Save</button></div>
-        <div class = "cache-container"><div class = "cache-label"> <img id="s-key" src="static/img/s.png" style="width: 50px"> &larr;</div><div id="cache3" class = "cache"></div><button type="button" id = "cache-btn3" class="cache-btn">Save</button></div>
+        <div class = "cache-container"><div class = "cache-label"> <img id="e-key" src="static/img/e.png" style="width: 50px"> &larr;</div><div id="cache2" class = "cache"></div><button type="button" id = "cache-btn2" class="cache-btn">Propose</button><button type="button" id = "cache-btn2v" class="cache-btn-vote">&#128077;</button><button type="button" id = "cache-btn2va" class="cache-btn">&#128078;</button></div>
+        <div class = "cache-container"><div class = "cache-label"> <img id="s-key" src="static/img/s.png" style="width: 50px"> &larr;</div><div id="cache3" class = "cache"></div><button type="button" id = "cache-btn3" class="cache-btn">Propose</button><button type="button" id = "cache-btn3v" class="cache-btn-vote">&#128077;</button><button type="button" id = "cache-btn3va" class="cache-btn">&#128078;</button></div>
     </div>
 </div>
 <br>
@@ -51,30 +108,5 @@
 <button type="button" id = "restart-action" class="action-btn" onclick="Clear()">Reset</button>
 <button type="button" id = "submit-action" class="action-btn" onclick="Submit()">Act</button>
 </div>
-<br>
-
-<p onclick="Instructions1()" id="insbtn1"><b>Click to view instructions</b></p>
-<div style="display:none;" id="instructions">
-<p><b>Instructions:</b></p>
-    <p>You are a one of a team of scientists working on synthetic protein folding.</p>
-    <p>Your collective goal is to find a procedure to replicate the target protein (shown here as a green pattern).</p>
-    <p>There are 5 basic actions you can use to achieve this:</p>
-    <ul>
-        <li><b>a</b> adds a single piece in the center of the board
-        <li><b>d</b> removes any piece in the center of the board
-        <li><b>o</b> rotates all (unlocked) pieces clockwise
-        <li><b>w</b> shift all (unlocked) pieces one space to the West. <!--Any pieces that fall off the edge of the board are deleted -->
-        <li><b>r</b> reflects all tiles horizontally, duplicating them
-    </ul>
-    <p>You succeed by covering the green pattern exactly. Your additions (shown in gray) can overlap existing tiles. Your transformation actions (moving, and rotating and reflecting) affect everything on the board. The red dot indicates how the board is orientated.</p>
-    <p>Press keys on the keyboad totransform the protein</p>
-    <p>Press Act if you are ready to contribute to the solution or Reset if you make a mistake. If you do not want to add anything, press Pass. If you want to start over, press Vote Restart.</p>
-    <p>Your additions can overlap existing pieces. You complete the puzzle by covering all the green hexes with locked in pieces. You lose a point for each white hex you cover in your final pattern.</p>
-    <p><b>Demo options</b></p>
-    <ol>
-        <li>Try procedurally generated target patterns (click <a href=https://eco.ppls.ed.ac.uk/~nbramley/hexcraft/demo.html>here</a> & refresh for new patterns)
-        <li>Set the depth of the procedural generation by adding a url "depth" parameter <a href="https://eco.ppls.ed.ac.uk/~nbramley/hexcraft/demo.html?depth=100">like this</a>
-        <li>Include a "pattern" parameter to load your own challenge problem like <a href=https://eco.ppls.ed.ac.uk/~nbramley/hexcraft/demo.html?pattern=ZXDESZXDSR>this</a><br>(note, these use K instead of SPACE)
-        <li>Navigate to the demo with <a href = "https://eco.ppls.ed.ac.uk/~nbramley/hexcraft/demo_nocache.html">fixed actions</a>
-    </ol>     
+<br>     
 </body>
