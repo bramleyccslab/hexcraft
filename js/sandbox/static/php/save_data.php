@@ -14,7 +14,7 @@
 	$results = $_POST['results'];
 
 	//Create a query
-	$query = "INSERT INTO hexcraft (ip, date, results) VALUES ('{$ip}', '{$date}', '{$results}')";
+	$query = "INSERT INTO hexcraft_sandbox (ip, date, results) VALUES ('{$ip}', '{$date}', '{$results}')";
 	
 	//Do it
 	mysqli_query($mysqli, $query);
