@@ -3,7 +3,7 @@
 	// Create a database connection
 	$mysqli = mysqli_connect("localhost","eco_mdb_root","KZrQupBmNL", "eco_mdb1");
 
-	if (mysqli_connect_errno($mysqli)) {
+	if (mysqli_connect_errno()) {
 		echo "Failed to connect to MySQL: " . mysqli_connect_error();
 	}
 
