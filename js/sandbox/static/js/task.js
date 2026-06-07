@@ -1121,7 +1121,7 @@ function UseCache(n, this_state, this_real, player) {
         cache_pattern.includes(cachable_keycodes[3])) {
 
         infinite_loop_safeguard++;
-        if (infinite_loop_safeguard > 6) {
+        if (infinite_loop_safeguard > 20) {
             console.log('infinite loop safeguard triggered, breaking out of loop', cache_pattern);
             loopy = true;
             break;
