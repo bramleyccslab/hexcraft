@@ -201,3 +201,24 @@ ggplot(board_polygons, aes(x_pos, y_pos)) +
   scale_fill_manual(values = c('white','yellow','pink','lightgreen'), drop = F)
 
 
+
+# For grant app test uniqueness
+f<-f[c(1:5,7:10)]#Remove flip
+
+combinations<-expand.grid(1:9,1:9,1:9,1:9,1:9,1:9)
+out<-matrix(NA, ncol=nrow(combinations), nrow=nrow(state))
+for(i in 1:nrow(combinations))
+{
+  state<-empty_state %>% select(-x_pos, -y_pos) %>% mutate(target = 0, active=0)
+  
+  for (j in 1:ncol(combinations))
+  {
+    state<-f[[combinations[i,j]]](state)
+  }
+  out[,i]<-state$active
+}
+
+out_strings<-apply(out, 2, paste0, collapse = '')
+
+summary(as.factor(out_strings))
+summary(unique(out_strings))
