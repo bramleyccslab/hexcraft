@@ -2,7 +2,7 @@
 
 ### Contents
 
-- python
+- python codebase (build by Haozhe Sun)
     - mcmc.py: the file for the Metropolis-Hastings model for the general sequence learning process.
     - generate_probabilistic.py: the code for generating sequences from a given PCFG.
     - square_game.py: the code for manipulating a square board. A Python replica of a previous master's project.
@@ -13,49 +13,50 @@
     - solver.py: a script for searching all the possible action chains that could solve a problem within a certain chain length. Possible to use shapes or action sequences as input.
     - q_learning.py: a Q-learning-based RL algorithm to train a model to solve the hex game. Used as a baseline in our project.
 - js
-    - exp1: code in development for first experiment
+    - exp1: code in development for first pilot (Ana Belan's MSc Project)
         - demo and demo_nocache are original demo sites created by Neil 
         - testing.html: modified version of no_cache in development for use as experiment 1. Among other things, in this file the caches and their corresponding testing trials are defined. 
-        - task.js: actual hexcraft task. The logic behind all actions etc is set up here. 
+        - task.js: actual hexcraft task. The logic behind all actions etc is set up here.
+            List of primitive actions (can also be seen visually in instructions_mockup):
+            - A = put a piece in the middle of the board
+            - D = delete a piece in the middle of the board 
+            - Z = put a cornery shape 
+            - X = put a diagonal bar 
+            - W = shifts all pieces one space to the west 
+            - E = shifts to North-East 
+            - S = shifts to South-East 
+            - F = flips pieces from SE to NW (and vice versa)
+            - R = reflects pieces (same as Flip but the original pieces stay in their places)
+            - K / Space = rotates the board clockwise (is coded as 'K' in the actual code)
+            - L / Enter = Ends the trial 
+    - exp2: code for second pilot (N=80, Haozhe Sun's MRes project)
+    - sandbox: code for Leverhulme bid proposal demos
 
-    List of primitive actions (can also be seen visually in instructions_mockup):
-    - A = put a piece in the middle of the board
-    - D = delete a piece in the middle of the board 
-    - Z = put a cornery shape 
-    - X = put a diagonal bar 
-    - W = shifts all pieces one space to the west 
-    - E = shifts to North-East 
-    - S = shifts to South-East 
-    - F = flips pieces from SE to NW (and vice versa)
-    - R = reflects pieces (same as Flip but the original pieces stay in their places)
-    - K / Space = rotates the board clockwise (is coded as 'K' in the actual code)
-    - L / Enter = Ends the trial 
 
- - R
-    - demos: this is a file I mostly used to input action sequences to see how they are reflected on the board. There is also a greedy solver that I haven't touched yet. 
+ - R (built by Neil Bramley)
+    - demos: Gives some examples of running the code, creating sequences and visualising how they are reflected on the board. There is also a greedy solver. 
     - generate_testsets: generates random caches and then test sets using these caches 
     - custom_cache_test: edited generate_testsets that generates based on custom caches (defined as a manual list of primitives)
     - hex_setup: sets up the board and actions. Actions match the js ones.
-        - f$[1] "AddUnit" corresponds to "A"
-        - f$[2] "RemoveUnit" corresponds to "D"
-        - f$[3] "AddBar" corresponds to "X"
-        - f$[4] "AddCorner" corresponds to "Z"
-        - f$[5] "RotateClockwise" corresponds to "K"/"Space"
-        - f$[6] "Flip" corresponds to "F"
-        - f$[7] "Reflect" corresponds to "R"
-        - f$[8] "ShiftNE" corresponds to "E"
-        - f$[9] "ShiftSE" corresponds to "S"
-        - f$[10] "ShiftW" corresponds to "W"
+        - f$[1] "AddUnit" 
+        - f$[2] "RemoveUnit"
+        - f$[3] "AddBar" 
+        - f$[4] "AddCorner"
+        - f$[5] "RotateClockwise" 
+        - f$[6] "Flip" (depracated)
+        - f$[7] "Reflect"
+        - f$[8] "ShiftNE" 
+        - f$[9] "ShiftSE" 
+        - f$[10] "ShiftW" 
 
 
-### Experiment 1 Design
+### Pilot 1 Design
 
 Caches and testing trials: 
-- There are three caches (pictures can be found in the 'caches' folder):
+- There are four caches (pictures can be found in the 'caches' folder):
     - dabone (sort of looks like a bone, achieved via X-K-X)
     - hazard (sort of looks like the hazard symbol, Z-S-A)
     - triangle (A-S-A-E-A)
-- Since the triangle is a bit long, there is also another one (TBC) that would also be 3 keys long:
     - Dinopaw (X-Z-D)
 - For each cache there are two puzzles that make use of these caches. One medium and one hard:
     - dabone: medium: Z[XKX]W; hard: [XKX]KS[XKX]R
@@ -69,7 +70,7 @@ When running the html file now, the sequence of the puzzles goes like this:
 - hazard, medium hazard, hard hazard
 - triangle, medium triangle, hard triangle 
 
-For each puzzle, after three unsuccessful tries the user can move on to the next one. 
+For each puzzle, after three unsuccessful tries the user can move on to the next one.
 
 ## Contributors
  - Haozhe Sun (sunhaozhepy; sunhaozhe050722a@gmail.com)
